@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Luiz Placencia Transport — Chófer privado VTC en París</title>
+<meta name="description" content="Servicio de chófer privado VTC en París. Traslados aeropuerto, Disneyland, city tours y excursiones por Francia y Europa. Vehículos premium, 24/7." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="styles.css" />
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+  /* Responsive helpers */
+  @media (max-width: 1100px) {
+    .hero-grid, .reserva-grid, .contacto-grid { grid-template-columns: 1fr !important; }
+    .services-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .fleet-grid, .testimonios-grid, .process-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .footer-grid { grid-template-columns: 1fr 1fr !important; }
+    .service-row { grid-template-columns: 1fr !important; }
+  }
+  @media (max-width: 700px) {
+    .nav-links { display: none !important; }
+    .nav-phone { display: none !important; }
+    .services-grid, .fleet-grid, .testimonios-grid, .process-grid { grid-template-columns: 1fr !important; }
+    .footer-grid { grid-template-columns: 1fr !important; }
+  }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <rect width="400" height="400" fill="#1a1d23"/>
+    <g transform="translate(120, 120)" stroke="#c9a961" stroke-width="3" fill="none">
+      <rect x="0" y="0" width="160" height="160"/>
+      <path d="M40 40 L40 120 L100 120"/>
+      <path d="M80 40 L120 80 L80 120" stroke="#c9a961"/>
+    </g>
+    <text x="200" y="320" text-anchor="middle" fill="#f5f1ea" font-family="Georgia, serif" font-size="22" font-style="italic">Luiz Placencia</text>
+    <text x="200" y="346" text-anchor="middle" fill="#c9a961" font-family="monospace" font-size="10" letter-spacing="3">TRANSPORT · PARIS</text>
+  </svg>
+</template>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail" data-bg-color="#1a1815">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="1200" height="800" fill="#1a1815"/>
+    <g transform="translate(420, 280)">
+      <rect x="0" y="0" width="240" height="240" fill="none" stroke="#f3eee5" stroke-width="3"/>
+      <path d="M60 60 L60 180 L140 180" stroke="#f3eee5" stroke-width="6" fill="none" stroke-linecap="square"/>
+      <path d="M120 60 L180 120 L120 180" stroke="#c9a86a" stroke-width="6" fill="none" stroke-linecap="square"/>
+    </g>
+    <text x="600" y="600" font-family="Georgia, serif" font-size="44" fill="#f3eee5" text-anchor="middle" font-style="italic">Luiz Placencia</text>
+    <text x="600" y="650" font-family="Arial, sans-serif" font-size="14" letter-spacing="6" fill="#9a9388" text-anchor="middle">TRANSPORT · PARIS</text>
+  </svg>
+</template>
+
+<script type="text/babel">
+// Image map — label → real photo URL (Unsplash)
+window.IMG = {
+  "Mercedes Clase E · Place Vendôme":   "https://images.unsplash.com/photo-1563720223185-11003d516935?w=1400&q=80&auto=format&fit=crop",
+  "Mercedes en zona de embarque CDG":   "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1400&q=80&auto=format&fit=crop",
+  "Llegada Disneyland Hotel":           "https://images.unsplash.com/photo-1531315396756-905d68d21b56?w=1400&q=80&auto=format&fit=crop",
+  "Torre Eiffel desde Trocadéro":       "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1400&q=80&auto=format&fit=crop",
+  "Interior cabina trasera":            "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1400&q=80&auto=format&fit=crop",
+  "Castillo de Versalles":              "https://images.unsplash.com/photo-1591289009723-aef022f0c0ad?w=1400&q=80&auto=format&fit=crop",
+  "Cortejo en Place de l'Opéra":        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1400&q=80&auto=format&fit=crop",
+  "Mercedes Clase E":                   "https://images.unsplash.com/photo-1617469767053-d3b523a0b982?w=1400&q=80&auto=format&fit=crop",
+  "Mercedes Clase V":                   "https://images.unsplash.com/photo-1609520505218-7421df17ed5b?w=1400&q=80&auto=format&fit=crop",
+  "Mercedes Clase S":                   "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1400&q=80&auto=format&fit=crop",
+  "Mercedes Clase E · CDG Terminal 2E": "https://images.unsplash.com/photo-1563720223185-11003d516935?w=1400&q=80&auto=format&fit=crop",
+  "Interior cabina trasera Clase S":    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1400&q=80&auto=format&fit=crop",
+  "Castillo de Chenonceau":             "https://images.unsplash.com/photo-1591289009723-aef022f0c0ad?w=1400&q=80&auto=format&fit=crop",
+  "Cortejo Place de l'Opéra":           "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1400&q=80&auto=format&fit=crop",
+  "Mapa Île-de-France · cobertura":     "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=1400&q=80&auto=format&fit=crop",
+};
+window.bg = (label) => window.IMG[label] ? { backgroundImage: `url('${window.IMG[label]}')` } : {};
+</script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="components/shell.jsx"></script>
+<script type="text/babel" src="components/home.jsx"></script>
+<script type="text/babel" src="components/pages.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "dorado",
+  "fontPair": "playfair-inter",
+  "buttonShape": "soft",
+  "density": "comfortable"
+}/*EDITMODE-END*/;
+
+const ACCENTS = {
+  dorado:  { val: "oklch(0.78 0.09 85)",   soft: "oklch(0.78 0.09 85 / 0.15)" },
+  azul:    { val: "oklch(0.62 0.10 240)",  soft: "oklch(0.62 0.10 240 / 0.18)" },
+  plata:   { val: "oklch(0.82 0.012 240)", soft: "oklch(0.82 0.012 240 / 0.15)" },
+  cobre:   { val: "oklch(0.66 0.11 50)",   soft: "oklch(0.66 0.11 50 / 0.18)" },
+};
+
+const FONT_PAIRS = {
+  "cormorant-inter": { display: '"Cormorant Garamond", Georgia, serif', sans: '"Inter", sans-serif', label: "Cormorant + Inter" },
+  "playfair-inter":  { display: '"Playfair Display", Georgia, serif',  sans: '"Inter", sans-serif', label: "Playfair + Inter" },
+  "inter-only":      { display: '"Inter", sans-serif',                 sans: '"Inter", sans-serif', label: "Inter (mono)" },
+};
+
+const SHAPES = { angular: "2px", soft: "10px", pill: "999px" };
+const DENSITIES = { comfortable: { pad: 1, container: 1320 }, airy: { pad: 1.25, container: 1320 }, compact: { pad: 0.78, container: 1240 } };
+
+function App() {
+  const [page, setPage] = React.useState("home");
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  // Apply tweaks to root vars
+  React.useEffect(() => {
+    const r = document.documentElement.style;
+    const acc = ACCENTS[tweaks.accent] || ACCENTS.dorado;
+    r.setProperty("--accent", acc.val);
+    r.setProperty("--accent-soft", acc.soft);
+    const fp = FONT_PAIRS[tweaks.fontPair] || FONT_PAIRS["cormorant-inter"];
+    r.setProperty("--display", fp.display);
+    r.setProperty("--sans", fp.sans);
+    r.setProperty("--radius", SHAPES[tweaks.buttonShape] || "2px");
+    const d = DENSITIES[tweaks.density] || DENSITIES.comfortable;
+    r.setProperty("--pad", d.pad);
+    r.setProperty("--container", d.container + "px");
+  }, [tweaks]);
+
+  // Scroll to top on page change
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [page]);
+
+  const renderPage = () => {
+    switch (page) {
+      case "servicios": return <ServiciosPage setPage={setPage} />;
+      case "reserva":   return <ReservaPage setPage={setPage} />;
+      case "contacto":  return <ContactoPage setPage={setPage} />;
+      default:          return <HomePage setPage={setPage} />;
+    }
+  };
+
+  return (
+    <div data-screen-label={`${page === "home" ? "01 Inicio" : page === "servicios" ? "02 Servicios" : page === "reserva" ? "03 Reserva" : "04 Contacto"}`} key={page}>
+      <NavBar page={page} setPage={setPage} />
+      {renderPage()}
+      <Footer setPage={setPage} />
+      <WhatsAppFAB />
+
+      <TweaksPanel title="Tweaks" defaultOpen={false}>
+        <TweakSection title="Color de acento">
+          <TweakRadio
+            value={tweaks.accent}
+            onChange={v => setTweak("accent", v)}
+            options={[
+              { value: "dorado", label: "Dorado" },
+              { value: "azul",   label: "Azul" },
+              { value: "plata",  label: "Plata" },
+              { value: "cobre",  label: "Cobre" },
+            ]}
+          />
+        </TweakSection>
+
+        <TweakSection title="Tipografía">
+          <TweakSelect
+            value={tweaks.fontPair}
+            onChange={v => setTweak("fontPair", v)}
+            options={Object.entries(FONT_PAIRS).map(([k, v]) => ({ value: k, label: v.label }))}
+          />
+        </TweakSection>
+
+        <TweakSection title="Forma de botones">
+          <TweakRadio
+            value={tweaks.buttonShape}
+            onChange={v => setTweak("buttonShape", v)}
+            options={[
+              { value: "angular", label: "Angular" },
+              { value: "soft",    label: "Suave" },
+              { value: "pill",    label: "Píldora" },
+            ]}
+          />
+        </TweakSection>
+
+        <TweakSection title="Densidad">
+          <TweakRadio
+            value={tweaks.density}
+            onChange={v => setTweak("density", v)}
+            options={[
+              { value: "compact",     label: "Compacto" },
+              { value: "comfortable", label: "Cómodo" },
+              { value: "airy",        label: "Aireado" },
+            ]}
+          />
+        </TweakSection>
+      </TweaksPanel>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>
