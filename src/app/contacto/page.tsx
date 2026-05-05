@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { sendContactMessage } from '@/app/actions/contact'
+import { subscribeNewsletter } from '@/app/actions/newsletter'
 
 type ContactForm = { nombre: string; email: string; mensaje: string }
 
@@ -13,11 +15,43 @@ const CONTACT_ITEMS = [
 ]
 
 export default function ContactoPage() {
-  const [sent, setSent] = useState(false)
-  const [form, setForm] = useState<ContactForm>({ nombre: '', email: '', mensaje: '' })
+  const [sent, setSent]       = useState(false)
+  const [form, setForm]       = useState<ContactForm>({ nombre: '', email: '', mensaje: '' })
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState<string | null>(null)
   const [newsletter, setNewsletter] = useState('')
+  const [nlLoading, setNlLoading]   = useState(false)
+  const [nlStatus, setNlStatus]     = useState<'idle' | 'success' | 'error' | 'already'>('idle')
+
+  async function handleNewsletter(e: React.FormEvent) {
+    e.preventDefault()
+    setNlLoading(true)
+    const result = await subscribeNewsletter(newsletter)
+    setNlLoading(false)
+    if (result.success) {
+      setNlStatus('success')
+      setNewsletter('')
+    } else {
+      setNlStatus(result.already ? 'already' : 'error')
+    }
+  }
 
   const upd = (k: keyof ContactForm, v: string) => setForm(f => ({ ...f, [k]: v }))
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    const result = await sendContactMessage(form.nombre, form.email, form.mensaje)
+
+    if (result.success) {
+      setSent(true)
+    } else {
+      setError(result.error)
+    }
+    setLoading(false)
+  }
 
   return (
     <main className="page-enter">
@@ -106,26 +140,44 @@ export default function ContactoPage() {
                   </p>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
                   <div className="field">
                     <label>Nombre completo</label>
                     <input type="text" placeholder="Carmen González"
-                      value={form.nombre} onChange={e => upd('nombre', e.target.value)} />
+                      value={form.nombre} onChange={e => upd('nombre', e.target.value)} required />
                   </div>
                   <div className="field">
                     <label>Email</label>
                     <input type="email" placeholder="carmen@correo.com"
-                      value={form.email} onChange={e => upd('email', e.target.value)} />
+                      value={form.email} onChange={e => upd('email', e.target.value)} required />
                   </div>
                   <div className="field">
                     <label>Mensaje</label>
                     <textarea rows={5} placeholder="¿Cómo podemos ayudarle?"
-                      value={form.mensaje} onChange={e => upd('mensaje', e.target.value)} />
+                      value={form.mensaje} onChange={e => upd('mensaje', e.target.value)} required />
                   </div>
-                  <button className="btn btn-primary" style={{ alignSelf: 'start' }} onClick={() => setSent(true)}>
-                    Enviar mensaje
+
+                  {error && (
+                    <div style={{
+                      padding: '12px 16px',
+                      background: 'oklch(0.35 0.08 20 / 0.2)',
+                      border: '1px solid oklch(0.55 0.12 20)',
+                      fontSize: 13,
+                      color: 'oklch(0.85 0.08 20)',
+                    }}>
+                      {error}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{ alignSelf: 'start', opacity: loading ? 0.7 : 1 }}
+                    disabled={loading}
+                  >
+                    {loading ? 'Enviando…' : 'Enviar mensaje'}
                   </button>
-                </div>
+                </form>
               )}
 
               {/* Newsletter */}
@@ -134,25 +186,40 @@ export default function ContactoPage() {
                 <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 16 }}>
                   Recomendaciones para sus visitas en París, novedades, ofertas exclusivas.
                 </p>
-                <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--line)' }}>
-                  <input
-                    type="email"
-                    placeholder="Su correo electrónico"
-                    value={newsletter}
-                    onChange={e => setNewsletter(e.target.value)}
-                    style={{
-                      flex: 1, background: 'transparent', border: 0, padding: '12px 0',
-                      fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--fg)', outline: 'none',
-                    }}
-                  />
-                  <button style={{
-                    background: 'transparent', border: 0, color: 'var(--accent)',
-                    padding: '12px 16px', cursor: 'pointer', fontSize: 13, letterSpacing: '0.1em',
-                    textTransform: 'uppercase', fontFamily: 'var(--sans)',
-                  }}>
-                    Suscribirse →
-                  </button>
-                </div>
+                {nlStatus === 'success' ? (
+                  <p style={{ fontSize: 13, color: 'var(--accent)' }}>✓ Suscripción confirmada. Gracias.</p>
+                ) : (
+                  <form onSubmit={handleNewsletter} style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--line)' }}>
+                    <input
+                      type="email"
+                      placeholder="Su correo electrónico"
+                      value={newsletter}
+                      onChange={e => { setNewsletter(e.target.value); setNlStatus('idle') }}
+                      required
+                      style={{
+                        flex: 1, background: 'transparent', border: 0, padding: '12px 0',
+                        fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--fg)', outline: 'none',
+                      }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={nlLoading}
+                      style={{
+                        background: 'transparent', border: 0, color: 'var(--accent)',
+                        padding: '12px 16px', cursor: nlLoading ? 'wait' : 'pointer',
+                        fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase',
+                        fontFamily: 'var(--sans)', opacity: nlLoading ? 0.6 : 1,
+                      }}
+                    >
+                      {nlLoading ? '…' : 'Suscribirse →'}
+                    </button>
+                  </form>
+                )}
+                {(nlStatus === 'error' || nlStatus === 'already') && (
+                  <p style={{ fontSize: 12, color: nlStatus === 'already' ? 'var(--fg-muted)' : 'oklch(0.85 0.08 20)', marginTop: 8 }}>
+                    {nlStatus === 'already' ? 'Este correo ya está suscrito.' : 'Error al suscribirse. Inténtelo de nuevo.'}
+                  </p>
+                )}
               </div>
             </div>
           </div>

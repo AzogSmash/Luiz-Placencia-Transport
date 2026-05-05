@@ -71,9 +71,9 @@ export default function Footer() {
         }}>
           <div>© 2026 Luiz Placencia Transport · SIRET 000 000 000 00000</div>
           <div style={{ display: 'flex', gap: 24 }}>
-            <span style={{ cursor: 'pointer' }}>Aviso legal</span>
-            <span style={{ cursor: 'pointer' }}>Política de privacidad</span>
-            <span style={{ cursor: 'pointer' }}>CGV</span>
+            <Link href="/aviso-legal" style={{ color: 'var(--fg-dim)' }}>Aviso legal</Link>
+            <Link href="/politica-privacidad" style={{ color: 'var(--fg-dim)' }}>Política de privacidad</Link>
+            <Link href="/cgv" style={{ color: 'var(--fg-dim)' }}>CGV</Link>
           </div>
         </div>
       </div>

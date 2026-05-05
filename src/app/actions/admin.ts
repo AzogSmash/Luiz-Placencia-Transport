@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient }      from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { resend, FROM } from '@/lib/resend'
+import { emailStatusUpdate } from '@/lib/emails'
 
 const VALID_STATUSES = [
   'en attente',
@@ -43,12 +45,29 @@ export async function updateReservationStatus(
   if (!isAdmin) return { success: false, error: 'Accès refusé' }
 
   const admin = createAdminClient()
+
+  // Fetch reservation details to send notification email
+  const { data: reservation } = await admin
+    .from('reservations')
+    .select('id, nom, email, adresse_depart, adresse_arrivee, date_heure, nombre_passagers, message')
+    .eq('id', id)
+    .single()
+
   const { error } = await admin
     .from('reservations')
     .update({ statut })
     .eq('id', id)
 
   if (error) return { success: false, error: error.message }
+
+  // Send status notification to client (non-blocking)
+  if (reservation?.email) {
+    resend.emails.send({
+      from: FROM,
+      to:   reservation.email,
+      ...emailStatusUpdate({ ...reservation, statut }),
+    }).catch(err => console.error('[statusEmail]', err))
+  }
 
   revalidatePath('/admin')
   return { success: true }
