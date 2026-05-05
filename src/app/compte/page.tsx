@@ -5,10 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import LogoutButton from '@/components/LogoutButton'
+import PhoneInput, { parsePhone } from '@/components/PhoneInput'
 
 type Profile = {
   full_name: string
-  phone: string
   address: string
   preferred_language: string
 }
@@ -59,15 +59,22 @@ export default function ComptePage() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [userId, setUserId]       = useState<string | null>(null)
 
-  const [profile, setProfile] = useState<Profile>({
-    full_name: '', phone: '', address: '', preferred_language: 'es',
-  })
-  const [profileLoading, setProfileLoading] = useState(false)
+  // Profile
+  const [profile, setProfile] = useState<Profile>({ full_name: '', address: '', preferred_language: 'es' })
+  const [phonePrefix, setPhonePrefix] = useState('+33')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [profileLoading, setProfileLoading]   = useState(false)
   const [profileFeedback, setProfileFeedback] = useState<{ type: 'error' | 'success'; msg: string } | null>(null)
 
+  // Email change
+  const [newEmail, setNewEmail]       = useState('')
+  const [emailLoading, setEmailLoading]   = useState(false)
+  const [emailFeedback, setEmailFeedback] = useState<{ type: 'error' | 'success'; msg: string } | null>(null)
+
+  // Password
   const [password, setPassword] = useState('')
   const [confirm, setConfirm]   = useState('')
-  const [pwdLoading, setPwdLoading] = useState(false)
+  const [pwdLoading, setPwdLoading]   = useState(false)
   const [pwdFeedback, setPwdFeedback] = useState<{ type: 'error' | 'success'; msg: string } | null>(null)
 
   useEffect(() => {
@@ -86,10 +93,12 @@ export default function ComptePage() {
       if (data) {
         setProfile({
           full_name:          data.full_name          ?? '',
-          phone:              data.phone              ?? '',
           address:            data.address            ?? '',
           preferred_language: data.preferred_language ?? 'es',
         })
+        const parsed = parsePhone(data.phone ?? '')
+        setPhonePrefix(parsed.prefix)
+        setPhoneNumber(parsed.number)
       }
     })
   }, [router])
@@ -100,11 +109,12 @@ export default function ComptePage() {
     setProfileLoading(true)
     setProfileFeedback(null)
 
+    const phone = `${phonePrefix} ${phoneNumber}`.trim()
     const supabase = createClient()
     const [{ error: dbErr }, { error: authErr }] = await Promise.all([
       supabase.from('profiles').update({
         full_name:          profile.full_name          || null,
-        phone:              profile.phone              || null,
+        phone:              phone                      || null,
         address:            profile.address            || null,
         preferred_language: profile.preferred_language || null,
       }).eq('id', userId),
@@ -116,6 +126,26 @@ export default function ComptePage() {
       setProfileFeedback({ type: 'error', msg: (dbErr ?? authErr)?.message ?? 'Error al guardar.' })
     } else {
       setProfileFeedback({ type: 'success', msg: 'Datos guardados correctamente.' })
+    }
+  }
+
+  async function handleEmailSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newEmail.trim()) return
+    setEmailLoading(true)
+    setEmailFeedback(null)
+
+    const { error } = await createClient().auth.updateUser({ email: newEmail.trim() })
+
+    setEmailLoading(false)
+    if (error) {
+      setEmailFeedback({ type: 'error', msg: error.message })
+    } else {
+      setEmailFeedback({
+        type: 'success',
+        msg: `Hemos enviado un enlace de confirmación a ${newEmail}. Su email cambiará al hacer clic en el enlace.`,
+      })
+      setNewEmail('')
     }
   }
 
@@ -150,23 +180,12 @@ export default function ComptePage() {
     <main className="page-enter">
 
       {/* ── Cabecera ── */}
-      <section style={{
-        borderBottom: '1px solid var(--line-soft)',
-        padding: '40px 0',
-        background: 'var(--bg-elev)',
-      }}>
+      <section style={{ borderBottom: '1px solid var(--line-soft)', padding: '40px 0', background: 'var(--bg-elev)' }}>
         <div className="container">
-          <div style={{
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between', flexWrap: 'wrap', gap: 20,
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
             <div>
               <div className="eyebrow" style={{ marginBottom: 8 }}>Espacio personal</div>
-              <h1 style={{
-                fontFamily: 'var(--display)',
-                fontSize: 'clamp(28px, 4vw, 52px)',
-                margin: 0, fontWeight: 400,
-              }}>
+              <h1 style={{ fontFamily: 'var(--display)', fontSize: 'clamp(28px, 4vw, 52px)', margin: 0, fontWeight: 400 }}>
                 Mi cuenta
               </h1>
               <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 6 }}>{userEmail}</p>
@@ -188,24 +207,15 @@ export default function ComptePage() {
 
             {/* ── Datos personales ── */}
             <div>
-              <h2 style={{
-                fontFamily: 'var(--display)', fontSize: 28,
-                margin: 0, marginBottom: 6, fontWeight: 400,
-              }}>
+              <h2 style={{ fontFamily: 'var(--display)', fontSize: 28, margin: 0, marginBottom: 6, fontWeight: 400 }}>
                 Datos personales
               </h2>
               <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 28 }}>
                 Esta información se usará para agilizar sus futuras reservas.
               </p>
-
-              <div style={{ border: '1px solid var(--line-soft)', padding: '32px' }}>
+              <div style={{ border: '1px solid var(--line-soft)', padding: 32 }}>
                 <form onSubmit={handleProfileSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: 24,
-                  }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
                     <div className="field">
                       <label>Nombre completo</label>
                       <input
@@ -218,12 +228,11 @@ export default function ComptePage() {
                     </div>
                     <div className="field">
                       <label>Teléfono</label>
-                      <input
-                        type="tel"
-                        placeholder="+33 6 12 34 56 78"
-                        value={profile.phone}
-                        onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))}
-                        autoComplete="tel"
+                      <PhoneInput
+                        prefix={phonePrefix}
+                        number={phoneNumber}
+                        onPrefixChange={setPhonePrefix}
+                        onNumberChange={setPhoneNumber}
                       />
                     </div>
                   </div>
@@ -231,9 +240,7 @@ export default function ComptePage() {
                   <div className="field">
                     <label>
                       Dirección
-                      <span style={{ fontWeight: 400, opacity: 0.45, fontSize: 11, marginLeft: 6 }}>
-                        (opcional)
-                      </span>
+                      <span style={{ fontWeight: 400, opacity: 0.45, fontSize: 11, marginLeft: 6 }}>(opcional)</span>
                     </label>
                     <input
                       type="text"
@@ -247,9 +254,7 @@ export default function ComptePage() {
                   <div className="field">
                     <label>
                       Idioma preferido
-                      <span style={{ fontWeight: 400, opacity: 0.45, fontSize: 11, marginLeft: 6 }}>
-                        (opcional)
-                      </span>
+                      <span style={{ fontWeight: 400, opacity: 0.45, fontSize: 11, marginLeft: 6 }}>(opcional)</span>
                     </label>
                     <select
                       value={profile.preferred_language}
@@ -262,9 +267,7 @@ export default function ComptePage() {
                     </select>
                   </div>
 
-                  {profileFeedback && (
-                    <FeedbackBox type={profileFeedback.type} msg={profileFeedback.msg} />
-                  )}
+                  {profileFeedback && <FeedbackBox type={profileFeedback.type} msg={profileFeedback.msg} />}
 
                   <button
                     type="submit"
@@ -278,25 +281,53 @@ export default function ComptePage() {
               </div>
             </div>
 
+            {/* ── Correo electrónico ── */}
+            <div>
+              <h2 style={{ fontFamily: 'var(--display)', fontSize: 28, margin: 0, marginBottom: 6, fontWeight: 400 }}>
+                Correo electrónico
+              </h2>
+              <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 28 }}>
+                Email actual: <strong style={{ color: 'var(--fg)' }}>{userEmail}</strong>
+              </p>
+              <div style={{ border: '1px solid var(--line-soft)', padding: 32 }}>
+                <form onSubmit={handleEmailSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                  <div className="field">
+                    <label>Nuevo correo electrónico</label>
+                    <input
+                      type="email"
+                      placeholder="nuevo@correo.com"
+                      value={newEmail}
+                      onChange={e => { setNewEmail(e.target.value); setEmailFeedback(null) }}
+                      required
+                      autoComplete="email"
+                    />
+                  </div>
+
+                  {emailFeedback && <FeedbackBox type={emailFeedback.type} msg={emailFeedback.msg} />}
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={emailLoading || !newEmail}
+                    style={{ opacity: emailLoading ? 0.7 : 1, justifyContent: 'center', alignSelf: 'flex-start' }}
+                  >
+                    {emailLoading ? 'Enviando…' : 'Cambiar correo'}
+                  </button>
+                </form>
+              </div>
+            </div>
+
             {/* ── Contraseña ── */}
             <div>
-              <h2 style={{
-                fontFamily: 'var(--display)', fontSize: 28,
-                margin: 0, marginBottom: 6, fontWeight: 400,
-              }}>
+              <h2 style={{ fontFamily: 'var(--display)', fontSize: 28, margin: 0, marginBottom: 6, fontWeight: 400 }}>
                 Contraseña
               </h2>
               <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 28 }}>
-                Mínimo 6 caracteres. Deje los campos en blanco para no cambiarla.
+                Mínimo 6 caracteres.
               </p>
-
-              <div style={{ border: '1px solid var(--line-soft)', padding: '32px' }}>
+              <div style={{ border: '1px solid var(--line-soft)', padding: 32 }}>
                 <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: 24,
-                  }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
                     <div className="field">
                       <label>Nueva contraseña</label>
                       <input
@@ -323,9 +354,7 @@ export default function ComptePage() {
                     </div>
                   </div>
 
-                  {pwdFeedback && (
-                    <FeedbackBox type={pwdFeedback.type} msg={pwdFeedback.msg} />
-                  )}
+                  {pwdFeedback && <FeedbackBox type={pwdFeedback.type} msg={pwdFeedback.msg} />}
 
                   <button
                     type="submit"

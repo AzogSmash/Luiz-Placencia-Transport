@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { bg } from '@/lib/images'
 import { createReservation } from '@/app/actions/reservations'
+import PhoneInput from '@/components/PhoneInput'
 
 type FormData = {
   serviceType: string
@@ -61,6 +62,8 @@ export default function ReservaPage() {
     vehiculo: 'berlina',
     mensaje: '',
   })
+  const [phonePrefix, setPhonePrefix] = useState('+33')
+  const [phoneNumber, setPhoneNumber] = useState('')
 
   const upd = (k: keyof FormData, v: string) => setData(d => ({ ...d, [k]: v }))
 
@@ -88,7 +91,7 @@ export default function ReservaPage() {
 
     const result = await createReservation({
       nom:              `${data.nombre} ${data.apellido}`.trim(),
-      telephone:        data.telefono,
+      telephone:        `${phonePrefix} ${phoneNumber}`.trim(),
       email:            data.email,
       adresse_depart:   data.origen,
       adresse_arrivee:  data.destino,
@@ -331,8 +334,12 @@ export default function ReservaPage() {
                     </div>
                     <div className="field">
                       <label>Teléfono / WhatsApp *</label>
-                      <input type="tel" placeholder="+34 600 000 000"
-                        value={data.telefono} onChange={e => upd('telefono', e.target.value)} />
+                      <PhoneInput
+                        prefix={phonePrefix}
+                        number={phoneNumber}
+                        onPrefixChange={setPhonePrefix}
+                        onNumberChange={setPhoneNumber}
+                      />
                     </div>
                     <div className="field" style={{ gridColumn: '1 / -1' }}>
                       <label>Mensaje complementario</label>
@@ -364,7 +371,7 @@ export default function ReservaPage() {
                     <button
                       className="btn btn-primary"
                       onClick={handleSubmit}
-                      disabled={loading || !data.nombre || !data.email || !data.telefono}
+                      disabled={loading || !data.nombre || !data.email || !phoneNumber}
                       style={{ opacity: loading ? 0.7 : 1 }}
                     >
                       {loading ? 'Enviando…' : 'Enviar solicitud'}
