@@ -1,5 +1,7 @@
 'use client'
 
+import { CSSProperties } from 'react'
+
 const COUNTRIES = [
   { code: '+33',  flag: '🇫🇷', name: 'France' },
   { code: '+34',  flag: '🇪🇸', name: 'España' },
@@ -24,11 +26,12 @@ type Props = {
   onPrefixChange: (v: string) => void
   onNumberChange: (v: string) => void
   placeholder?: string
+  style?: CSSProperties
 }
 
-export default function PhoneInput({ prefix, number, onPrefixChange, onNumberChange, placeholder = '6 12 34 56 78' }: Props) {
+export default function PhoneInput({ prefix, number, onPrefixChange, onNumberChange, placeholder = '6 12 34 56 78', style }: Props) {
   return (
-    <div style={{ display: 'flex', gap: 0 }}>
+    <div style={{ display: 'flex', gap: 0, width: '100%', ...style }}>
       <select
         value={prefix}
         onChange={e => onPrefixChange(e.target.value)}
@@ -37,14 +40,13 @@ export default function PhoneInput({ prefix, number, onPrefixChange, onNumberCha
           color: 'var(--fg)',
           border: '1px solid var(--line-soft)',
           borderRight: 0,
-          padding: '10px 8px',
+          padding: '10px 6px',
           fontFamily: 'var(--sans)',
           fontSize: 13,
           outline: 'none',
-          appearance: 'none',
           cursor: 'pointer',
           flexShrink: 0,
-          minWidth: 90,
+          width: 80,
         }}
       >
         {COUNTRIES.map(c => (
@@ -58,7 +60,7 @@ export default function PhoneInput({ prefix, number, onPrefixChange, onNumberCha
         placeholder={placeholder}
         value={number}
         onChange={e => onNumberChange(e.target.value)}
-        style={{ flex: 1 }}
+        style={{ flex: 1, minWidth: 0 }}
       />
     </div>
   )

@@ -32,11 +32,18 @@ const SERVICES = [
 ]
 
 const VEHICULOS = [
-  { id: 'tesla',    t: 'Tesla Model Y',   d: 'Berline eléctrica',  pax: '1–4', bag: '2 valises',  price: 'Precio bajo consulta' },
-  { id: 'staria',   t: 'Hyundai Staria',  d: 'Van premium',         pax: '1–7', bag: '6 valises',  price: 'Precio bajo consulta' },
-  { id: 'mercedes', t: 'Mercedes Clase V', d: 'Van ejecutiva',      pax: '1–7', bag: '6 valises',  price: 'Precio bajo consulta' },
-  { id: 'proace',   t: 'Toyota Proace',   d: 'Van gran capacidad',  pax: '1–8', bag: '6 valises',  price: 'Precio bajo consulta' },
+  { id: 'tesla',    t: 'Tesla Model Y',    d: 'Berline eléctrica', pax: '1–4', bag: '2 valises', price: 'Precio bajo consulta' },
+  { id: 'staria',   t: 'Hyundai Staria',   d: 'Van premium',       pax: '1–7', bag: '6 valises', price: 'Precio bajo consulta' },
+  { id: 'mercedes', t: 'Mercedes Clase V', d: 'Van ejecutiva',     pax: '1–7', bag: '6 valises', price: 'Precio bajo consulta' },
+  { id: 'proace',   t: 'Toyota Proace',    d: 'Van gran capacidad', pax: '1–8', bag: '6 valises', price: 'Precio bajo consulta' },
 ]
+
+const CAPACITY: Record<string, { maxPax: number; maxBag: number }> = {
+  tesla:    { maxPax: 4, maxBag: 2 },
+  staria:   { maxPax: 7, maxBag: 6 },
+  mercedes: { maxPax: 7, maxBag: 6 },
+  proace:   { maxPax: 8, maxBag: 6 },
+}
 
 function SummaryRow({ k, v }: { k: string; v: string }) {
   return (
@@ -53,6 +60,7 @@ export default function ReservaPage() {
   const [reservationId, setReservationId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const [data, setData] = useState<FormData>({
     serviceType: 'aeropuerto',
@@ -66,14 +74,46 @@ export default function ReservaPage() {
   const [phonePrefix, setPhonePrefix] = useState('+33')
   const [phoneNumber, setPhoneNumber] = useState('')
 
-  const upd = (k: keyof FormData, v: string) => setData(d => ({ ...d, [k]: v }))
+  const upd = (k: keyof FormData, v: string) => {
+    setData(d => ({ ...d, [k]: v }))
+    if (fieldErrors[k]) setFieldErrors(f => { const n = { ...f }; delete n[k]; return n })
+  }
+
+  const selectVehiculo = (id: string) => {
+    const cap = CAPACITY[id]
+    setData(d => ({
+      ...d,
+      vehiculo: id,
+      pasajeros: String(Math.min(parseInt(d.pasajeros) || 1, cap.maxPax)),
+      equipaje:  String(Math.min(parseInt(d.equipaje)  || 0, cap.maxBag)),
+    }))
+  }
 
   const vehiculoImg =
     data.vehiculo === 'staria'   ? 'Hyundai Staria' :
     data.vehiculo === 'mercedes' ? 'Mercedes Clase V' :
     data.vehiculo === 'proace'   ? 'Toyota Proace' : 'Tesla Model Y'
 
+  function validateStep2(): boolean {
+    const e: Record<string, string> = {}
+    if (!data.origen.trim())  e.origen  = 'Por favor, complete este campo'
+    if (!data.destino.trim()) e.destino = 'Por favor, complete este campo'
+    if (!data.fecha)          e.fecha   = 'Por favor, complete este campo'
+    setFieldErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  function validateStep3(): boolean {
+    const e: Record<string, string> = {}
+    if (!data.nombre.trim()) e.nombre   = 'Por favor, complete este campo'
+    if (!data.email.trim())  e.email    = 'Por favor, complete este campo'
+    if (!phoneNumber.trim()) e.telefono = 'Por favor, complete este campo'
+    setFieldErrors(e)
+    return Object.keys(e).length === 0
+  }
+
   async function handleSubmit() {
+    if (!validateStep3()) return
     setLoading(true)
     setError(null)
 
@@ -206,36 +246,42 @@ export default function ReservaPage() {
                   </p>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 32 }}>
-                    {SERVICES.map(s => (
+                    {SERVICES.map(s => {
+                      const sel = data.serviceType === s.id
+                      return (
                       <button key={s.id} onClick={() => upd('serviceType', s.id)} style={{
                         textAlign: 'left', padding: '20px 24px', fontFamily: 'var(--sans)',
-                        background: data.serviceType === s.id ? 'var(--accent-soft)' : 'transparent',
-                        border: `1px solid ${data.serviceType === s.id ? 'var(--accent)' : 'var(--line)'}`,
-                        color: 'var(--fg)', cursor: 'pointer', borderRadius: 'var(--radius)',
+                        background: sel ? 'var(--accent)' : 'transparent',
+                        border: `1px solid ${sel ? 'var(--accent)' : 'var(--line)'}`,
+                        color: sel ? '#0a0a0a' : 'var(--fg)', cursor: 'pointer', borderRadius: 'var(--radius)',
                         transition: 'all 0.18s ease',
                       }}>
-                        <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>{s.t}</div>
-                        <div style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{s.d}</div>
+                        <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 4, color: sel ? '#0a0a0a' : 'var(--fg)' }}>{s.t}</div>
+                        <div style={{ fontSize: 12, color: sel ? '#0a0a0a99' : 'var(--fg-muted)' }}>{s.d}</div>
                       </button>
-                    ))}
+                      )
+                    })}
                   </div>
 
                   <h3 style={{ fontFamily: 'var(--display)', fontSize: 24, margin: '40px 0 16px', fontWeight: 400 }}>
                     Categoría de vehículo
                   </h3>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 40 }}>
-                    {VEHICULOS.map(v => (
-                      <button key={v.id} onClick={() => upd('vehiculo', v.id)} style={{
+                    {VEHICULOS.map(v => {
+                      const sel = data.vehiculo === v.id
+                      return (
+                      <button key={v.id} onClick={() => selectVehiculo(v.id)} style={{
                         textAlign: 'left', padding: 20, fontFamily: 'var(--sans)',
-                        background: data.vehiculo === v.id ? 'var(--accent-soft)' : 'transparent',
-                        border: `1px solid ${data.vehiculo === v.id ? 'var(--accent)' : 'var(--line)'}`,
-                        color: 'var(--fg)', cursor: 'pointer', borderRadius: 'var(--radius)',
+                        background: sel ? 'var(--accent)' : 'transparent',
+                        border: `1px solid ${sel ? 'var(--accent)' : 'var(--line)'}`,
+                        color: sel ? '#0a0a0a' : 'var(--fg)', cursor: 'pointer', borderRadius: 'var(--radius)',
                       }}>
                         <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>{v.t}</div>
-                        <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginBottom: 12 }}>{v.d} · {v.pax} pax</div>
-                        <div className="mono" style={{ color: 'var(--accent)', fontSize: 11 }}>{v.price}</div>
+                        <div style={{ fontSize: 11, color: sel ? '#0a0a0a99' : 'var(--fg-muted)', marginBottom: 12 }}>{v.d} · {v.pax} pax</div>
+                        <div className="mono" style={{ color: sel ? '#0a0a0a' : 'var(--accent)', fontSize: 11 }}>{v.price}</div>
                       </button>
-                    ))}
+                      )
+                    })}
                   </div>
 
                   <button className="btn btn-primary" onClick={() => setStep(2)}>
@@ -258,33 +304,39 @@ export default function ReservaPage() {
                     <div className="field">
                       <label>Lugar de salida *</label>
                       <input type="text" placeholder="Hotel Le Bristol, 112 Rue du Faubourg…"
-                        value={data.origen} onChange={e => upd('origen', e.target.value)} />
+                        value={data.origen} onChange={e => upd('origen', e.target.value)}
+                        style={fieldErrors.origen ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
+                      {fieldErrors.origen && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.origen}</span>}
                     </div>
                     <div className="field">
                       <label>Destino *</label>
                       <input type="text" placeholder="Aeropuerto CDG, Terminal 2E…"
-                        value={data.destino} onChange={e => upd('destino', e.target.value)} />
+                        value={data.destino} onChange={e => upd('destino', e.target.value)}
+                        style={fieldErrors.destino ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
+                      {fieldErrors.destino && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.destino}</span>}
                     </div>
                     <div className="field">
                       <label>Fecha *</label>
-                      <input type="date" value={data.fecha} onChange={e => upd('fecha', e.target.value)} />
+                      <input type="date" value={data.fecha} onChange={e => upd('fecha', e.target.value)}
+                        style={fieldErrors.fecha ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
+                      {fieldErrors.fecha && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.fecha}</span>}
                     </div>
                     <div className="field">
                       <label>Hora</label>
                       <input type="time" value={data.hora} onChange={e => upd('hora', e.target.value)} />
                     </div>
                     <div className="field">
-                      <label>Pasajeros</label>
+                      <label>Pasajeros <span style={{ color: 'var(--fg-dim)', fontSize: 11 }}>(máx. {CAPACITY[data.vehiculo].maxPax})</span></label>
                       <select value={data.pasajeros} onChange={e => upd('pasajeros', e.target.value)}>
-                        {['1','2','3','4','5','6','7','8+'].map(n => (
+                        {Array.from({ length: CAPACITY[data.vehiculo].maxPax }, (_, i) => String(i + 1)).map(n => (
                           <option key={n} value={n}>{n} pasajero{n !== '1' ? 's' : ''}</option>
                         ))}
                       </select>
                     </div>
                     <div className="field">
-                      <label>Equipaje</label>
+                      <label>Equipaje <span style={{ color: 'var(--fg-dim)', fontSize: 11 }}>(máx. {CAPACITY[data.vehiculo].maxBag})</span></label>
                       <select value={data.equipaje} onChange={e => upd('equipaje', e.target.value)}>
-                        {['0','1','2','3','4','5+'].map(n => (
+                        {Array.from({ length: CAPACITY[data.vehiculo].maxBag + 1 }, (_, i) => String(i)).map(n => (
                           <option key={n} value={n}>{n} maleta{n !== '1' ? 's' : ''}</option>
                         ))}
                       </select>
@@ -292,11 +344,10 @@ export default function ReservaPage() {
                   </div>
 
                   <div style={{ display: 'flex', gap: 12 }}>
-                    <button className="btn btn-ghost" onClick={() => setStep(1)}>← Anterior</button>
+                    <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(1) }}>← Anterior</button>
                     <button
                       className="btn btn-primary"
-                      onClick={() => setStep(3)}
-                      disabled={!data.origen || !data.destino || !data.fecha}
+                      onClick={() => { if (validateStep2()) setStep(3) }}
                     >
                       Siguiente · Contacto
                     </button>
@@ -318,7 +369,9 @@ export default function ReservaPage() {
                     <div className="field">
                       <label>Nombre *</label>
                       <input type="text" placeholder="Carmen"
-                        value={data.nombre} onChange={e => upd('nombre', e.target.value)} />
+                        value={data.nombre} onChange={e => upd('nombre', e.target.value)}
+                        style={fieldErrors.nombre ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
+                      {fieldErrors.nombre && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.nombre}</span>}
                     </div>
                     <div className="field">
                       <label>Apellido</label>
@@ -328,7 +381,9 @@ export default function ReservaPage() {
                     <div className="field">
                       <label>Email *</label>
                       <input type="email" placeholder="carmen@correo.com"
-                        value={data.email} onChange={e => upd('email', e.target.value)} />
+                        value={data.email} onChange={e => upd('email', e.target.value)}
+                        style={fieldErrors.email ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
+                      {fieldErrors.email && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.email}</span>}
                     </div>
                     <div className="field">
                       <label>Teléfono / WhatsApp *</label>
@@ -336,8 +391,10 @@ export default function ReservaPage() {
                         prefix={phonePrefix}
                         number={phoneNumber}
                         onPrefixChange={setPhonePrefix}
-                        onNumberChange={setPhoneNumber}
+                        onNumberChange={v => { setPhoneNumber(v); if (fieldErrors.telefono) setFieldErrors(f => { const n = { ...f }; delete n.telefono; return n }) }}
+                        style={fieldErrors.telefono ? { borderColor: 'oklch(0.65 0.14 20)' } : undefined}
                       />
+                      {fieldErrors.telefono && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.telefono}</span>}
                     </div>
                     <div className="field" style={{ gridColumn: '1 / -1' }}>
                       <label>Mensaje complementario</label>
@@ -363,13 +420,13 @@ export default function ReservaPage() {
                   )}
 
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <button className="btn btn-ghost" onClick={() => setStep(2)} disabled={loading}>
+                    <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(2) }} disabled={loading}>
                       ← Anterior
                     </button>
                     <button
                       className="btn btn-primary"
                       onClick={handleSubmit}
-                      disabled={loading || !data.nombre || !data.email || !phoneNumber}
+                      disabled={loading}
                       style={{ opacity: loading ? 0.7 : 1 }}
                     >
                       {loading ? 'Enviando…' : 'Enviar solicitud'}
