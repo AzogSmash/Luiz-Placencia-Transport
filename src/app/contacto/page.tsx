@@ -109,7 +109,7 @@ export default function ContactoPage() {
                   className="placeholder"
                   data-label="Mapa Île-de-France · cobertura"
                   style={{
-                    backgroundImage: "url('https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=1400&q=80&auto=format&fit=crop')",
+                    backgroundImage: "url('/bg/paris.png')",
                     aspectRatio: '16/9',
                   }}
                 />
