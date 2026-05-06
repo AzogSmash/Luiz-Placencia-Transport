@@ -1,4 +1,4 @@
-# Guide — Luiz Placencia Transport
+# Guide — Luis Placencia Transport
 
 > Rédigé le 06/05/2026 — pour Clément et l'équipe.
 
@@ -58,7 +58,7 @@ C'est une application Next.js complète avec :
    - Toyota Proace : 1–8 pax · 6 bagages
 3. **Étape 2** — lieu de départ, destination, date (pas dans le passé), heure, passagers, bagages
 4. **Étape 3** — nom, email, téléphone (min. 9 chiffres), message optionnel
-5. Validation → confirmation à l'écran avec numéro de réservation + email automatique envoyé au client ET à Luiz
+5. Validation → confirmation à l'écran avec numéro de réservation + email automatique envoyé au client ET à Luis
 
 ---
 
@@ -98,7 +98,7 @@ Depuis le dashboard, le lien "Panel Admin" apparaît si le compte a le rôle `ad
 
 **Statuts disponibles :**
 - `En attente` — réservation reçue, pas encore traitée
-- `Confirmée` — Luiz a confirmé le trajet
+- `Confirmée` — Luis a confirmé le trajet
 - `En cours` — trajet en cours
 - `Terminée` — trajet terminé
 - `Annulée` — réservation annulée
@@ -112,7 +112,7 @@ Les comptes admin **ne se créent pas depuis le site** — ils se configurent di
 ### Étapes :
 
 **Option A — Promouvoir un compte existant**
-1. Aller sur [supabase.com](https://supabase.com) → se connecter → ouvrir le projet Luiz Placencia Transport
+1. Aller sur [supabase.com](https://supabase.com) → se connecter → ouvrir le projet Luis Placencia Transport
 2. Aller dans **Table Editor** → table `profiles`
 3. Trouver la ligne avec l'email du compte à promouvoir
 4. Changer la colonne `role` de `user` à `admin`
@@ -122,7 +122,7 @@ Les comptes admin **ne se créent pas depuis le site** — ils se configurent di
 1. Créer le compte normalement sur le site (`/register`)
 2. Puis faire l'étape A ci-dessus pour lui donner le rôle admin
 
-> Le compte de Luiz devrait être promu admin de cette façon pour qu'il accède à `/admin`.
+> Le compte de Luis devrait être promu admin de cette façon pour qu'il accède à `/admin`.
 
 ---
 
@@ -131,9 +131,9 @@ Les comptes admin **ne se créent pas depuis le site** — ils se configurent di
 | Déclencheur | Destinataire | Contenu |
 |-------------|-------------|---------|
 | Nouvelle réservation | Client | Confirmation avec numéro de réf., détails du trajet |
-| Nouvelle réservation | Admin (Luiz) | Alerte avec toutes les infos client, lien vers `/admin` |
+| Nouvelle réservation | Admin (Luis) | Alerte avec toutes les infos client, lien vers `/admin` |
 | Changement de statut | Client | Notification du nouveau statut |
-| Formulaire de contact | Admin (Luiz) | Message reçu avec email du client en reply-to |
+| Formulaire de contact | Admin (Luis) | Message reçu avec email du client en reply-to |
 
 > **Note :** Les emails partent actuellement depuis `onboarding@resend.dev` (adresse de test). Une fois le domaine connecté, ils partiront depuis `noreply@luizplasenciatransport.com`.
 
@@ -145,7 +145,7 @@ Les comptes admin **ne se créent pas depuis le site** — ils se configurent di
 
 **1. Compléter les mentions légales et CGV**
 Les pages `/aviso-legal`, `/politica-privacidad` et `/cgv` ont des champs `[À compléter]`.
-Il faut demander à Luiz :
+Il faut demander à Luis :
 - Son adresse postale complète
 - Sa forme juridique (Auto-entrepreneur ? SASU ?)
 - Ses conditions d'annulation (délai de préavis, pourcentage de pénalité)
@@ -153,23 +153,17 @@ Il faut demander à Luiz :
 - Son assurance responsabilité civile professionnelle
 - Le nom du médiateur de consommation agréé
 
-**2. Promouvoir le compte de Luiz en admin**
-Sans ça, Luiz ne peut pas voir les réservations. Voir section 5.
-
-**3. Vérifier la clé Resend en production**
-Aller sur Vercel → projet → Settings → Environment Variables → vérifier que `RESEND_API_KEY` est présente. Si ce n'est pas le cas, les emails ne partent pas.
-
 ---
 
 ### 🟡 IMPORTANT — Pour un site professionnel complet
 
-**4. Confirmer les tarifs avec Luiz**
-La page `/servicios` affiche des tarifs indicatifs (75€ aéroport, 110€ Disneyland, etc.) mais le formulaire de réservation dit "Precio bajo consulta". Il faut décider avec Luiz si :
+**4. Confirmer les tarifs avec Luis**
+La page `/servicios` affiche des tarifs indicatifs (75€ aéroport, 110€ Disneyland, etc.) mais le formulaire de réservation dit "Precio bajo consulta". Il faut décider avec Luis si :
 - Les tarifs affichés sont corrects et définitifs
 - Ou si on enlève les prix de la page services et tout passe par devis
 
 **5. Connecter le domaine `luizplasenciatransport.com`**
-- Luiz a le domaine via Wix
+- Luis a le domaine via Wix
 - Il doit se connecter à son compte Wix, aller dans Domaines → DNS
 - Toi tu vas dans Vercel → projet → Settings → Domains → ajouter `luizplasenciatransport.com`
 - Vercel te donne 2 enregistrements DNS à coller dans Wix
@@ -183,10 +177,10 @@ La page `/servicios` affiche des tarifs indicatifs (75€ aéroport, 110€ Disn
 
 **6. Paiement en ligne (Stripe)**
 Intégrer Stripe pour permettre le paiement à la réservation (ou acompte).
-Nécessite : la grille tarifaire définitive de Luiz + un compte Stripe.
+Nécessite : la grille tarifaire définitive de Luis + un compte Stripe.
 
 **7. Photos réelles des véhicules**
-Si Luiz prend de vraies photos de ses véhicules, on les intègre directement (remplacer les photos actuelles dans `public/vehicles/`).
+Si Luis prend de vraies photos de ses véhicules, on les intègre directement (remplacer les photos actuelles dans `public/vehicles/`).
 
 **8. Newsletter**
 La liste des emails s'accumule dans Supabase. Pour envoyer de vraies campagnes, il faudra connecter un outil comme Brevo (gratuit jusqu'à 300 emails/jour) ou Resend Broadcasts.
@@ -232,9 +226,9 @@ Aller sur **Vercel → projet → Settings → Environment Variables**
 | Vercel (hébergement) | vercel.com |
 | Supabase (base de données) | supabase.com |
 | Resend (emails) | resend.com |
-| GitHub (code source) | github.com/AzogSmash/Luiz-Placencia-Transport |
+| GitHub (code source) | github.com/AzogSmash/Luis-Placencia-Transport |
 | Site en production | luiz-placencia-transport.vercel.app |
 
 ---
 
-*Guide rédigé par Clément — projet Luiz Placencia Transport*
+*Guide rédigé par Clément — projet Luis Placencia Transport*

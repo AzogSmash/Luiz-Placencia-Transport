@@ -1,5 +1,5 @@
 const ITEMS = [
-  { q: 'Puntualidad absoluta y un trato exquisito. Llevamos tres años llamando solo a Luiz para todos nuestros traslados.', a: 'Isabel M.',     r: 'Hôtel Costes · Conserjería' },
+  { q: 'Puntualidad absoluta y un trato exquisito. Llevamos tres años llamando solo a Luis para todos nuestros traslados.', a: 'Isabel M.',     r: 'Hôtel Costes · Conserjería' },
   { q: 'Un city tour memorable. Conoce París como nadie y respeta los silencios. Volveremos.',                             a: 'Carlos & Ana R.', r: 'Madrid' },
   { q: 'Servicio impecable de París a Reims. Vehículo perfecto, conducción muy suave.',                                    a: 'Marc D.',         r: 'Maison de champagne' },
 ]

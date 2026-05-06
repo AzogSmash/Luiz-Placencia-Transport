@@ -14,7 +14,7 @@ export default function Logo({ small }: { small?: boolean }) {
           letterSpacing: '0.01em',
           fontWeight: 500,
         }}>
-          Luiz Placencia
+          Luis Placencia
         </span>
         <span style={{
           fontFamily: 'var(--sans)',

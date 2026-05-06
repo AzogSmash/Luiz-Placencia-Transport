@@ -69,7 +69,7 @@ export default function Footer() {
           flexWrap: 'wrap',
           gap: 16,
         }}>
-          <div>© 2026 Luiz Placencia Transport · SIRET 101 300 291 000 16</div>
+          <div>© 2026 Luis Placencia Transport · SIRET 101 300 291 000 16</div>
           <div style={{ display: 'flex', gap: 24 }}>
             <Link href="/aviso-legal" style={{ color: 'var(--fg-dim)' }}>Aviso legal</Link>
             <Link href="/politica-privacidad" style={{ color: 'var(--fg-dim)' }}>Política de privacidad</Link>

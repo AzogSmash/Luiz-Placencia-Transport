@@ -28,7 +28,7 @@ const jetbrains = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Luiz Placencia Transport — Chófer privado VTC en París',
+  title: 'Luis Placencia Transport — Chófer privado VTC en París',
   description: 'Servicio de chófer privado VTC en París. Traslados aeropuerto, Disneyland, city tours y excursiones por Francia y Europa. Vehículos premium, 24/7.',
 }
 
