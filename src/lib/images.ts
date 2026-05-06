@@ -10,11 +10,11 @@ export const IMG: Record<string, string> = {
   "Tesla Model Y":
     "https://images.unsplash.com/photo-1536883442700-ffaa4d76e372?w=1400&q=80&auto=format&fit=crop",
   "Hyundai Staria":
-    "https://images.unsplash.com/photo-1758956929717-e657fc784606?w=1400&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1776929484525-d5a85a426949?w=1400&q=80&auto=format&fit=crop",
   "Mercedes Clase V":
-    "https://images.unsplash.com/photo-1609520505218-7421df17ed5b?w=1400&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1688619102600-976b3bb41aaf?w=1400&q=80&auto=format&fit=crop",
   "Toyota Proace":
-    "https://images.unsplash.com/photo-1468802161019-65df4084ccf7?w=1400&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1775054185026-8dc74fac136f?w=1400&q=80&auto=format&fit=crop",
 
   // ── Intérieur ─────────────────────────────────────────────────────────────
   "Interior cabina trasera":
