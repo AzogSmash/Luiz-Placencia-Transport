@@ -24,9 +24,9 @@ export const IMG: Record<string, string> = {
 
   // ── Aéroport ──────────────────────────────────────────────────────────────
   "Mercedes en zona de embarque CDG":
-    "https://images.unsplash.com/photo-1468802161019-65df4084ccf7?w=1400&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1551432615-469d73f41b97?w=1400&q=80&auto=format&fit=crop",
   "Mercedes Clase E · CDG Terminal 2E":
-    "https://images.unsplash.com/photo-1468802161019-65df4084ccf7?w=1400&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1551432615-469d73f41b97?w=1400&q=80&auto=format&fit=crop",
 
   // ── Disneyland ────────────────────────────────────────────────────────────
   "Llegada Disneyland Hotel":
@@ -38,19 +38,19 @@ export const IMG: Record<string, string> = {
 
   // ── Excursions ────────────────────────────────────────────────────────────
   "Castillo de Versalles":
-    "https://images.unsplash.com/photo-1591289009723-aef022f0c0ad?w=1400&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1591828353335-197466da2a4e?w=1400&q=80&auto=format&fit=crop",
   "Castillo de Chenonceau":
     "https://images.unsplash.com/photo-1756307400556-e7dc592739b9?w=1400&q=80&auto=format&fit=crop",
 
   // ── Événements / Bodas ────────────────────────────────────────────────────
   "Cortejo en Place de l'Opéra":
-    "https://images.unsplash.com/photo-1547800085-0907795e4a3b?w=1400&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1516536900061-d881b27e8ff8?w=1400&q=80&auto=format&fit=crop",
   "Cortejo Place de l'Opéra":
-    "https://images.unsplash.com/photo-1547800085-0907795e4a3b?w=1400&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1516536900061-d881b27e8ff8?w=1400&q=80&auto=format&fit=crop",
 
   // ── Carte / Zone de service ───────────────────────────────────────────────
   "Mapa Île-de-France · cobertura":
-    "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=1400&q=80&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1520939817895-060bdaf4fe1b?w=1400&q=80&auto=format&fit=crop",
 }
 
 export function bg(label: string): CSSProperties {
