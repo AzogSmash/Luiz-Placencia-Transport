@@ -94,20 +94,45 @@ export default function ReservaPage() {
     data.vehiculo === 'mercedes' ? 'Mercedes Clase V' :
     data.vehiculo === 'proace'   ? 'Toyota Proace' : 'Tesla Model Y'
 
+  const todayStr = new Date().toISOString().split('T')[0]
+
   function validateStep2(): boolean {
     const e: Record<string, string> = {}
     if (!data.origen.trim())  e.origen  = 'Por favor, complete este campo'
     if (!data.destino.trim()) e.destino = 'Por favor, complete este campo'
-    if (!data.fecha)          e.fecha   = 'Por favor, complete este campo'
+
+    if (!data.fecha) {
+      e.fecha = 'Por favor, complete este campo'
+    } else if (data.fecha < todayStr) {
+      e.fecha = 'La fecha no puede ser anterior a hoy'
+    } else if (data.fecha === todayStr && data.hora) {
+      const now = new Date()
+      const [h, m] = data.hora.split(':').map(Number)
+      const selected = new Date(); selected.setHours(h, m, 0, 0)
+      if (selected <= now) e.hora = 'La hora indicada ya ha pasado'
+    }
+
     setFieldErrors(e)
     return Object.keys(e).length === 0
   }
 
   function validateStep3(): boolean {
     const e: Record<string, string> = {}
-    if (!data.nombre.trim()) e.nombre   = 'Por favor, complete este campo'
-    if (!data.email.trim())  e.email    = 'Por favor, complete este campo'
-    if (!phoneNumber.trim()) e.telefono = 'Por favor, complete este campo'
+    if (!data.nombre.trim()) e.nombre = 'Por favor, complete este campo'
+
+    if (!data.email.trim()) {
+      e.email = 'Por favor, complete este campo'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+      e.email = 'Dirección de email no válida'
+    }
+
+    const digits = phoneNumber.replace(/\D/g, '')
+    if (!phoneNumber.trim()) {
+      e.telefono = 'Por favor, complete este campo'
+    } else if (digits.length < 9) {
+      e.telefono = 'Mínimo 9 dígitos'
+    }
+
     setFieldErrors(e)
     return Object.keys(e).length === 0
   }
@@ -317,13 +342,16 @@ export default function ReservaPage() {
                     </div>
                     <div className="field">
                       <label>Fecha *</label>
-                      <input type="date" value={data.fecha} onChange={e => upd('fecha', e.target.value)}
+                      <input type="date" value={data.fecha} min={todayStr}
+                        onChange={e => upd('fecha', e.target.value)}
                         style={fieldErrors.fecha ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
                       {fieldErrors.fecha && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.fecha}</span>}
                     </div>
                     <div className="field">
                       <label>Hora</label>
-                      <input type="time" value={data.hora} onChange={e => upd('hora', e.target.value)} />
+                      <input type="time" value={data.hora} onChange={e => upd('hora', e.target.value)}
+                        style={fieldErrors.hora ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
+                      {fieldErrors.hora && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.hora}</span>}
                     </div>
                     <div className="field">
                       <label>Pasajeros <span style={{ color: 'var(--fg-dim)', fontSize: 11 }}>(máx. {CAPACITY[data.vehiculo].maxPax})</span></label>
