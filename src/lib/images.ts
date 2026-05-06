@@ -9,12 +9,9 @@ export const IMG: Record<string, string> = {
   // ── Véhicules ─────────────────────────────────────────────────────────────
   "Tesla Model Y":
     "https://images.unsplash.com/photo-1536883442700-ffaa4d76e372?w=1400&q=80&auto=format&fit=crop",
-  "Hyundai Staria":
-    "https://images.unsplash.com/photo-1741859765127-fda6acfea347?w=1400&q=80&auto=format&fit=crop",
-  "Mercedes Clase V":
-    "https://images.unsplash.com/photo-1534756287545-6b3a471d4e0e?w=1400&q=80&auto=format&fit=crop",
-  "Toyota Proace":
-    "https://images.unsplash.com/photo-1627031779530-1ea70d30a3b0?w=1400&q=80&auto=format&fit=crop",
+  "Hyundai Staria":   "/vehicles/hyunddai.png",
+  "Mercedes Clase V": "/vehicles/mercedesV.png",
+  "Toyota Proace":    "/vehicles/toyota.png",
 
   // ── Intérieur ─────────────────────────────────────────────────────────────
   "Interior cabina trasera":
@@ -49,8 +46,7 @@ export const IMG: Record<string, string> = {
     "https://images.unsplash.com/photo-1516536900061-d881b27e8ff8?w=1400&q=80&auto=format&fit=crop",
 
   // ── Carte / Zone de service ───────────────────────────────────────────────
-  "Mapa Île-de-France · cobertura":
-    "https://images.unsplash.com/photo-1520939817895-060bdaf4fe1b?w=1400&q=80&auto=format&fit=crop",
+  "Mapa Île-de-France · cobertura": "/bg/paris.png",
 }
 
 export function bg(label: string): CSSProperties {
