@@ -264,6 +264,7 @@ img { max-width: 100%; display: block; }
 
 .field select {
   appearance: none;
+  color-scheme: dark;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23999' fill='none' stroke-width='1.2'/></svg>");
   background-repeat: no-repeat;
   background-position: right 4px center;
