@@ -1,9 +1,10 @@
 import { bg } from '@/lib/images'
 
 const FLEET = [
-  { name: 'Mercedes Clase E', cat: 'Berlina',           pax: '1–3', bag: '3', desc: 'Comodidad y discreción para trayectos urbanos y traslados.' },
-  { name: 'Mercedes Clase V', cat: 'Van premium',       pax: '1–7', bag: '7', desc: 'Familias, equipos y grupos. Espacio generoso, asientos en cuero.' },
-  { name: 'Mercedes Clase S', cat: 'Berlina ejecutiva', pax: '1–3', bag: '2', desc: 'Para clientes ejecutivos y trayectos largos. Lo más alto de gama.' },
+  { name: 'Tesla Model Y',   cat: 'Berlina eléctrica', pax: '1–4', bag: '2', desc: 'Silenciosa, moderna y sostenible. La experiencia del vehículo eléctrico de alta gama.' },
+  { name: 'Hyundai Staria',  cat: 'Van premium',       pax: '1–7', bag: '6', desc: 'Espaciosa y elegante. Ideal para familias, grupos y trayectos con mucho equipaje.' },
+  { name: 'Mercedes Clase V', cat: 'Van ejecutiva',    pax: '1–7', bag: '6', desc: 'Referencia del segmento van de lujo. Asientos en cuero, wi-fi y trato impecable.' },
+  { name: 'Toyota Proace',   cat: 'Van gran capacidad', pax: '1–8', bag: '6', desc: 'Capacidad máxima para grupos y excursiones. Confort sin compromiso.' },
 ]
 
 export default function Fleet() {
@@ -21,7 +22,7 @@ export default function Fleet() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }} className="fleet-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 32 }} className="fleet-grid">
           {FLEET.map(v => (
             <div key={v.name} style={{
               border: '1px solid var(--line-soft)',

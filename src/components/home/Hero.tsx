@@ -2,9 +2,9 @@ import Link from 'next/link'
 import { bg } from '@/lib/images'
 
 const STATS = [
-  { k: '12 +',   v: 'Años de experiencia' },
-  { k: '3 200',  v: 'Trayectos al año' },
-  { k: '4.9 / 5', v: 'Valoración clientes' },
+  { k: '20 +',    v: 'Años de experiencia' },
+  { k: '3 000',   v: 'Trayectos realizados' },
+  { k: '4.8 / 5', v: 'Valoración clientes' },
 ]
 
 export default function Hero() {

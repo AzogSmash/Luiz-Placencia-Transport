@@ -12,11 +12,11 @@ export default function AvisoLegalPage() {
 
         <Section title="Editor del sitio">
           <Row label="Razón social">Luiz Placencia Transport</Row>
-          <Row label="Forma jurídica">[À compléter — ex: Auto-entrepreneur, SARL…]</Row>
-          <Row label="SIRET">[À compléter — ex: 000 000 000 00000]</Row>
+          <Row label="Forma jurídica">[À compléter — ex: Auto-entrepreneur]</Row>
+          <Row label="SIRET">101 300 291 000 16</Row>
           <Row label="Domicilio">[À compléter — dirección completa]</Row>
-          <Row label="Teléfono">[À compléter — +33 6 XX XX XX XX]</Row>
-          <Row label="Email">contacto@lp-transport.fr</Row>
+          <Row label="Teléfono">+33 6 43 27 21 73</Row>
+          <Row label="Email">Luisplasenciatransport@gmail.com</Row>
           <Row label="Responsable de publicación">Luiz Placencia</Row>
         </Section>
 

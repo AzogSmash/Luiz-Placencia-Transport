@@ -17,8 +17,8 @@ export default function CgvPage() {
           <p>
             <strong style={{ color: 'var(--fg)' }}>Luiz Placencia Transport</strong><br />
             [À compléter — dirección postal]<br />
-            SIRET: [À compléter]<br />
-            Email: contacto@lp-transport.fr — Teléfono: [À compléter]
+            SIRET: 101 300 291 000 16<br />
+            Email: Luisplasenciatransport@gmail.com — Teléfono: +33 6 43 27 21 73
           </p>
         </Section>
 

@@ -35,7 +35,7 @@ export default function CTA() {
           </h2>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', position: 'relative' }}>
             <Link href="/reserva" className="btn btn-primary">Solicitar presupuesto</Link>
-            <a href="https://wa.me/33600000000" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+            <a href="https://wa.me/33643272173" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
               WhatsApp directo
             </a>
           </div>

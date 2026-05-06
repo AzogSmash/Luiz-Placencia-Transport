@@ -8,9 +8,9 @@ import { subscribeNewsletter } from '@/app/actions/newsletter'
 type ContactForm = { nombre: string; email: string; mensaje: string }
 
 const CONTACT_ITEMS = [
-  { k: 'Teléfono',  v: '+33 6 00 00 00 00',       sub: 'Disponible 24/7',            href: 'tel:+33600000000' },
-  { k: 'WhatsApp',  v: '+33 6 00 00 00 00',       sub: 'Respuesta en minutos',        href: 'https://wa.me/33600000000' },
-  { k: 'Email',     v: 'contacto@lp-transport.fr', sub: 'Respuesta en menos de 1 h',  href: 'mailto:contacto@lp-transport.fr' },
+  { k: 'Teléfono',  v: '+33 6 43 27 21 73',                sub: 'Disponible 24/7',          href: 'tel:+33643272173' },
+  { k: 'WhatsApp',  v: '+33 6 43 27 21 73',                sub: 'Respuesta en minutos',     href: 'https://wa.me/33643272173' },
+  { k: 'Email',     v: 'Luisplasenciatransport@gmail.com', sub: 'Respuesta en menos de 1 h', href: 'mailto:Luisplasenciatransport@gmail.com' },
   { k: 'Dirección', v: 'París, Île-de-France',     sub: 'Servicio en toda Francia y Europa', href: null },
 ]
 

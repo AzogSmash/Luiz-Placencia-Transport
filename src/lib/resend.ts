@@ -8,4 +8,4 @@ export const resend = new Resend(process.env.RESEND_API_KEY)
 export const FROM = 'Luiz Placencia Transport <onboarding@resend.dev>'
 
 // Email admin qui reçoit les notifications
-export const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL ?? 'sebcasse9@gmail.com'
+export const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL ?? 'Luisplasenciatransport@gmail.com'

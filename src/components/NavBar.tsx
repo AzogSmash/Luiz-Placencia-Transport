@@ -74,12 +74,12 @@ export default function NavBar() {
         </nav>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <a href="tel:+33600000000" className="mono nav-phone" style={{
+          <a href="tel:+33643272173" className="mono nav-phone" style={{
             color: 'var(--fg-muted)',
             fontSize: 12,
             letterSpacing: '0.06em',
           }}>
-            +33 6 00 00 00 00
+            +33 6 43 27 21 73
           </a>
 
           {user ? (

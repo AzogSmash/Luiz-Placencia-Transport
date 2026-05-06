@@ -32,9 +32,10 @@ const SERVICES = [
 ]
 
 const VEHICULOS = [
-  { id: 'berlina',   t: 'Berlina',     d: 'Mercedes Clase E', pax: '1–3', price: 'Desde 75 €' },
-  { id: 'executive', t: 'Ejecutiva',   d: 'Mercedes Clase S', pax: '1–3', price: 'Desde 110 €' },
-  { id: 'van',       t: 'Van premium', d: 'Mercedes Clase V', pax: '1–7', price: 'Desde 95 €' },
+  { id: 'tesla',    t: 'Tesla Model Y',   d: 'Berline eléctrica',  pax: '1–4', bag: '2 valises',  price: 'Precio bajo consulta' },
+  { id: 'staria',   t: 'Hyundai Staria',  d: 'Van premium',         pax: '1–7', bag: '6 valises',  price: 'Precio bajo consulta' },
+  { id: 'mercedes', t: 'Mercedes Clase V', d: 'Van ejecutiva',      pax: '1–7', bag: '6 valises',  price: 'Precio bajo consulta' },
+  { id: 'proace',   t: 'Toyota Proace',   d: 'Van gran capacidad',  pax: '1–8', bag: '6 valises',  price: 'Precio bajo consulta' },
 ]
 
 function SummaryRow({ k, v }: { k: string; v: string }) {
@@ -59,7 +60,7 @@ export default function ReservaPage() {
     fecha: '', hora: '',
     origen: '', destino: '',
     pasajeros: '2', equipaje: '2',
-    vehiculo: 'berlina',
+    vehiculo: 'tesla',
     mensaje: '',
   })
   const [phonePrefix, setPhonePrefix] = useState('+33')
@@ -68,12 +69,9 @@ export default function ReservaPage() {
   const upd = (k: keyof FormData, v: string) => setData(d => ({ ...d, [k]: v }))
 
   const vehiculoImg =
-    data.vehiculo === 'van'       ? 'Mercedes Clase V' :
-    data.vehiculo === 'executive' ? 'Mercedes Clase S' : 'Mercedes Clase E'
-
-  const basePrice =
-    data.vehiculo === 'executive' ? '110' :
-    data.vehiculo === 'van'       ? '95'  : '75'
+    data.vehiculo === 'staria'   ? 'Hyundai Staria' :
+    data.vehiculo === 'mercedes' ? 'Mercedes Clase V' :
+    data.vehiculo === 'proace'   ? 'Toyota Proace' : 'Tesla Model Y'
 
   async function handleSubmit() {
     setLoading(true)
@@ -139,7 +137,7 @@ export default function ReservaPage() {
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link href="/" className="btn btn-primary">Volver al inicio</Link>
-              <a href="https://wa.me/33600000000" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+              <a href="https://wa.me/33643272173" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
                 Continuar por WhatsApp
               </a>
             </div>
@@ -225,7 +223,7 @@ export default function ReservaPage() {
                   <h3 style={{ fontFamily: 'var(--display)', fontSize: 24, margin: '40px 0 16px', fontWeight: 400 }}>
                     Categoría de vehículo
                   </h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 40 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 40 }}>
                     {VEHICULOS.map(v => (
                       <button key={v.id} onClick={() => upd('vehiculo', v.id)} style={{
                         textAlign: 'left', padding: 20, fontFamily: 'var(--sans)',
@@ -405,12 +403,12 @@ export default function ReservaPage() {
               </div>
 
               <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--line-soft)' }}>
-                <div className="eyebrow" style={{ marginBottom: 8 }}>Estimación</div>
-                <div className="display" style={{ fontSize: 36, fontWeight: 400 }}>
-                  Desde {basePrice} €
+                <div className="eyebrow" style={{ marginBottom: 8 }}>Precio</div>
+                <div className="display" style={{ fontSize: 24, fontWeight: 400 }}>
+                  Precio bajo consulta
                 </div>
                 <p style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 8 }}>
-                  Tarifa final confirmada por correo antes de la reserva.
+                  Tarifa confirmada por correo en menos de 30 minutos.
                 </p>
               </div>
             </aside>

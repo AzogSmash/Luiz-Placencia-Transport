@@ -17,8 +17,8 @@ export default function PoliticaPrivacidadPage() {
           <p>
             <strong style={{ color: 'var(--fg)' }}>Luiz Placencia Transport</strong><br />
             [À compléter — dirección postal]<br />
-            Email: contacto@lp-transport.fr<br />
-            Teléfono: [À compléter]
+            Email: Luisplasenciatransport@gmail.com<br />
+            Teléfono: +33 6 43 27 21 73
           </p>
         </Section>
 
@@ -76,7 +76,7 @@ export default function PoliticaPrivacidadPage() {
           </ul>
           <p style={{ marginTop: 12 }}>
             Para ejercer estos derechos, envíe un email a:{' '}
-            <strong style={{ color: 'var(--fg)' }}>contacto@lp-transport.fr</strong>
+            <strong style={{ color: 'var(--fg)' }}>Luisplasenciatransport@gmail.com</strong>
           </p>
           <p style={{ marginTop: 8 }}>
             Si considera que sus derechos no han sido respetados, puede presentar una reclamación

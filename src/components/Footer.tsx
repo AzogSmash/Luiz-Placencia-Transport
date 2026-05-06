@@ -51,8 +51,8 @@ export default function Footer() {
 
           <div>
             <div className="eyebrow" style={{ marginBottom: 18 }}>Contacto</div>
-            <div style={{ fontSize: 14, color: 'var(--fg-muted)', marginBottom: 8 }}>+33 6 00 00 00 00</div>
-            <div style={{ fontSize: 14, color: 'var(--fg-muted)', marginBottom: 8 }}>contacto@lp-transport.fr</div>
+            <div style={{ fontSize: 14, color: 'var(--fg-muted)', marginBottom: 8 }}>+33 6 43 27 21 73</div>
+            <div style={{ fontSize: 14, color: 'var(--fg-muted)', marginBottom: 8 }}>Luisplasenciatransport@gmail.com</div>
             <div style={{ fontSize: 14, color: 'var(--fg-muted)' }}>París · Île-de-France</div>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function Footer() {
           flexWrap: 'wrap',
           gap: 16,
         }}>
-          <div>© 2026 Luiz Placencia Transport · SIRET 000 000 000 00000</div>
+          <div>© 2026 Luiz Placencia Transport · SIRET 101 300 291 000 16</div>
           <div style={{ display: 'flex', gap: 24 }}>
             <Link href="/aviso-legal" style={{ color: 'var(--fg-dim)' }}>Aviso legal</Link>
             <Link href="/politica-privacidad" style={{ color: 'var(--fg-dim)' }}>Política de privacidad</Link>
