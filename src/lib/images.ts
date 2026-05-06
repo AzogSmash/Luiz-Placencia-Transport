@@ -1,22 +1,56 @@
 import { CSSProperties } from 'react'
 
 export const IMG: Record<string, string> = {
-  "Mercedes Clase E · Place Vendôme":   "https://images.unsplash.com/photo-1563720223185-11003d516935?w=1400&q=80&auto=format&fit=crop",
-  "Mercedes en zona de embarque CDG":   "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1400&q=80&auto=format&fit=crop",
-  "Llegada Disneyland Hotel":           "https://images.unsplash.com/photo-1531315396756-905d68d21b56?w=1400&q=80&auto=format&fit=crop",
-  "Torre Eiffel desde Trocadéro":       "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1400&q=80&auto=format&fit=crop",
-  "Interior cabina trasera":            "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1400&q=80&auto=format&fit=crop",
-  "Castillo de Versalles":              "https://images.unsplash.com/photo-1591289009723-aef022f0c0ad?w=1400&q=80&auto=format&fit=crop",
-  "Cortejo en Place de l'Opéra":        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1400&q=80&auto=format&fit=crop",
-  "Tesla Model Y":                       "https://images.unsplash.com/photo-1617469767053-d3b523a0b982?w=1400&q=80&auto=format&fit=crop",
-  "Hyundai Staria":                      "https://images.unsplash.com/photo-1609520505218-7421df17ed5b?w=1400&q=80&auto=format&fit=crop",
-  "Mercedes Clase V":                    "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1400&q=80&auto=format&fit=crop",
-  "Toyota Proace":                       "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1400&q=80&auto=format&fit=crop",
-  "Mercedes Clase E · CDG Terminal 2E": "https://images.unsplash.com/photo-1563720223185-11003d516935?w=1400&q=80&auto=format&fit=crop",
-  "Interior cabina trasera Clase S":    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1400&q=80&auto=format&fit=crop",
-  "Castillo de Chenonceau":             "https://images.unsplash.com/photo-1591289009723-aef022f0c0ad?w=1400&q=80&auto=format&fit=crop",
-  "Cortejo Place de l'Opéra":           "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1400&q=80&auto=format&fit=crop",
-  "Mapa Île-de-France · cobertura":     "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=1400&q=80&auto=format&fit=crop",
+
+  // ── Hero ──────────────────────────────────────────────────────────────────
+  "Mercedes Clase E · Place Vendôme":
+    "https://images.unsplash.com/photo-1686199948265-ddc4ebb1cc92?w=1400&q=80&auto=format&fit=crop",
+
+  // ── Véhicules ─────────────────────────────────────────────────────────────
+  "Tesla Model Y":
+    "https://images.unsplash.com/photo-1536883442700-ffaa4d76e372?w=1400&q=80&auto=format&fit=crop",
+  "Hyundai Staria":
+    "https://images.unsplash.com/photo-1758956929717-e657fc784606?w=1400&q=80&auto=format&fit=crop",
+  "Mercedes Clase V":
+    "https://images.unsplash.com/photo-1609520505218-7421df17ed5b?w=1400&q=80&auto=format&fit=crop",
+  "Toyota Proace":
+    "https://images.unsplash.com/photo-1468802161019-65df4084ccf7?w=1400&q=80&auto=format&fit=crop",
+
+  // ── Intérieur ─────────────────────────────────────────────────────────────
+  "Interior cabina trasera":
+    "https://images.unsplash.com/photo-1760161339261-56487b766a17?w=1400&q=80&auto=format&fit=crop",
+  "Interior cabina trasera Clase S":
+    "https://images.unsplash.com/photo-1760161339261-56487b766a17?w=1400&q=80&auto=format&fit=crop",
+
+  // ── Aéroport ──────────────────────────────────────────────────────────────
+  "Mercedes en zona de embarque CDG":
+    "https://images.unsplash.com/photo-1468802161019-65df4084ccf7?w=1400&q=80&auto=format&fit=crop",
+  "Mercedes Clase E · CDG Terminal 2E":
+    "https://images.unsplash.com/photo-1468802161019-65df4084ccf7?w=1400&q=80&auto=format&fit=crop",
+
+  // ── Disneyland ────────────────────────────────────────────────────────────
+  "Llegada Disneyland Hotel":
+    "https://images.unsplash.com/photo-1742079727590-4f7682f67d89?w=1400&q=80&auto=format&fit=crop",
+
+  // ── Paris / City tour ─────────────────────────────────────────────────────
+  "Torre Eiffel desde Trocadéro":
+    "https://images.unsplash.com/photo-1565881606991-789a8dff9dbb?w=1400&q=80&auto=format&fit=crop",
+
+  // ── Excursions ────────────────────────────────────────────────────────────
+  "Castillo de Versalles":
+    "https://images.unsplash.com/photo-1591289009723-aef022f0c0ad?w=1400&q=80&auto=format&fit=crop",
+  "Castillo de Chenonceau":
+    "https://images.unsplash.com/photo-1756307400556-e7dc592739b9?w=1400&q=80&auto=format&fit=crop",
+
+  // ── Événements / Bodas ────────────────────────────────────────────────────
+  "Cortejo en Place de l'Opéra":
+    "https://images.unsplash.com/photo-1547800085-0907795e4a3b?w=1400&q=80&auto=format&fit=crop",
+  "Cortejo Place de l'Opéra":
+    "https://images.unsplash.com/photo-1547800085-0907795e4a3b?w=1400&q=80&auto=format&fit=crop",
+
+  // ── Carte / Zone de service ───────────────────────────────────────────────
+  "Mapa Île-de-France · cobertura":
+    "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=1400&q=80&auto=format&fit=crop",
 }
 
 export function bg(label: string): CSSProperties {
