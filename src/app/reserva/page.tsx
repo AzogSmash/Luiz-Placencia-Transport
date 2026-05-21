@@ -22,21 +22,21 @@ type FormData = {
 }
 
 const SERVICES = [
-  { id: 'aeropuerto',  t: 'Traslado aeropuerto', d: 'CDG · Orly · Beauvais' },
-  { id: 'disneyland',  t: 'Disneyland París',     d: 'Ida, vuelta o ambos' },
-  { id: 'citytour',    t: 'City tour privado',    d: 'Por horas' },
-  { id: 'disposicion', t: 'Disposición',          d: 'A su servicio' },
-  { id: 'excursion',   t: 'Excursión',            d: 'Francia · Europa' },
-  { id: 'evento',      t: 'Evento / boda',        d: 'A medida' },
+  { id: 'aeropuerto',  t: 'Traslado CDG / Orly', d: 'Desde 70 €' },
+  { id: 'beauvais',    t: 'Traslado Beauvais',    d: 'Desde 160 €' },
+  { id: 'disneyland',  t: 'Disneyland París',      d: 'Ida, vuelta o ambos' },
+  { id: 'citytour',    t: 'City tour privado',     d: 'Por horas' },
+  { id: 'disposicion', t: 'Disposición',           d: 'A su servicio' },
+  { id: 'excursion',   t: 'Excursión',             d: 'Versalles · Bruges · Saint-Michel' },
 ]
 
 const SERVICE_IMGS: Record<string, string> = {
   aeropuerto:  'Mercedes Clase E · CDG Terminal 2E',
+  beauvais:    'Mercedes en zona de embarque CDG',
   disneyland:  'Llegada Disneyland Hotel',
   citytour:    'Torre Eiffel desde Trocadéro',
   disposicion: 'Interior cabina trasera',
   excursion:   'Castillo de Versalles',
-  evento:      "Cortejo Place de l'Opéra",
 }
 
 const TARIFAS_TRASLADO: Record<number, number> = {
@@ -48,13 +48,25 @@ const TARIFAS_TRASLADO: Record<number, number> = {
   23: 350, 24: 360, 25: 410,
 }
 
-function getPriceDisplay(serviceType: string, pasajeros: string): { label: string; note: string } {
+const TARIFAS_BEAUVAIS: Record<number, number> = {
+  1: 160, 2: 160, 3: 160,
+  4: 170, 5: 180, 6: 190, 7: 200, 8: 210, 9: 350,
+  10: 360, 11: 370, 12: 380, 13: 390, 14: 400, 15: 410, 16: 420,
+}
+
+type PriceInfo = { label: string; note: string; overLimit: boolean }
+
+function getPriceDisplay(serviceType: string, pasajeros: string): PriceInfo {
   const pax = parseInt(pasajeros) || 1
   if (serviceType === 'aeropuerto' || serviceType === 'disneyland') {
-    if (pax > 25) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 25 personas.' }
-    return { label: `${TARIFAS_TRASLADO[pax]} €`, note: 'Precio fijo · IVA incluido' }
+    if (pax > 25) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 25 personas.', overLimit: true }
+    return { label: `${TARIFAS_TRASLADO[pax]} €`, note: 'Precio fijo · IVA incluido', overLimit: false }
   }
-  return { label: 'Precio bajo consulta', note: 'Tarifa confirmada en menos de 30 min.' }
+  if (serviceType === 'beauvais') {
+    if (pax > 16) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 16 personas.', overLimit: true }
+    return { label: `${TARIFAS_BEAUVAIS[pax]} €`, note: 'Precio fijo · IVA incluido', overLimit: false }
+  }
+  return { label: 'Precio bajo consulta', note: 'Tarifa confirmada en menos de 30 min.', overLimit: false }
 }
 
 function SummaryRow({ k, v }: { k: string; v: string }) {
@@ -93,8 +105,9 @@ export default function ReservaPage() {
   const todayStr = new Date().toISOString().split('T')[0]
 
   const pax = parseInt(data.pasajeros) || 1
-  const isTransfer = data.serviceType === 'aeropuerto' || data.serviceType === 'disneyland'
-  const moreThan25 = pax > 25
+  const isTransfer = ['aeropuerto', 'disneyland', 'beauvais'].includes(data.serviceType)
+  const paxLimit = data.serviceType === 'beauvais' ? 16 : 25
+  const overLimit = isTransfer && pax > paxLimit
 
   function validateStep2(): boolean {
     const e: Record<string, string> = {}
@@ -143,12 +156,12 @@ export default function ReservaPage() {
     setError(null)
 
     const serviceName = SERVICES.find(s => s.id === data.serviceType)?.t ?? data.serviceType
-    const price = getPriceDisplay(data.serviceType, data.pasajeros)
+    const priceDisplay = getPriceDisplay(data.serviceType, data.pasajeros)
 
     const messageLines = [
       data.mensaje,
       `Service: ${serviceName}`,
-      `Prix: ${price.label}`,
+      `Prix: ${priceDisplay.label}`,
       `Bagages: ${data.equipaje}`,
     ].filter(Boolean)
 
@@ -218,7 +231,6 @@ export default function ReservaPage() {
 
   return (
     <main className="page-enter">
-      {/* Page header */}
       <section className="section" style={{ paddingTop: 56, paddingBottom: 32 }}>
         <div className="container">
           <div className="eyebrow" style={{ marginBottom: 24 }}>Reserva · Solicitud de presupuesto</div>
@@ -277,7 +289,10 @@ export default function ReservaPage() {
                     {SERVICES.map(s => {
                       const sel = data.serviceType === s.id
                       return (
-                        <button key={s.id} onClick={() => upd('serviceType', s.id)} style={{
+                        <button key={s.id} onClick={() => {
+                          upd('serviceType', s.id)
+                          if (s.id === 'beauvais' && parseInt(data.pasajeros) > 16) upd('pasajeros', '16')
+                        }} style={{
                           textAlign: 'left', padding: '20px 24px', fontFamily: 'var(--sans)',
                           background: sel ? 'var(--accent)' : 'transparent',
                           border: `1px solid ${sel ? 'var(--accent)' : 'var(--line)'}`,
@@ -338,10 +353,10 @@ export default function ReservaPage() {
                     <div className="field">
                       <label>Pasajeros</label>
                       <select value={data.pasajeros} onChange={e => upd('pasajeros', e.target.value)}>
-                        {Array.from({ length: 25 }, (_, i) => String(i + 1)).map(n => (
+                        {Array.from({ length: paxLimit }, (_, i) => String(i + 1)).map(n => (
                           <option key={n} value={n}>{n} pasajero{n !== '1' ? 's' : ''}</option>
                         ))}
-                        <option value="26">Más de 25 → WhatsApp</option>
+                        <option value={String(paxLimit + 1)}>Más de {paxLimit} → WhatsApp</option>
                       </select>
                     </div>
                     <div className="field">
@@ -364,19 +379,16 @@ export default function ReservaPage() {
                       color: 'var(--fg-muted)',
                     }}>
                       <strong style={{ color: 'var(--accent)' }}>Tarifa fija:</strong>{' '}
-                      {moreThan25
-                        ? 'Para grupos de más de 25 personas, contáctenos por WhatsApp para un presupuesto personalizado.'
-                        : `Para ${data.pasajeros} pasajero${pax > 1 ? 's' : ''}: ${TARIFAS_TRASLADO[pax]} € · IVA incluido.`
+                      {overLimit
+                        ? `Para grupos de más de ${paxLimit} personas, contáctenos por WhatsApp para un presupuesto personalizado.`
+                        : `Para ${data.pasajeros} pasajero${pax > 1 ? 's' : ''}: ${priceDisplay.label} · IVA incluido.`
                       }
                     </div>
                   )}
 
                   <div style={{ display: 'flex', gap: 12 }}>
                     <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(1) }}>← Anterior</button>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => { if (validateStep2()) setStep(3) }}
-                    >
+                    <button className="btn btn-primary" onClick={() => { if (validateStep2()) setStep(3) }}>
                       Siguiente · Contacto
                     </button>
                   </div>
@@ -433,7 +445,6 @@ export default function ReservaPage() {
                     </div>
                   </div>
 
-                  {/* Error banner */}
                   {error && (
                     <div style={{
                       padding: '14px 18px',
@@ -451,12 +462,7 @@ export default function ReservaPage() {
                     <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(2) }} disabled={loading}>
                       ← Anterior
                     </button>
-                    <button
-                      className="btn btn-primary"
-                      onClick={handleSubmit}
-                      disabled={loading}
-                      style={{ opacity: loading ? 0.7 : 1 }}
-                    >
+                    <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
                       {loading ? 'Enviando…' : 'Enviar solicitud'}
                     </button>
                   </div>
@@ -483,18 +489,18 @@ export default function ReservaPage() {
                 <SummaryRow k="Salida"    v={data.origen || '—'} />
                 <SummaryRow k="Destino"   v={data.destino || '—'} />
                 <SummaryRow k="Fecha"     v={data.fecha ? `${data.fecha} ${data.hora}`.trim() : '—'} />
-                <SummaryRow k="Pasajeros" v={moreThan25 ? '+25 · WhatsApp' : `${data.pasajeros} · ${data.equipaje} maletas`} />
+                <SummaryRow k="Pasajeros" v={overLimit ? `+${paxLimit} · WhatsApp` : `${data.pasajeros} · ${data.equipaje} maletas`} />
               </div>
 
               <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--line-soft)' }}>
                 <div className="eyebrow" style={{ marginBottom: 8 }}>Precio</div>
-                <div className="display" style={{ fontSize: 28, fontWeight: 400, color: moreThan25 ? 'var(--fg-muted)' : 'var(--fg)' }}>
+                <div className="display" style={{ fontSize: 28, fontWeight: 400, color: overLimit ? 'var(--fg-muted)' : 'var(--fg)' }}>
                   {priceDisplay.label}
                 </div>
                 <p style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 8 }}>
                   {priceDisplay.note}
                 </p>
-                {moreThan25 && (
+                {overLimit && (
                   <a
                     href="https://wa.me/33643272173"
                     target="_blank"

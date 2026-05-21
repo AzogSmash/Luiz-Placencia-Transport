@@ -4,9 +4,9 @@ import { bg } from '@/lib/images'
 
 const SERVICES = [
   {
-    n: '01', t: 'Traslados aeropuerto', price: 'Desde 70 €',
-    d: 'Servicio completo desde y hacia los principales aeropuertos parisinos: Charles de Gaulle, Orly, Beauvais y Le Bourget.',
-    f: ['Seguimiento de vuelo en tiempo real', '60 min de espera gratuitos', 'Cartel personalizado a la llegada', 'Asistencia con el equipaje'],
+    n: '01', t: 'Traslado CDG / Orly', price: 'Desde 70 €',
+    d: 'Servicio completo desde y hacia los aeropuertos de Charles de Gaulle y Orly. Tarifa fija según número de pasajeros.',
+    f: ['Seguimiento de vuelo en tiempo real', '60 min de espera gratuitos', 'Cartel personalizado a la llegada', '1–3 pax: 70 € · hasta 25 pax con tarifa progresiva'],
     img: 'Mercedes Clase E · CDG Terminal 2E',
   },
   {
@@ -16,28 +16,28 @@ const SERVICES = [
     img: 'Llegada Disneyland Hotel',
   },
   {
-    n: '03', t: 'City tour privado', price: 'Desde 90 € / hora',
+    n: '03', t: 'City tour privado', price: '200 € / 4 h',
     d: 'Descubra París desde la comodidad de un vehículo premium. Itinerarios a medida, paradas libres.',
-    f: ['Itinerario personalizado', 'Comentarios discretos del chófer', 'Paradas fotos sin límite', 'Recomendaciones de restaurantes'],
+    f: ['Berlina: 200€ · 4 h (50€/h extra)', 'Van: 250€ · 4 h (60€/h extra)', 'Itinerario personalizado', 'Paradas para fotos sin límite'],
     img: 'Torre Eiffel desde Trocadéro',
   },
   {
-    n: '04', t: 'Disposición con chófer', price: 'Desde 80 € / hora',
+    n: '04', t: 'Disposición con chófer', price: 'Desde 50 € / h',
     d: 'Su chófer le acompaña durante el tiempo que necesite — reuniones, compras, visitas, eventos.',
-    f: ['Mínimo 3 horas', 'Tarifa decreciente por jornada completa', 'Vehículo a su disposición', 'Total flexibilidad de horario'],
+    f: ['Berlina: 50€/h · Van: 60€/h', 'Mínimo 3 horas', 'Vehículo a su disposición', 'Total flexibilidad de horario'],
     img: 'Interior cabina trasera Clase S',
   },
   {
-    n: '05', t: 'Excursiones privadas', price: 'Desde 450 € / día',
-    d: 'Versalles, valle del Loira, Champaña, Normandía, Mont-Saint-Michel, Bélgica, Suiza, Italia.',
-    f: ['Itinerarios a medida en Francia y Europa', 'Guía local opcional', 'Reservas de restaurantes', 'Vehículos adaptados a viajes largos'],
-    img: 'Castillo de Chenonceau',
+    n: '05', t: 'Excursiones privadas', price: 'Desde 700 €',
+    d: 'Versalles, Mont-Saint-Michel, Bruges y más. Un día completo con chófer privado para descubrir los tesoros de Francia y Europa.',
+    f: ['Versalles · Mont-Saint-Michel · Bruges desde 700€', 'Ámsterdam · Champaña · Loire · Italia: bajo consulta', 'Guía local opcional', 'Reservas de restaurantes incluidas'],
+    img: 'Castillo de Versalles',
   },
   {
-    n: '06', t: 'Eventos & bodas', price: 'Cotización a medida',
-    d: 'Servicio premium para bodas, galas, premieres y eventos corporativos. Cortejos, recepciones, traslados de invitados.',
-    f: ['Decoración del vehículo', 'Cortejos coordinados', 'Conductor en traje', 'Servicio de protocolo'],
-    img: "Cortejo Place de l'Opéra",
+    n: '06', t: 'Traslado Beauvais', price: 'Desde 160 €',
+    d: 'Traslado entre París, Disneyland y el aeropuerto de Beauvais-Tillé. Tarifa fija según número de pasajeros.',
+    f: ['1–3 pax: 160 € · tarifa progresiva hasta 16 pax', 'Grupos de más de 16 → presupuesto privado', 'Asistencia con el equipaje', 'Seguimiento de vuelo incluido'],
+    img: 'Mercedes en zona de embarque CDG',
   },
 ]
 
