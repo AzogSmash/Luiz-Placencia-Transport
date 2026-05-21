@@ -78,6 +78,40 @@ function getPriceDisplay(serviceType: string, pasajeros: string): PriceInfo {
   return { label: 'Precio bajo consulta', note: 'Tarifa confirmada en menos de 30 min.', overLimit: false }
 }
 
+const FIXED_PRICE_SERVICES = ['aeropuerto', 'beauvais', 'disneyland']
+
+function buildWhatsAppUrl(
+  data: FormData,
+  phonePrefix: string,
+  phoneNumber: string,
+  reservationId: number | null,
+): string {
+  const serviceName = SERVICES.find(s => s.id === data.serviceType)?.t ?? data.serviceType
+  const lines: string[] = [
+    `Hola Luis, me llamo *${data.nombre}${data.apellido ? ' ' + data.apellido : ''}* y quisiera información sobre:`,
+    '',
+    `*Servicio:* ${serviceName}`,
+    `*Salida:* ${data.origen}`,
+    `*Destino:* ${data.destino}`,
+    `*Fecha:* ${data.fecha}${data.hora ? ' a las ' + data.hora : ''}`,
+  ]
+  if (data.fechaVuelta) lines.push(`*Vuelta:* ${data.fechaVuelta}${data.horaVuelta ? ' a las ' + data.horaVuelta : ''}`)
+  lines.push(`*Pasajeros:* ${data.pasajeros}`)
+  lines.push(`*Equipaje:* ${data.equipaje} maleta${data.equipaje !== '1' ? 's' : ''}`)
+  if (data.duracion)    lines.push(`*Duración:* ${data.duracion}`)
+  if (data.vuelo)       lines.push(`*Vuelo llegada:* ${data.vuelo}`)
+  if (data.vueloVuelta) lines.push(`*Vuelo vuelta:* ${data.vueloVuelta}`)
+  if (data.hotel)       lines.push(`*Hotel:* ${data.hotel}`)
+  if (data.hotelVuelta) lines.push(`*Hotel vuelta:* ${data.hotelVuelta}`)
+  if (data.edadNinos)   lines.push(`*Niños:* ${data.edadNinos}`)
+  if (data.mensaje)     lines.push(`*Notas:* ${data.mensaje}`)
+  lines.push('')
+  lines.push(`*Tel:* ${phonePrefix} ${phoneNumber}`)
+  lines.push(`*Email:* ${data.email}`)
+  if (reservationId)    lines.push(`*Ref:* #${reservationId}`)
+  return `https://wa.me/33643272173?text=${encodeURIComponent(lines.join('\n'))}`
+}
+
 function SummaryRow({ k, v }: { k: string; v: string }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 13 }}>
@@ -201,6 +235,9 @@ export default function ReservaPage() {
   }
 
   if (submitted) {
+    const isFixedPrice = FIXED_PRICE_SERVICES.includes(data.serviceType) && !overLimit
+    const waUrl = buildWhatsAppUrl(data, phonePrefix, phoneNumber, reservationId)
+
     return (
       <main className="page-enter">
         <section className="section" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center' }}>
@@ -215,16 +252,46 @@ export default function ReservaPage() {
             {reservationId && (
               <div className="mono" style={{ color: 'var(--accent)', marginBottom: 16, fontSize: 13 }}>Reserva #{reservationId}</div>
             )}
-            <p className="lead" style={{ marginBottom: 40, marginLeft: 'auto', marginRight: 'auto' }}>
-              Hemos recibido su solicitud. Le enviaremos un presupuesto detallado y la confirmación
-              en menos de 30 minutos al correo <strong style={{ color: 'var(--fg)' }}>{data.email}</strong>.
-            </p>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/" className="btn btn-primary">Volver al inicio</Link>
-              <a href="https://wa.me/33643272173" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
-                Continuar por WhatsApp
-              </a>
-            </div>
+
+            {isFixedPrice ? (
+              /* Fixed price: email confirmation flow */
+              <>
+                <p className="lead" style={{ marginBottom: 40, marginLeft: 'auto', marginRight: 'auto' }}>
+                  Hemos recibido su solicitud. Le enviaremos la confirmación y los detalles de pago
+                  en menos de 30 minutos al correo <strong style={{ color: 'var(--fg)' }}>{data.email}</strong>.
+                </p>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <Link href="/" className="btn btn-primary">Volver al inicio</Link>
+                  <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+                    Contactar por WhatsApp
+                  </a>
+                </div>
+              </>
+            ) : (
+              /* Variable price: WhatsApp CTA pre-filled */
+              <>
+                <p className="lead" style={{ marginBottom: 16, marginLeft: 'auto', marginRight: 'auto' }}>
+                  Su solicitud ha sido registrada. Para obtener su presupuesto personalizado,
+                  contacte directamente con Luis por WhatsApp — todos los detalles de su reserva
+                  ya están incluidos en el mensaje.
+                </p>
+                <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 32 }}>
+                  También recibirá un resumen en <strong style={{ color: 'var(--fg)' }}>{data.email}</strong>.
+                </p>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary"
+                    style={{ fontSize: 14 }}
+                  >
+                    Enviar por WhatsApp →
+                  </a>
+                  <Link href="/" className="btn btn-ghost">Volver al inicio</Link>
+                </div>
+              </>
+            )}
           </div>
         </section>
       </main>
