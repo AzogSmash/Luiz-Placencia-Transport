@@ -18,7 +18,6 @@ type FormData = {
   destino: string
   pasajeros: string
   equipaje: string
-  vehiculo: string
   mensaje: string
 }
 
@@ -31,18 +30,31 @@ const SERVICES = [
   { id: 'evento',      t: 'Evento / boda',        d: 'A medida' },
 ]
 
-const VEHICULOS = [
-  { id: 'tesla',    t: 'Tesla Model Y',    d: 'Berline eléctrica', pax: '1–4', bag: '2 valises', price: 'Precio bajo consulta' },
-  { id: 'staria',   t: 'Hyundai Staria',   d: 'Van premium',       pax: '1–7', bag: '6 valises', price: 'Precio bajo consulta' },
-  { id: 'mercedes', t: 'Mercedes Clase V', d: 'Van ejecutiva',     pax: '1–7', bag: '6 valises', price: 'Precio bajo consulta' },
-  { id: 'proace',   t: 'Toyota Proace',    d: 'Van gran capacidad', pax: '1–8', bag: '6 valises', price: 'Precio bajo consulta' },
-]
+const SERVICE_IMGS: Record<string, string> = {
+  aeropuerto:  'Mercedes Clase E · CDG Terminal 2E',
+  disneyland:  'Llegada Disneyland Hotel',
+  citytour:    'Torre Eiffel desde Trocadéro',
+  disposicion: 'Interior cabina trasera',
+  excursion:   'Castillo de Versalles',
+  evento:      "Cortejo Place de l'Opéra",
+}
 
-const CAPACITY: Record<string, { maxPax: number; maxBag: number }> = {
-  tesla:    { maxPax: 4, maxBag: 2 },
-  staria:   { maxPax: 7, maxBag: 6 },
-  mercedes: { maxPax: 7, maxBag: 6 },
-  proace:   { maxPax: 8, maxBag: 6 },
+const TARIFAS_TRASLADO: Record<number, number> = {
+  1: 70, 2: 70, 3: 70,
+  4: 80, 5: 90, 6: 100, 7: 110, 8: 120, 9: 170,
+  10: 180, 11: 190, 12: 200, 13: 210, 14: 220,
+  15: 230, 16: 240, 17: 290,
+  18: 300, 19: 310, 20: 320, 21: 330, 22: 340,
+  23: 350, 24: 360, 25: 410,
+}
+
+function getPriceDisplay(serviceType: string, pasajeros: string): { label: string; note: string } {
+  const pax = parseInt(pasajeros) || 1
+  if (serviceType === 'aeropuerto' || serviceType === 'disneyland') {
+    if (pax > 25) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 25 personas.' }
+    return { label: `${TARIFAS_TRASLADO[pax]} €`, note: 'Precio fijo · IVA incluido' }
+  }
+  return { label: 'Precio bajo consulta', note: 'Tarifa confirmada en menos de 30 min.' }
 }
 
 function SummaryRow({ k, v }: { k: string; v: string }) {
@@ -68,7 +80,6 @@ export default function ReservaPage() {
     fecha: '', hora: '',
     origen: '', destino: '',
     pasajeros: '2', equipaje: '2',
-    vehiculo: 'tesla',
     mensaje: '',
   })
   const [phonePrefix, setPhonePrefix] = useState('+33')
@@ -79,22 +90,11 @@ export default function ReservaPage() {
     if (fieldErrors[k]) setFieldErrors(f => { const n = { ...f }; delete n[k]; return n })
   }
 
-  const selectVehiculo = (id: string) => {
-    const cap = CAPACITY[id]
-    setData(d => ({
-      ...d,
-      vehiculo: id,
-      pasajeros: String(Math.min(parseInt(d.pasajeros) || 1, cap.maxPax)),
-      equipaje:  String(Math.min(parseInt(d.equipaje)  || 0, cap.maxBag)),
-    }))
-  }
-
-  const vehiculoImg =
-    data.vehiculo === 'staria'   ? 'Hyundai Staria' :
-    data.vehiculo === 'mercedes' ? 'Mercedes Clase V' :
-    data.vehiculo === 'proace'   ? 'Toyota Proace' : 'Tesla Model Y'
-
   const todayStr = new Date().toISOString().split('T')[0]
+
+  const pax = parseInt(data.pasajeros) || 1
+  const isTransfer = data.serviceType === 'aeropuerto' || data.serviceType === 'disneyland'
+  const moreThan25 = pax > 25
 
   function validateStep2(): boolean {
     const e: Record<string, string> = {}
@@ -143,12 +143,12 @@ export default function ReservaPage() {
     setError(null)
 
     const serviceName = SERVICES.find(s => s.id === data.serviceType)?.t ?? data.serviceType
-    const vehiculoName = VEHICULOS.find(v => v.id === data.vehiculo)?.t ?? data.vehiculo
+    const price = getPriceDisplay(data.serviceType, data.pasajeros)
 
     const messageLines = [
       data.mensaje,
       `Service: ${serviceName}`,
-      `Véhicule: ${vehiculoName}`,
+      `Prix: ${price.label}`,
       `Bagages: ${data.equipaje}`,
     ].filter(Boolean)
 
@@ -213,6 +213,9 @@ export default function ReservaPage() {
   }
 
   /* ── Main form ── */
+  const sidebarImg = SERVICE_IMGS[data.serviceType] ?? 'Mercedes Clase E · CDG Terminal 2E'
+  const priceDisplay = getPriceDisplay(data.serviceType, data.pasajeros)
+
   return (
     <main className="page-enter">
       {/* Page header */}
@@ -270,41 +273,20 @@ export default function ReservaPage() {
                     Seleccione el tipo de trayecto. Podrá precisar los detalles a continuación.
                   </p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 32 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 40 }}>
                     {SERVICES.map(s => {
                       const sel = data.serviceType === s.id
                       return (
-                      <button key={s.id} onClick={() => upd('serviceType', s.id)} style={{
-                        textAlign: 'left', padding: '20px 24px', fontFamily: 'var(--sans)',
-                        background: sel ? 'var(--accent)' : 'transparent',
-                        border: `1px solid ${sel ? 'var(--accent)' : 'var(--line)'}`,
-                        color: sel ? '#0a0a0a' : 'var(--fg)', cursor: 'pointer', borderRadius: 'var(--radius)',
-                        transition: 'all 0.18s ease',
-                      }}>
-                        <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 4, color: sel ? '#0a0a0a' : 'var(--fg)' }}>{s.t}</div>
-                        <div style={{ fontSize: 12, color: sel ? '#0a0a0a99' : 'var(--fg-muted)' }}>{s.d}</div>
-                      </button>
-                      )
-                    })}
-                  </div>
-
-                  <h3 style={{ fontFamily: 'var(--display)', fontSize: 24, margin: '40px 0 16px', fontWeight: 400 }}>
-                    Categoría de vehículo
-                  </h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 40 }}>
-                    {VEHICULOS.map(v => {
-                      const sel = data.vehiculo === v.id
-                      return (
-                      <button key={v.id} onClick={() => selectVehiculo(v.id)} style={{
-                        textAlign: 'left', padding: 20, fontFamily: 'var(--sans)',
-                        background: sel ? 'var(--accent)' : 'transparent',
-                        border: `1px solid ${sel ? 'var(--accent)' : 'var(--line)'}`,
-                        color: sel ? '#0a0a0a' : 'var(--fg)', cursor: 'pointer', borderRadius: 'var(--radius)',
-                      }}>
-                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>{v.t}</div>
-                        <div style={{ fontSize: 11, color: sel ? '#0a0a0a99' : 'var(--fg-muted)', marginBottom: 12 }}>{v.d} · {v.pax} pax</div>
-                        <div className="mono" style={{ color: sel ? '#0a0a0a' : 'var(--accent)', fontSize: 11 }}>{v.price}</div>
-                      </button>
+                        <button key={s.id} onClick={() => upd('serviceType', s.id)} style={{
+                          textAlign: 'left', padding: '20px 24px', fontFamily: 'var(--sans)',
+                          background: sel ? 'var(--accent)' : 'transparent',
+                          border: `1px solid ${sel ? 'var(--accent)' : 'var(--line)'}`,
+                          color: sel ? '#0a0a0a' : 'var(--fg)', cursor: 'pointer', borderRadius: 'var(--radius)',
+                          transition: 'all 0.18s ease',
+                        }}>
+                          <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 4, color: sel ? '#0a0a0a' : 'var(--fg)' }}>{s.t}</div>
+                          <div style={{ fontSize: 12, color: sel ? '#0a0a0a99' : 'var(--fg-muted)' }}>{s.d}</div>
+                        </button>
                       )
                     })}
                   </div>
@@ -354,22 +336,40 @@ export default function ReservaPage() {
                       {fieldErrors.hora && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.hora}</span>}
                     </div>
                     <div className="field">
-                      <label>Pasajeros <span style={{ color: 'var(--fg-dim)', fontSize: 11 }}>(máx. {CAPACITY[data.vehiculo].maxPax})</span></label>
+                      <label>Pasajeros</label>
                       <select value={data.pasajeros} onChange={e => upd('pasajeros', e.target.value)}>
-                        {Array.from({ length: CAPACITY[data.vehiculo].maxPax }, (_, i) => String(i + 1)).map(n => (
+                        {Array.from({ length: 25 }, (_, i) => String(i + 1)).map(n => (
                           <option key={n} value={n}>{n} pasajero{n !== '1' ? 's' : ''}</option>
                         ))}
+                        <option value="26">Más de 25 → WhatsApp</option>
                       </select>
                     </div>
                     <div className="field">
-                      <label>Equipaje <span style={{ color: 'var(--fg-dim)', fontSize: 11 }}>(máx. {CAPACITY[data.vehiculo].maxBag})</span></label>
+                      <label>Equipaje</label>
                       <select value={data.equipaje} onChange={e => upd('equipaje', e.target.value)}>
-                        {Array.from({ length: CAPACITY[data.vehiculo].maxBag + 1 }, (_, i) => String(i)).map(n => (
+                        {Array.from({ length: 7 }, (_, i) => String(i)).map(n => (
                           <option key={n} value={n}>{n} maleta{n !== '1' ? 's' : ''}</option>
                         ))}
                       </select>
                     </div>
                   </div>
+
+                  {isTransfer && (
+                    <div style={{
+                      padding: '14px 18px',
+                      marginBottom: 24,
+                      background: 'var(--accent-soft)',
+                      border: '1px solid var(--accent)',
+                      fontSize: 13,
+                      color: 'var(--fg-muted)',
+                    }}>
+                      <strong style={{ color: 'var(--accent)' }}>Tarifa fija:</strong>{' '}
+                      {moreThan25
+                        ? 'Para grupos de más de 25 personas, contáctenos por WhatsApp para un presupuesto personalizado.'
+                        : `Para ${data.pasajeros} pasajero${pax > 1 ? 's' : ''}: ${TARIFAS_TRASLADO[pax]} € · IVA incluido.`
+                      }
+                    </div>
+                  )}
 
                   <div style={{ display: 'flex', gap: 12 }}>
                     <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(1) }}>← Anterior</button>
@@ -475,26 +475,36 @@ export default function ReservaPage() {
               <div className="eyebrow" style={{ marginBottom: 20 }}>Resumen</div>
               <div
                 className="placeholder"
-                data-label={vehiculoImg}
-                style={{ ...bg(vehiculoImg), aspectRatio: '16/10', marginBottom: 24 }}
+                data-label={sidebarImg}
+                style={{ ...bg(sidebarImg), aspectRatio: '16/10', marginBottom: 24 }}
               />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <SummaryRow k="Servicio"   v={SERVICES.find(s => s.id === data.serviceType)?.t ?? '—'} />
-                <SummaryRow k="Vehículo"  v={VEHICULOS.find(v => v.id === data.vehiculo)?.t ?? '—'} />
                 <SummaryRow k="Salida"    v={data.origen || '—'} />
                 <SummaryRow k="Destino"   v={data.destino || '—'} />
                 <SummaryRow k="Fecha"     v={data.fecha ? `${data.fecha} ${data.hora}`.trim() : '—'} />
-                <SummaryRow k="Pasajeros" v={`${data.pasajeros} · ${data.equipaje} maletas`} />
+                <SummaryRow k="Pasajeros" v={moreThan25 ? '+25 · WhatsApp' : `${data.pasajeros} · ${data.equipaje} maletas`} />
               </div>
 
               <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--line-soft)' }}>
                 <div className="eyebrow" style={{ marginBottom: 8 }}>Precio</div>
-                <div className="display" style={{ fontSize: 24, fontWeight: 400 }}>
-                  Precio bajo consulta
+                <div className="display" style={{ fontSize: 28, fontWeight: 400, color: moreThan25 ? 'var(--fg-muted)' : 'var(--fg)' }}>
+                  {priceDisplay.label}
                 </div>
                 <p style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 8 }}>
-                  Tarifa confirmada por correo en menos de 30 minutos.
+                  {priceDisplay.note}
                 </p>
+                {moreThan25 && (
+                  <a
+                    href="https://wa.me/33643272173"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost"
+                    style={{ marginTop: 16, fontSize: 12 }}
+                  >
+                    Contactar por WhatsApp
+                  </a>
+                )}
               </div>
             </aside>
           </div>

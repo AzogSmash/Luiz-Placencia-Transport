@@ -4,15 +4,15 @@ import { bg } from '@/lib/images'
 
 const SERVICES = [
   {
-    n: '01', t: 'Traslados aeropuerto', price: 'Desde 75 €',
+    n: '01', t: 'Traslados aeropuerto', price: 'Desde 70 €',
     d: 'Servicio completo desde y hacia los principales aeropuertos parisinos: Charles de Gaulle, Orly, Beauvais y Le Bourget.',
     f: ['Seguimiento de vuelo en tiempo real', '60 min de espera gratuitos', 'Cartel personalizado a la llegada', 'Asistencia con el equipaje'],
     img: 'Mercedes Clase E · CDG Terminal 2E',
   },
   {
-    n: '02', t: 'París ↔ Disneyland', price: 'Desde 110 €',
+    n: '02', t: 'París ↔ Disneyland', price: 'Desde 70 €',
     d: 'Traslado directo y cómodo entre cualquier dirección parisina y los parques Disneyland París.',
-    f: ['Sillas infantiles bajo petición', 'Vehículos hasta 7 pasajeros', 'Espacio para equipaje y cochecitos', 'Reserva ida y vuelta con tarifa preferente'],
+    f: ['Sillas infantiles bajo petición', 'Vehículos hasta 8 pasajeros', 'Espacio para equipaje y cochecitos', 'Reserva ida y vuelta con tarifa preferente'],
     img: 'Llegada Disneyland Hotel',
   },
   {

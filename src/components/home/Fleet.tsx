@@ -1,10 +1,10 @@
 import { bg } from '@/lib/images'
 
 const FLEET = [
-  { name: 'Tesla Model Y',   cat: 'Berlina eléctrica', pax: '1–4', bag: '2', desc: 'Silenciosa, moderna y sostenible. La experiencia del vehículo eléctrico de alta gama.' },
-  { name: 'Hyundai Staria',  cat: 'Van premium',       pax: '1–7', bag: '6', desc: 'Espaciosa y elegante. Ideal para familias, grupos y trayectos con mucho equipaje.' },
-  { name: 'Mercedes Clase V', cat: 'Van ejecutiva',    pax: '1–7', bag: '6', desc: 'Referencia del segmento van de lujo. Asientos en cuero, wi-fi y trato impecable.' },
-  { name: 'Toyota Proace',   cat: 'Van gran capacidad', pax: '1–8', bag: '6', desc: 'Capacidad máxima para grupos y excursiones. Confort sin compromiso.' },
+  { name: 'Mercedes Clase V', cat: 'Van ejecutiva',    pax: '1–8', bag: '6',   desc: 'Referencia del segmento van de lujo. Asientos en cuero, wi-fi y trato impecable.' },
+  { name: 'Hyundai Staria',   cat: 'Van premium',      pax: '1–8', bag: '6',   desc: 'Espaciosa y elegante. Ideal para familias, grupos y trayectos con mucho equipaje.' },
+  { name: 'Tesla Model Y',    cat: 'Berlina eléctrica', pax: '1–3', bag: '2+3', desc: 'Silenciosa, moderna y sostenible. La experiencia del vehículo eléctrico de alta gama.' },
+  { name: 'Mercedes Clase S', cat: 'Berlina de lujo',   pax: '1–3', bag: '2+3', desc: 'Elegancia y confort absolutos. La berlina de referencia para traslados ejecutivos.' },
 ]
 
 export default function Fleet() {

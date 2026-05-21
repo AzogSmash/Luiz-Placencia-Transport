@@ -7,11 +7,10 @@ export const IMG: Record<string, string> = {
     "https://images.unsplash.com/photo-1686199948265-ddc4ebb1cc92?w=1400&q=80&auto=format&fit=crop",
 
   // ── Véhicules ─────────────────────────────────────────────────────────────
-  "Tesla Model Y":
-    "https://images.unsplash.com/photo-1536883442700-ffaa4d76e372?w=1400&q=80&auto=format&fit=crop",
-  "Hyundai Staria":   "/vehicles/hyunddai.png",
   "Mercedes Clase V": "/vehicles/mercedesV.png",
-  "Toyota Proace":    "/vehicles/toyota.png",
+  "Hyundai Staria":   "/vehicles/hyunddai.png",
+  "Tesla Model Y":    "https://images.unsplash.com/photo-1536883442700-ffaa4d76e372?w=1400&q=80&auto=format&fit=crop",
+  "Mercedes Clase S": "https://images.unsplash.com/photo-1686199948265-ddc4ebb1cc92?w=1400&q=80&auto=format&fit=crop",
 
   // ── Intérieur ─────────────────────────────────────────────────────────────
   "Interior cabina trasera":
