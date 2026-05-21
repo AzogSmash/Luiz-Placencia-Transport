@@ -31,22 +31,24 @@ type FormData = {
 }
 
 const SERVICES = [
-  { id: 'aeropuerto',  t: 'Traslado CDG / Orly', d: 'Desde 70 €' },
-  { id: 'beauvais',    t: 'Traslado Beauvais',    d: 'Desde 160 €' },
-  { id: 'disneyland',  t: 'Disneyland París',      d: 'Ida, vuelta o ambos' },
-  { id: 'citytour',    t: 'City tour privado',     d: 'Por horas' },
-  { id: 'disposicion',     t: 'Disposición con chófer',           d: 'A su servicio' },
-  { id: 'excursion',       t: 'Versalles · St-Michel · Bruges',   d: 'Desde 700 €' },
-  { id: 'excursion_devis', t: 'Excursión a medida',               d: 'Ámsterdam · Loire · Champagne · Italia' },
+  { id: 'aeropuerto',      t: 'Traslado CDG / Orly',             d: 'Desde 70 €' },
+  { id: 'beauvais',        t: 'Traslado Beauvais',               d: 'Desde 160 €' },
+  { id: 'disneyland',      t: 'Disneyland París',                d: 'Ida, vuelta o ambos' },
+  { id: 'versailles',      t: 'Visita Versalles',                d: 'Desde 50 €' },
+  { id: 'citytour',        t: 'City tour privado',               d: 'Por horas' },
+  { id: 'disposicion',     t: 'Disposición con chófer',          d: 'A su servicio' },
+  { id: 'excursion',       t: 'St-Michel · Bruges',              d: 'Desde 700 €' },
+  { id: 'excursion_devis', t: 'Excursión a medida',              d: 'Ámsterdam · Loire · Champagne · Italia' },
 ]
 
 const SERVICE_IMGS: Record<string, string> = {
-  aeropuerto:  'Mercedes Clase E · CDG Terminal 2E',
-  beauvais:    'Mercedes en zona de embarque CDG',
-  disneyland:  'Llegada Disneyland Hotel',
-  citytour:    'Torre Eiffel desde Trocadéro',
+  aeropuerto:      'Mercedes Clase E · CDG Terminal 2E',
+  beauvais:        'Mercedes en zona de embarque CDG',
+  disneyland:      'Llegada Disneyland Hotel',
+  versailles:      'Castillo de Versalles',
+  citytour:        'Torre Eiffel desde Trocadéro',
   disposicion:     'Interior cabina trasera',
-  excursion:       'Castillo de Versalles',
+  excursion:       'Castillo de Chenonceau',
   excursion_devis: 'Castillo de Chenonceau',
 }
 
@@ -63,6 +65,11 @@ const TARIFAS_BEAUVAIS: Record<number, number> = {
   1: 160, 2: 160, 3: 160,
   4: 170, 5: 180, 6: 190, 7: 200, 8: 210, 9: 350,
   10: 360, 11: 370, 12: 380, 13: 390, 14: 400, 15: 410, 16: 420,
+}
+
+const TARIFAS_VERSAILLES: Record<number, number> = {
+  1: 50, 2: 60, 3: 70, 4: 80, 5: 90, 6: 100, 7: 110, 8: 120,
+  9: 130, 10: 140, 11: 150, 12: 160, 13: 170, 14: 180, 15: 190, 16: 200,
 }
 
 const TARIFAS_EXCURSION: Record<number, number> = {
@@ -84,6 +91,10 @@ function getPriceDisplay(serviceType: string, pasajeros: string): PriceInfo {
     if (pax > 16) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 16 personas.', overLimit: true }
     return { label: `${TARIFAS_BEAUVAIS[pax]} €`, note: 'Precio fijo · IVA incluido', overLimit: false }
   }
+  if (serviceType === 'versailles') {
+    if (pax > 16) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 16 personas.', overLimit: true }
+    return { label: `${TARIFAS_VERSAILLES[pax]} €`, note: 'Precio fijo · IVA incluido', overLimit: false }
+  }
   if (serviceType === 'excursion') {
     if (pax > 16) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 16 personas.', overLimit: true }
     return { label: `${TARIFAS_EXCURSION[pax]} €`, note: 'Precio fijo · IVA incluido', overLimit: false }
@@ -91,7 +102,7 @@ function getPriceDisplay(serviceType: string, pasajeros: string): PriceInfo {
   return { label: 'Precio bajo consulta', note: 'Tarifa confirmada en menos de 30 min.', overLimit: false }
 }
 
-const FIXED_PRICE_SERVICES = ['aeropuerto', 'beauvais', 'disneyland', 'excursion']
+const FIXED_PRICE_SERVICES = ['aeropuerto', 'beauvais', 'disneyland', 'versailles', 'excursion']
 
 function buildWhatsAppUrl(
   data: FormData,
@@ -164,9 +175,9 @@ export default function ReservaPage() {
   const todayStr   = new Date().toISOString().split('T')[0]
   const pax        = parseInt(data.pasajeros) || 1
   const isTransfer     = ['aeropuerto', 'disneyland', 'beauvais'].includes(data.serviceType)
-  const showPriceBanner = isTransfer || data.serviceType === 'excursion'
-  const paxLimit   = ['beauvais', 'excursion'].includes(data.serviceType) ? 16 : 25
-  const overLimit  = isTransfer && pax > paxLimit
+  const showPriceBanner = FIXED_PRICE_SERVICES.includes(data.serviceType)
+  const paxLimit   = ['beauvais', 'versailles', 'excursion'].includes(data.serviceType) ? 16 : 25
+  const overLimit  = FIXED_PRICE_SERVICES.includes(data.serviceType) && pax > paxLimit
   const isAirport  = data.serviceType === 'aeropuerto' || data.serviceType === 'beauvais'
   const hasReturn  = isAirport || data.serviceType === 'disneyland'
 

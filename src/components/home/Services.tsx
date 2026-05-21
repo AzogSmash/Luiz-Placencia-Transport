@@ -8,8 +8,8 @@ const SERVICES = [
   { n: '02', t: 'Disneyland París',               d: 'Trayecto directo París ↔ Disneyland. Sillas infantiles disponibles bajo petición.',      img: 'Llegada Disneyland Hotel' },
   { n: '03', t: 'City tour privado',              d: 'Descubra París a su ritmo. Itinerario personalizado, paradas libres, comentarios discretos.', img: 'Torre Eiffel desde Trocadéro' },
   { n: '04', t: 'Disposición con chófer',         d: 'A la hora o jornada completa. Reuniones, compras, eventos — su chófer le espera.',     img: 'Interior cabina trasera' },
-  { n: '05', t: 'Versalles · St-Michel · Bruges', d: 'Excursiones de un día con tarifa fija. Versalles, Mont-Saint-Michel y Brujas desde 700 €.', img: 'Castillo de Versalles' },
-  { n: '06', t: 'Excursiones a medida',           d: 'Ámsterdam, Loire, Champaña, Italia y más. Presupuesto personalizado en 30 minutos.',   img: 'Castillo de Chenonceau' },
+  { n: '05', t: 'Versalles · St-Michel · Bruges', d: 'Versalles desde 50 €/pax · Mont-Saint-Michel y Brujas desde 700 €. Tarifa fija por número de pasajeros.', img: 'Castillo de Versalles' },
+  { n: '06', t: 'Excursiones a medida',           d: 'Ámsterdam, Loire, Champaña, Italia y más. Presupuesto personalizado en menos de 30 minutos.',             img: 'Castillo de Chenonceau' },
 ]
 
 export default function Services() {
