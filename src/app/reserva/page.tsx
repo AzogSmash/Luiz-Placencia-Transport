@@ -370,7 +370,7 @@ export default function ReservaPage() {
                   <h3 style={{ fontFamily: 'var(--display)', fontSize: 32, margin: 0, marginBottom: 8, fontWeight: 400 }}>Detalles del trayecto</h3>
                   <p style={{ color: 'var(--fg-muted)', marginBottom: 32, fontSize: 14 }}>Indique el recorrido y el número de pasajeros.</p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+                  <div className="form-grid" style={{ marginBottom: 24 }}>
                     <div className="field">
                       <label>Lugar de salida *</label>
                       <input type="text" placeholder="Hotel Le Bristol, 112 Rue du Faubourg…"
@@ -428,7 +428,7 @@ export default function ReservaPage() {
                   {/* ── Informaciones adicionales ── */}
                   <div style={{ borderTop: '1px solid var(--line-soft)', paddingTop: 28, marginBottom: 28 }}>
                     <div className="eyebrow" style={{ marginBottom: 20 }}>Información del viaje</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                    <div className="form-grid">
 
                       {/* Airport: flight numbers + hotels */}
                       {isAirport && (
@@ -527,7 +527,7 @@ export default function ReservaPage() {
                   <h3 style={{ fontFamily: 'var(--display)', fontSize: 32, margin: 0, marginBottom: 8, fontWeight: 400 }}>Sus datos de contacto</h3>
                   <p style={{ color: 'var(--fg-muted)', marginBottom: 32, fontSize: 14 }}>Le contestaremos en menos de 30 minutos.</p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+                  <div className="form-grid" style={{ marginBottom: 24 }}>
                     <div className="field">
                       <label>Nombre *</label>
                       <input type="text" placeholder="Carmen"
