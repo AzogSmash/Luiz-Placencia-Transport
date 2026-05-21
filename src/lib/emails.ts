@@ -19,7 +19,7 @@ function layout(title: string, body: string) {
         <tr>
           <td style="padding:0 0 32px 0;border-bottom:1px solid #2a2a2a;">
             <p style="margin:0;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:${ACCENT};">
-              Luis Placencia Transport
+              Luis Plasencia Transport
             </p>
           </td>
         </tr>
@@ -35,7 +35,7 @@ function layout(title: string, body: string) {
         <tr>
           <td style="padding:24px 0 0 0;border-top:1px solid #2a2a2a;">
             <p style="margin:0;font-size:11px;color:#555;line-height:1.6;">
-              Luis Placencia Transport · París, Île-de-France<br/>
+              Luis Plasencia Transport · París, Île-de-France<br/>
               <a href="https://lp-transport.fr" style="color:${ACCENT};text-decoration:none;">lp-transport.fr</a>
             </p>
           </td>
@@ -149,7 +149,7 @@ export function emailReservationConfirmation(r: ReservationData) {
     </p>
   `
   return {
-    subject: `Reserva recibida — #${r.id} · Luis Placencia Transport`,
+    subject: `Reserva recibida — #${r.id} · Luis Plasencia Transport`,
     html: layout('Reserva recibida', body),
   }
 }
@@ -226,7 +226,7 @@ export function emailStatusUpdate(r: ReservationData & { statut: string }) {
     </p>
   `
   return {
-    subject: `Su reserva #${r.id} — ${info.label} · Luis Placencia Transport`,
+    subject: `Su reserva #${r.id} — ${info.label} · Luis Plasencia Transport`,
     html: layout('Estado actualizado', body),
   }
 }

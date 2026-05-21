@@ -4,12 +4,12 @@ import Link from 'next/link'
 import { bg } from '@/lib/images'
 
 const SERVICES = [
-  { n: '01', t: 'Traslados aeropuerto', d: 'CDG · Orly · Beauvais · Le Bourget. Seguimiento de vuelos y tiempo de espera incluido.', img: 'Mercedes en zona de embarque CDG' },
-  { n: '02', t: 'Disneyland París',      d: 'Trayecto directo París ↔ Disneyland. Sillas infantiles disponibles bajo petición.',      img: 'Llegada Disneyland Hotel' },
-  { n: '03', t: 'City tour privado',     d: 'Descubra París a su ritmo. Itinerario personalizado, paradas libres, comentarios discretos.', img: 'Torre Eiffel desde Trocadéro' },
-  { n: '04', t: 'Disposición con chófer', d: 'A la hora o jornada completa. Reuniones, compras, eventos — su chófer le espera.',     img: 'Interior cabina trasera' },
-  { n: '05', t: 'Excursiones',           d: 'Versalles, valle del Loira, Champaña, Normandía, Bélgica, Suiza. Viajes a medida.',     img: 'Castillo de Versalles' },
-  { n: '06', t: 'Eventos & bodas',       d: 'Cortejos privados, recepciones, galas. Vehículo decorado bajo petición.',               img: "Cortejo en Place de l'Opéra" },
+  { n: '01', t: 'Traslados aeropuerto',           d: 'CDG · Orly · Beauvais · Le Bourget. Seguimiento de vuelos y tiempo de espera incluido.', img: 'Mercedes en zona de embarque CDG' },
+  { n: '02', t: 'Disneyland París',               d: 'Trayecto directo París ↔ Disneyland. Sillas infantiles disponibles bajo petición.',      img: 'Llegada Disneyland Hotel' },
+  { n: '03', t: 'City tour privado',              d: 'Descubra París a su ritmo. Itinerario personalizado, paradas libres, comentarios discretos.', img: 'Torre Eiffel desde Trocadéro' },
+  { n: '04', t: 'Disposición con chófer',         d: 'A la hora o jornada completa. Reuniones, compras, eventos — su chófer le espera.',     img: 'Interior cabina trasera' },
+  { n: '05', t: 'Versalles · St-Michel · Bruges', d: 'Excursiones de un día con tarifa fija. Versalles, Mont-Saint-Michel y Brujas desde 700 €.', img: 'Castillo de Versalles' },
+  { n: '06', t: 'Excursiones a medida',           d: 'Ámsterdam, Loire, Champaña, Italia y más. Presupuesto personalizado en 30 minutos.',   img: 'Castillo de Chenonceau' },
 ]
 
 export default function Services() {

@@ -1,4 +1,4 @@
-export const metadata = { title: 'Condiciones generales de venta — Luis Placencia Transport' }
+export const metadata = { title: 'Condiciones generales de venta — Luis Plasencia Transport' }
 
 export default function CgvPage() {
   return (
@@ -15,7 +15,7 @@ export default function CgvPage() {
 
         <Section title="Identificación del prestador">
           <p>
-            <strong style={{ color: 'var(--fg)' }}>Luis Placencia Transport</strong><br />
+            <strong style={{ color: 'var(--fg)' }}>Luis Plasencia Transport</strong><br />
             [À compléter — dirección postal]<br />
             SIRET: 101 300 291 000 16<br />
             Email: Luisplasenciatransport@gmail.com — Teléfono: +33 6 43 27 21 73
@@ -24,7 +24,7 @@ export default function CgvPage() {
 
         <Section title="Servicios ofrecidos">
           <p>
-            Luis Placencia Transport presta servicios de transporte privado con conductor (VTC) en París,
+            Luis Plasencia Transport presta servicios de transporte privado con conductor (VTC) en París,
             Île-de-France y destinos europeos, incluyendo:
           </p>
           <ul style={{ paddingLeft: 20, marginTop: 12 }}>
@@ -42,7 +42,7 @@ export default function CgvPage() {
             [À compléter — indiquez ici votre politique tarifaire : tarif fixe, sur devis, grille de prix…]
           </p>
           <p style={{ marginTop: 12 }}>
-            Los precios se expresan en euros, impuestos incluidos. Luis Placencia Transport se reserva el
+            Los precios se expresan en euros, impuestos incluidos. Luis Plasencia Transport se reserva el
             derecho a modificar sus tarifas en cualquier momento. El precio aplicable es el vigente en el
             momento de la confirmación de la reserva.
           </p>
@@ -51,7 +51,7 @@ export default function CgvPage() {
         <Section title="Reserva y confirmación">
           <p>
             La reserva puede realizarse a través del formulario en línea, por teléfono o por WhatsApp.
-            Una reserva sólo se considera firme tras la confirmación expresa por parte de Luis Placencia Transport
+            Una reserva sólo se considera firme tras la confirmación expresa por parte de Luis Plasencia Transport
             (email o mensaje de confirmación).
           </p>
           <p style={{ marginTop: 12 }}>
@@ -74,11 +74,11 @@ export default function CgvPage() {
 
         <Section title="Responsabilidad">
           <p>
-            Luis Placencia Transport se compromete a realizar el trayecto en las condiciones acordadas.
+            Luis Plasencia Transport se compromete a realizar el trayecto en las condiciones acordadas.
             En caso de retraso imputable al prestador, se estudiarán soluciones alternativas.
           </p>
           <p style={{ marginTop: 12 }}>
-            Luis Placencia Transport no podrá ser considerado responsable de retrasos debidos a
+            Luis Plasencia Transport no podrá ser considerado responsable de retrasos debidos a
             circunstancias ajenas a su control (tráfico, condiciones meteorológicas, huelgas, etc.).
           </p>
           <p style={{ marginTop: 12 }}>

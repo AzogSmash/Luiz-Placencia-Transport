@@ -1,4 +1,4 @@
-export const metadata = { title: 'Aviso legal — Luis Placencia Transport' }
+export const metadata = { title: 'Aviso legal — Luis Plasencia Transport' }
 
 export default function AvisoLegalPage() {
   return (
@@ -11,13 +11,13 @@ export default function AvisoLegalPage() {
         </h1>
 
         <Section title="Editor del sitio">
-          <Row label="Razón social">Luis Placencia Transport</Row>
+          <Row label="Razón social">Luis Plasencia Transport</Row>
           <Row label="Forma jurídica">[À compléter — ex: Auto-entrepreneur]</Row>
           <Row label="SIRET">101 300 291 000 16</Row>
           <Row label="Domicilio">[À compléter — dirección completa]</Row>
           <Row label="Teléfono">+33 6 43 27 21 73</Row>
           <Row label="Email">Luisplasenciatransport@gmail.com</Row>
-          <Row label="Responsable de publicación">Luis Placencia</Row>
+          <Row label="Responsable de publicación">Luis Plasencia</Row>
         </Section>
 
         <Section title="Alojamiento del sitio">
@@ -29,14 +29,14 @@ export default function AvisoLegalPage() {
         <Section title="Propiedad intelectual">
           <p>
             El contenido de este sitio web (textos, imágenes, logotipos, diseño) es propiedad exclusiva de
-            Luis Placencia Transport, salvo indicación contraria. Queda prohibida cualquier reproducción,
+            Luis Plasencia Transport, salvo indicación contraria. Queda prohibida cualquier reproducción,
             distribución o uso sin autorización previa por escrito.
           </p>
         </Section>
 
         <Section title="Responsabilidad">
           <p>
-            Luis Placencia Transport no podrá ser considerado responsable de los daños de cualquier naturaleza
+            Luis Plasencia Transport no podrá ser considerado responsable de los daños de cualquier naturaleza
             que pudieran derivarse del uso del sitio o de la imposibilidad de acceder al mismo.
             Nos reservamos el derecho de modificar el contenido del sitio en cualquier momento y sin previo aviso.
           </p>

@@ -75,7 +75,7 @@ export default async function AdminPage() {
                 margin: 0,
                 fontWeight: 400,
               }}>
-                Luis Placencia Transport
+                Luis Plasencia Transport
               </h1>
               <p style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 4 }}>
                 {adminName} · {user.email}

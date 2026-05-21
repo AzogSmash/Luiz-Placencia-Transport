@@ -1,4 +1,4 @@
-export const metadata = { title: 'Política de privacidad — Luis Placencia Transport' }
+export const metadata = { title: 'Política de privacidad — Luis Plasencia Transport' }
 
 export default function PoliticaPrivacidadPage() {
   return (
@@ -15,7 +15,7 @@ export default function PoliticaPrivacidadPage() {
 
         <Section title="Responsable del tratamiento">
           <p>
-            <strong style={{ color: 'var(--fg)' }}>Luis Placencia Transport</strong><br />
+            <strong style={{ color: 'var(--fg)' }}>Luis Plasencia Transport</strong><br />
             [À compléter — dirección postal]<br />
             Email: Luisplasenciatransport@gmail.com<br />
             Teléfono: +33 6 43 27 21 73
@@ -58,7 +58,7 @@ export default function PoliticaPrivacidadPage() {
 
         <Section title="Destinatarios">
           <p>
-            Sus datos son tratados exclusivamente por Luis Placencia Transport y no se ceden a terceros,
+            Sus datos son tratados exclusivamente por Luis Plasencia Transport y no se ceden a terceros,
             salvo a los proveedores técnicos necesarios para el funcionamiento del servicio
             (alojamiento: Vercel; base de datos: Supabase; emails: [À compléter — Resend / Gmail…]).
             Todos estos proveedores ofrecen garantías de cumplimiento del RGPD.
