@@ -329,7 +329,7 @@ export default function ReservaPage() {
                       cursor: done ? 'pointer' : 'default', textAlign: 'left', fontFamily: 'var(--sans)',
                     }}>
                       <div className="mono" style={{ color: active ? 'var(--accent)' : done ? 'var(--fg-muted)' : 'var(--fg-dim)', marginBottom: 6 }}>0{idx}</div>
-                      <div style={{ fontSize: 15, fontWeight: 500 }}>{label}</div>
+                      <div className="reserva-stepper-label" style={{ fontSize: 15, fontWeight: 500 }}>{label}</div>
                     </button>
                   )
                 })}

@@ -271,6 +271,24 @@ img { max-width: 100%; display: block; }
   cursor: pointer;
 }
 
+.field select option {
+  background-color: oklch(0.18 0.005 240);
+  color: oklch(0.97 0.005 80);
+}
+
+/* === Form grid responsive === */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid > *[style*="grid-column"] { grid-column: 1 !important; }
+}
+
 /* === Util === */
 
 .hairline { height: 1px; background: var(--line-soft); }
@@ -309,6 +327,9 @@ html { scroll-behavior: smooth; }
 ::-webkit-scrollbar-thumb { background: var(--bg-soft); border-radius: 6px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--line); }
 
+/* === Nav hamburger (hidden on desktop) === */
+.nav-hamburger { display: none; }
+
 /* === Responsive === */
 
 @media (max-width: 1100px) {
@@ -321,19 +342,40 @@ html { scroll-behavior: smooth; }
   .process-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .footer-grid { grid-template-columns: 1fr 1fr !important; }
   .service-row { grid-template-columns: 1fr !important; }
+  /* hide service-row image reorder */
+  .service-row > div[style*="order: 1"],
+  .service-row > div[style*="order: 2"] { order: unset !important; }
 }
 
 @media (max-width: 800px) {
   .section-head { grid-template-columns: 1fr; gap: 24px; }
   .section { padding: 64px 0; }
+  .container { padding: 0 20px; }
 }
 
 @media (max-width: 700px) {
   .nav-links { display: none !important; }
   .nav-phone { display: none !important; }
+  .nav-auth  { display: none !important; }
+  .nav-hamburger { display: flex !important; }
+  .hero-info-card { display: none; }
   .services-grid,
   .fleet-grid,
   .testimonios-grid,
   .process-grid { grid-template-columns: 1fr !important; }
   .footer-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .contacto-item { grid-template-columns: 1fr !important; }
+  .contacto-value { font-size: 16px !important; word-break: break-all; }
+}
+
+@media (max-width: 600px) {
+  .container { padding: 0 16px; }
+  .section { padding: 48px 0; }
+  .btn { font-size: 12px; padding: 12px 18px; }
+  .section-head h2 { font-size: clamp(32px, 8vw, 48px) !important; }
+  /* Reserva stepper text */
+  .reserva-stepper-label { display: none; }
 }

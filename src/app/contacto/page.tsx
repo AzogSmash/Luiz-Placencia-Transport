@@ -81,6 +81,7 @@ export default function ContactoPage() {
                     href={c.href ?? undefined}
                     target={c.href?.startsWith('http') ? '_blank' : undefined}
                     rel={c.href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    className="contacto-item"
                     style={{
                       padding: '28px 32px',
                       borderTop: '1px solid var(--line-soft)',
@@ -96,7 +97,7 @@ export default function ContactoPage() {
                   >
                     <div className="eyebrow">{c.k}</div>
                     <div>
-                      <div style={{ fontFamily: 'var(--display)', fontSize: 22 }}>{c.v}</div>
+                      <div className="contacto-value" style={{ fontFamily: 'var(--display)', fontSize: 22 }}>{c.v}</div>
                       <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 4 }}>{c.sub}</div>
                     </div>
                   </a>

@@ -75,7 +75,7 @@ export default function Hero() {
               data-label="Mercedes Clase E · Place Vendôme"
               style={{ ...bg('Mercedes Clase E · Place Vendôme'), aspectRatio: '4/5', width: '100%' }}
             />
-            <div style={{
+            <div className="hero-info-card" style={{
               position: 'absolute',
               bottom: -24,
               left: -24,
