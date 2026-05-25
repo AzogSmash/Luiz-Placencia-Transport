@@ -2,11 +2,6 @@ import Stripe from 'stripe'
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase-admin'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  // @ts-ignore
-  apiVersion: undefined,
-})
-
 export default async function PagoExitosoPage({
   searchParams,
 }: {
@@ -18,6 +13,10 @@ export default async function PagoExitosoPage({
 
   if (session_id) {
     try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+        // @ts-ignore
+        apiVersion: undefined,
+      })
       const session = await stripe.checkout.sessions.retrieve(session_id)
       paid = session.payment_status === 'paid'
       customerEmail = session.customer_details?.email ?? ''

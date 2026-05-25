@@ -3,11 +3,6 @@
 import Stripe from 'stripe'
 import { headers } from 'next/headers'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  // @ts-ignore — stripe v22 uses package default version
-  apiVersion: undefined,
-})
-
 type CheckoutResult = { url: string; error?: never } | { url: null; error: string }
 
 export async function createCheckoutSession(
@@ -17,6 +12,10 @@ export async function createCheckoutSession(
   customerEmail: string,
 ): Promise<CheckoutResult> {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      // @ts-ignore — stripe v22 uses package default version
+      apiVersion: undefined,
+    })
     const h = headers()
     const host = h.get('host') ?? 'localhost:3000'
     const proto = process.env.NODE_ENV === 'production' ? 'https' : 'http'
