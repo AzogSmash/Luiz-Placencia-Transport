@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { bg } from '@/lib/images'
 import { createReservation } from '@/app/actions/reservations'
+import { createCheckoutSession } from '@/app/actions/checkout'
 import PhoneInput from '@/components/PhoneInput'
 
 type FormData = {
@@ -103,6 +104,14 @@ function getPriceDisplay(serviceType: string, pasajeros: string): PriceInfo {
 }
 
 const FIXED_PRICE_SERVICES = ['aeropuerto', 'beauvais', 'disneyland', 'versailles', 'excursion']
+
+function getAmount(serviceType: string, pax: number): number | null {
+  if (serviceType === 'aeropuerto' || serviceType === 'disneyland') return TARIFAS_TRASLADO[pax] ?? null
+  if (serviceType === 'beauvais')   return TARIFAS_BEAUVAIS[pax]   ?? null
+  if (serviceType === 'versailles') return TARIFAS_VERSAILLES[pax] ?? null
+  if (serviceType === 'excursion')  return TARIFAS_EXCURSION[pax]  ?? null
+  return null
+}
 
 function buildWhatsAppUrl(
   data: FormData,
@@ -253,8 +262,25 @@ export default function ReservaPage() {
       message:          messageLines.join(' | ') || null,
     })
 
+    if (!result.success) { setLoading(false); setError(result.error); return }
+
+    // Tarif fixe non dépassé → Stripe Checkout
+    const isFixedPrice = FIXED_PRICE_SERVICES.includes(data.serviceType) && !overLimit
+    if (isFixedPrice) {
+      const amount = getAmount(data.serviceType, pax)
+      if (!amount) { setLoading(false); setError('Error al calcular el importe.'); return }
+      const checkout = await createCheckoutSession(result.id, amount, serviceName, data.email)
+      if (checkout.url) {
+        window.location.href = checkout.url
+        return // spinner actif pendant la redirection
+      }
+      setLoading(false)
+      setError(checkout.error ?? 'Error al iniciar el pago. Inténtelo de nuevo.')
+      return
+    }
+
+    // Prix variable ou groupe hors limite → WhatsApp CTA
     setLoading(false)
-    if (!result.success) { setError(result.error); return }
     setReservationId(result.id)
     setSubmitted(true)
   }
