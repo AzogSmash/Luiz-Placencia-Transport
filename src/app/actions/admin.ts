@@ -72,3 +72,15 @@ export async function updateReservationStatus(
   revalidatePath('/admin')
   return { success: true }
 }
+
+export async function deleteReservation(id: number): Promise<AdminActionResult> {
+  const isAdmin = await assertAdmin()
+  if (!isAdmin) return { success: false, error: 'Accès refusé' }
+
+  const admin = createAdminClient()
+  const { error } = await admin.from('reservations').delete().eq('id', id)
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/admin')
+  return { success: true }
+}

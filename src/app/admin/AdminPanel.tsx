@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateReservationStatus } from '@/app/actions/admin'
+import { updateReservationStatus, deleteReservation } from '@/app/actions/admin'
 
 export type Reservation = {
   id: number
@@ -38,10 +38,7 @@ function truncate(s: string, n = 28) {
   return s.length > n ? s.slice(0, n) + '…' : s
 }
 
-type ParsedMessage = {
-  notes: string
-  fields: Record<string, string>
-}
+type ParsedMessage = { notes: string; fields: Record<string, string> }
 
 function parseMessage(raw: string | null): ParsedMessage {
   if (!raw) return { notes: '', fields: {} }
@@ -50,11 +47,8 @@ function parseMessage(raw: string | null): ParsedMessage {
   const noteParts: string[] = []
   for (const part of parts) {
     const idx = part.indexOf(': ')
-    if (idx !== -1) {
-      fields[part.slice(0, idx)] = part.slice(idx + 2)
-    } else if (part.trim()) {
-      noteParts.push(part.trim())
-    }
+    if (idx !== -1) fields[part.slice(0, idx)] = part.slice(idx + 2)
+    else if (part.trim()) noteParts.push(part.trim())
   }
   return { notes: noteParts.join(' / '), fields }
 }
@@ -63,7 +57,7 @@ const DETAIL_LABELS: { key: string; label: string }[] = [
   { key: 'Service',       label: 'Servicio'      },
   { key: 'Prix',          label: 'Precio'        },
   { key: 'Equipaje',      label: 'Equipaje'      },
-  { key: 'Bagages',       label: 'Equipaje'      }, // legacy
+  { key: 'Bagages',       label: 'Equipaje'      },
   { key: 'Vuelo ida',     label: 'Vuelo ida'     },
   { key: 'Vuelo vuelta',  label: 'Vuelo vuelta'  },
   { key: 'Fecha vuelta',  label: 'Fecha vuelta'  },
@@ -77,11 +71,8 @@ function DetailChip({ label, value }: { label: string; value: string }) {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 3,
-      padding: '10px 14px',
-      background: 'var(--bg-soft)',
-      border: '1px solid var(--line-soft)',
-      borderRadius: 6,
-      minWidth: 0,
+      padding: '10px 14px', background: 'var(--bg-soft)',
+      border: '1px solid var(--line-soft)', borderRadius: 6, minWidth: 0,
     }}>
       <div style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-dim)', fontWeight: 500 }}>
         {label}
@@ -93,18 +84,59 @@ function DetailChip({ label, value }: { label: string; value: string }) {
   )
 }
 
+function ActionBtn({ href, label, color }: { href: string; label: string; color: string }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" style={{
+      display: 'inline-flex', alignItems: 'center', gap: 6,
+      padding: '7px 14px', fontSize: 11, fontWeight: 600,
+      letterSpacing: '0.08em', textTransform: 'uppercase',
+      border: `1px solid ${color}`, color, borderRadius: 4,
+      textDecoration: 'none', whiteSpace: 'nowrap',
+      transition: 'opacity 0.15s ease',
+    }}
+    onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.7'}
+    onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
+    >
+      {label}
+    </a>
+  )
+}
+
+type TimeFilter = 'proximas' | 'pasadas' | 'todas'
+
 export default function AdminPanel({ reservations: initial }: { reservations: Reservation[] }) {
-  const [filter, setFilter]     = useState('todos')
-  const [statuses, setStatuses] = useState<Record<number, string>>(
+  const [statusFilter, setStatusFilter] = useState('todos')
+  const [timeFilter, setTimeFilter]     = useState<TimeFilter>('proximas')
+  const [sortAsc, setSortAsc]           = useState(true)
+  const [statuses, setStatuses]         = useState<Record<number, string>>(
     Object.fromEntries(initial.map(r => [r.id, r.statut])),
   )
-  const [updating, setUpdating]   = useState<Set<number>>(new Set())
-  const [errors, setErrors]       = useState<Record<number, string>>({})
-  const [expanded, setExpanded]   = useState<Set<number>>(new Set())
+  const [items, setItems]       = useState<Reservation[]>(initial)
+  const [updating, setUpdating] = useState<Set<number>>(new Set())
+  const [deleting, setDeleting] = useState<Set<number>>(new Set())
+  const [errors, setErrors]     = useState<Record<number, string>>({})
+  const [expanded, setExpanded] = useState<Set<number>>(new Set())
 
-  const filtered = filter === 'todos' ? initial : initial.filter(r => r.statut === filter)
-  const counts: Record<string, number> = { todos: initial.length }
-  STATUSES.forEach(s => { counts[s] = initial.filter(r => r.statut === s).length })
+  const now = new Date()
+
+  const timeFiltered = items.filter(r => {
+    const d = new Date(r.date_heure)
+    if (timeFilter === 'proximas') return d >= now
+    if (timeFilter === 'pasadas')  return d < now
+    return true
+  })
+
+  const statusFiltered = statusFilter === 'todos'
+    ? timeFiltered
+    : timeFiltered.filter(r => (statuses[r.id] ?? r.statut) === statusFilter)
+
+  const sorted = [...statusFiltered].sort((a, b) => {
+    const diff = new Date(a.date_heure).getTime() - new Date(b.date_heure).getTime()
+    return sortAsc ? diff : -diff
+  })
+
+  const counts: Record<string, number> = { todos: items.length }
+  STATUSES.forEach(s => { counts[s] = items.filter(r => (statuses[r.id] ?? r.statut) === s).length })
 
   function toggleExpand(id: number) {
     setExpanded(prev => {
@@ -127,9 +159,27 @@ export default function AdminPanel({ reservations: initial }: { reservations: Re
     }
   }
 
+  async function handleDelete(id: number) {
+    if (!confirm(`¿Eliminar la reserva #${id}? Esta acción no se puede deshacer.`)) return
+    setDeleting(d => new Set(d).add(id))
+    const result = await deleteReservation(id)
+    if (result.success) {
+      setItems(prev => prev.filter(r => r.id !== id))
+    } else {
+      setErrors(e => ({ ...e, [id]: result.error }))
+      setDeleting(d => { const n = new Set(d); n.delete(id); return n })
+    }
+  }
+
   const FILTER_TABS = [
     { id: 'todos', label: 'Todos' },
     ...STATUSES.map(s => ({ id: s, label: STATUS_STYLE[s].label })),
+  ]
+
+  const TIME_TABS: { id: TimeFilter; label: string }[] = [
+    { id: 'proximas', label: 'Próximas' },
+    { id: 'pasadas',  label: 'Pasadas'  },
+    { id: 'todas',    label: 'Todas'    },
   ]
 
   return (
@@ -149,13 +199,40 @@ export default function AdminPanel({ reservations: initial }: { reservations: Re
         })}
       </div>
 
-      {/* ── Filter tabs ── */}
+      {/* ── Time + Sort controls ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {TIME_TABS.map(t => (
+            <button key={t.id} onClick={() => setTimeFilter(t.id)} style={{
+              padding: '7px 16px', fontSize: 11, fontWeight: 600,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              border: '1px solid var(--line-soft)',
+              background: timeFilter === t.id ? 'var(--accent)' : 'transparent',
+              color: timeFilter === t.id ? '#0d0d0d' : 'var(--fg-muted)',
+              borderRadius: 4, cursor: 'pointer', transition: 'all 0.15s ease',
+            }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setSortAsc(a => !a)} style={{
+          padding: '7px 14px', fontSize: 11, fontWeight: 600,
+          letterSpacing: '0.08em', textTransform: 'uppercase',
+          border: '1px solid var(--line-soft)',
+          background: 'transparent', color: 'var(--fg-muted)',
+          borderRadius: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+        }}>
+          Fecha {sortAsc ? '↑' : '↓'}
+        </button>
+      </div>
+
+      {/* ── Status filter tabs ── */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--line-soft)', marginBottom: 24, flexWrap: 'wrap' }}>
         {FILTER_TABS.map(t => {
-          const active = filter === t.id
+          const active = statusFilter === t.id
           const st = STATUS_STYLE[t.id]
           return (
-            <button key={t.id} onClick={() => setFilter(t.id)} style={{
+            <button key={t.id} onClick={() => setStatusFilter(t.id)} style={{
               padding: '12px 20px', background: 'transparent', border: 0,
               borderBottom: active ? `2px solid ${st?.color ?? 'var(--accent)'}` : '2px solid transparent',
               color: active ? (st?.color ?? 'var(--fg)') : 'var(--fg-muted)',
@@ -169,13 +246,12 @@ export default function AdminPanel({ reservations: initial }: { reservations: Re
       </div>
 
       {/* ── Table ── */}
-      {filtered.length === 0 ? (
+      {sorted.length === 0 ? (
         <div style={{ padding: '48px 32px', border: '1px solid var(--line-soft)', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 14 }}>
           No hay reservas para este filtro.
         </div>
       ) : (
         <div style={{ border: '1px solid var(--line-soft)' }}>
-          {/* Header */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: '56px 1fr 130px 1.4fr 110px 46px 170px 40px',
@@ -187,46 +263,42 @@ export default function AdminPanel({ reservations: initial }: { reservations: Re
             ))}
           </div>
 
-          {/* Rows */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line-soft)', minWidth: 860 }}>
-            {filtered.map(r => {
+            {sorted.map(r => {
               const currentStatut = statuses[r.id] ?? r.statut
               const isUpdating    = updating.has(r.id)
+              const isDeleting    = deleting.has(r.id)
               const errorMsg      = errors[r.id]
               const st            = STATUS_STYLE[currentStatut] ?? STATUS_STYLE['en attente']
               const isOpen        = expanded.has(r.id)
               const parsed        = parseMessage(r.message)
+              const phoneClean    = r.telephone.replace(/\s/g, '')
+              const waPhone       = phoneClean.startsWith('+') ? phoneClean.slice(1) : phoneClean
 
               const visibleDetails = DETAIL_LABELS
                 .filter(d => parsed.fields[d.key])
-                // deduplicate (Bagages/Equipaje)
                 .filter((d, i, arr) => {
                   if (d.key === 'Bagages' && arr.some(x => x.key === 'Equipaje' && parsed.fields['Equipaje'])) return false
                   return true
                 })
 
               return (
-                <div key={r.id} style={{ background: isOpen ? 'var(--bg-elev)' : 'var(--bg)', transition: 'background 0.2s ease' }}>
-                  {/* Compact row */}
+                <div key={r.id} style={{ background: isOpen ? 'var(--bg-elev)' : 'var(--bg)', transition: 'background 0.2s ease', opacity: isDeleting ? 0.4 : 1 }}>
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: '56px 1fr 130px 1.4fr 110px 46px 170px 40px',
                     padding: '14px 16px', alignItems: 'center',
                     opacity: isUpdating ? 0.7 : 1, transition: 'opacity 0.2s ease',
                   }}>
-                    {/* ID */}
                     <div className="mono" style={{ color: 'var(--accent)', fontSize: 12, paddingRight: 10 }}>#{r.id}</div>
 
-                    {/* Client */}
                     <div style={{ paddingRight: 10, minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{r.nom}</div>
                       <div style={{ fontSize: 11, color: 'var(--fg-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.email}</div>
                     </div>
 
-                    {/* Phone */}
                     <div className="mono" style={{ fontSize: 11, color: 'var(--fg-muted)', paddingRight: 10 }}>{r.telephone}</div>
 
-                    {/* Route */}
                     <div style={{ paddingRight: 10, minWidth: 0 }}>
                       <div style={{ fontSize: 12, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{truncate(r.adresse_depart)}</div>
                       <div style={{ fontSize: 11, color: 'var(--fg-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -234,13 +306,10 @@ export default function AdminPanel({ reservations: initial }: { reservations: Re
                       </div>
                     </div>
 
-                    {/* Date */}
                     <div className="mono" style={{ fontSize: 10, color: 'var(--fg-muted)', paddingRight: 10, lineHeight: 1.5 }}>{fmt(r.date_heure)}</div>
 
-                    {/* Pax */}
                     <div style={{ fontSize: 13, textAlign: 'center', paddingRight: 10 }}>{r.nombre_passagers}</div>
 
-                    {/* Status */}
                     <div>
                       <select value={currentStatut} disabled={isUpdating}
                         onChange={e => handleStatusChange(r.id, e.target.value)}
@@ -259,26 +328,27 @@ export default function AdminPanel({ reservations: initial }: { reservations: Re
                       {errorMsg && <div style={{ fontSize: 10, color: 'oklch(0.65 0.14 20)', marginTop: 4 }}>{errorMsg}</div>}
                     </div>
 
-                    {/* Expand toggle */}
                     <button onClick={() => toggleExpand(r.id)} style={{
                       background: 'transparent', border: 0, cursor: 'pointer',
                       color: isOpen ? 'var(--accent)' : 'var(--fg-dim)',
-                      fontSize: 16, padding: 4, lineHeight: 1,
-                      transition: 'color 0.18s ease',
+                      fontSize: 16, padding: 4, lineHeight: 1, transition: 'color 0.18s ease',
                     }}>
                       {isOpen ? '▲' : '▼'}
                     </button>
                   </div>
 
-                  {/* Expanded detail */}
                   {isOpen && (
-                    <div style={{
-                      padding: '0 16px 20px 72px',
-                      borderTop: '1px solid var(--line-soft)',
-                    }}>
+                    <div style={{ padding: '0 16px 20px 72px', borderTop: '1px solid var(--line-soft)' }}>
                       <div style={{ paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-                        {/* Chips grid */}
+                        {/* Contact actions */}
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          <ActionBtn href={`tel:${phoneClean}`}            label="Llamar"     color="oklch(0.65 0.16 145)" />
+                          <ActionBtn href={`https://wa.me/${waPhone}`}     label="WhatsApp"   color="oklch(0.72 0.18 145)" />
+                          <ActionBtn href={`mailto:${r.email}`}            label="Email"      color="var(--accent)"         />
+                          <ActionBtn href={`sms:${phoneClean}`}            label="SMS"        color="oklch(0.62 0.10 240)" />
+                        </div>
+
                         {visibleDetails.length > 0 && (
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                             {visibleDetails.map(d => (
@@ -287,34 +357,43 @@ export default function AdminPanel({ reservations: initial }: { reservations: Re
                           </div>
                         )}
 
-                        {/* Full addresses */}
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                          <DetailChip label="Salida completa" value={r.adresse_depart} />
+                          <DetailChip label="Salida completa"  value={r.adresse_depart} />
                           <DetailChip label="Destino completo" value={r.adresse_arrivee} />
-                          <DetailChip label="Fecha reserva" value={fmt(r.created_at)} />
+                          <DetailChip label="Fecha reserva"    value={fmt(r.created_at)} />
                         </div>
 
-                        {/* Free notes */}
                         {parsed.notes && (
                           <div style={{
-                            padding: '12px 16px',
-                            background: 'var(--bg-soft)',
-                            border: '1px solid var(--line-soft)',
-                            borderRadius: 6,
-                            fontSize: 13,
-                            color: 'var(--fg-muted)',
+                            padding: '12px 16px', background: 'var(--bg-soft)',
+                            border: '1px solid var(--line-soft)', borderRadius: 6,
+                            fontSize: 13, color: 'var(--fg-muted)',
                           }}>
                             <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-dim)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Notas del cliente</span>
                             {parsed.notes}
                           </div>
                         )}
 
-                        {/* No extra info */}
                         {visibleDetails.length === 0 && !parsed.notes && (
-                          <div style={{ fontSize: 12, color: 'var(--fg-dim)', fontStyle: 'italic' }}>
-                            Sin información adicional.
-                          </div>
+                          <div style={{ fontSize: 12, color: 'var(--fg-dim)', fontStyle: 'italic' }}>Sin información adicional.</div>
                         )}
+
+                        {/* Delete */}
+                        <div style={{ paddingTop: 4, borderTop: '1px solid var(--line-soft)' }}>
+                          <button
+                            onClick={() => handleDelete(r.id)}
+                            disabled={isDeleting}
+                            style={{
+                              background: 'transparent', border: '1px solid oklch(0.65 0.14 20)',
+                              color: 'oklch(0.65 0.14 20)', padding: '6px 14px',
+                              fontSize: 11, fontWeight: 600, letterSpacing: '0.08em',
+                              textTransform: 'uppercase', borderRadius: 4,
+                              cursor: isDeleting ? 'wait' : 'pointer', opacity: isDeleting ? 0.5 : 1,
+                            }}
+                          >
+                            {isDeleting ? 'Eliminando…' : 'Eliminar reserva'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
