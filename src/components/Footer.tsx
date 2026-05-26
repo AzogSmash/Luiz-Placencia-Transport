@@ -80,9 +80,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               title="Site réalisé par Clément Casse — c.casse92@gmail.com"
-              style={{ color: 'var(--fg-dim)', opacity: 0.45, fontSize: 11, textDecoration: 'none', transition: 'opacity 0.2s' }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '0.45'}
+              className="credit-link"
             >
               Diseño & desarrollo
             </a>
