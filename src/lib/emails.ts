@@ -36,7 +36,7 @@ function layout(title: string, body: string) {
           <td style="padding:24px 0 0 0;border-top:1px solid #2a2a2a;">
             <p style="margin:0;font-size:11px;color:#555;line-height:1.6;">
               Luis Plasencia Transport · París, Île-de-France<br/>
-              <a href="https://lp-transport.fr" style="color:${ACCENT};text-decoration:none;">lp-transport.fr</a>
+              <a href="https://luisplasenciatransport.com" style="color:${ACCENT};text-decoration:none;">luisplasenciatransport.com</a>
             </p>
           </td>
         </tr>
@@ -182,7 +182,7 @@ export function emailNewReservationAdmin(r: ReservationData) {
 
     ${divider()}
 
-    <a href="https://lp-transport.fr/admin" style="display:inline-block;padding:12px 24px;background:${ACCENT};color:#0d0d0d;text-decoration:none;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">
+    <a href="https://luisplasenciatransport.com/admin" style="display:inline-block;padding:12px 24px;background:${ACCENT};color:#0d0d0d;text-decoration:none;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">
       Ver en el panel →
     </a>
   `

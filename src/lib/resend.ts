@@ -4,7 +4,7 @@ export const resend = new Resend(process.env.RESEND_API_KEY)
 
 // Adresse expéditeur
 // En test : onboarding@resend.dev (fonctionne sans domaine vérifié)
-// En prod  : remplacer par noreply@lp-transport.fr une fois le domaine vérifié dans Resend
+// En prod  : remplacer par noreply@luisplasenciatransport.com une fois le domaine vérifié dans Resend
 export const FROM = 'Luis Plasencia Transport <onboarding@resend.dev>'
 
 // Email admin qui reçoit les notifications
