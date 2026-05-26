@@ -47,6 +47,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   robots: { index: true, follow: true },
+  authors: [{ name: 'Clément Casse', url: 'https://www.linkedin.com/in/cl%C3%A9ment-casse-629242290/' }],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             description: 'Servicio de chófer privado VTC en París. Traslados aeropuerto, Disneyland, Versalles, city tours y excursiones por Europa.',
           }) }}
         />
+        {/* Design & développement : Clément Casse — c.casse92@gmail.com — linkedin.com/in/clément-casse-629242290 */}
         <NavBar />
         {children}
         <Footer />

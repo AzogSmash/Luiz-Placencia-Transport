@@ -70,10 +70,22 @@ export default function Footer() {
           gap: 16,
         }}>
           <div>© 2026 Luis Plasencia Transport · SIRET 101 300 291 000 16</div>
-          <div style={{ display: 'flex', gap: 24 }}>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center' }}>
             <Link href="/aviso-legal" style={{ color: 'var(--fg-dim)' }}>Aviso legal</Link>
             <Link href="/politica-privacidad" style={{ color: 'var(--fg-dim)' }}>Política de privacidad</Link>
             <Link href="/cgv" style={{ color: 'var(--fg-dim)' }}>CGV</Link>
+            <span style={{ color: 'var(--line-soft)' }}>·</span>
+            <a
+              href="https://www.linkedin.com/in/cl%C3%A9ment-casse-629242290/"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Site réalisé par Clément Casse — c.casse92@gmail.com"
+              style={{ color: 'var(--fg-dim)', opacity: 0.45, fontSize: 11, textDecoration: 'none', transition: 'opacity 0.2s' }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '0.45'}
+            >
+              Diseño & desarrollo
+            </a>
           </div>
         </div>
       </div>
