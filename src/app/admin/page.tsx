@@ -4,6 +4,7 @@ import { createClient }      from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import AdminPanel, { type Reservation } from './AdminPanel'
 import LogoutButton from '@/components/LogoutButton'
+import { type AdminLog, type NotifPrefs } from '@/app/actions/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,19 +18,31 @@ export default async function AdminPage() {
   // Verify admin role
   const { data: profile } = await admin
     .from('profiles')
-    .select('role, full_name')
+    .select('role, full_name, notif_new_reservation, notif_payment, notif_cancellation')
     .eq('id', user.id)
     .single()
 
   if (profile?.role !== 'admin') redirect('/')
 
-  // Fetch all reservations
-  const { data: raw } = await admin
-    .from('reservations')
-    .select('id, nom, email, telephone, adresse_depart, adresse_arrivee, date_heure, nombre_passagers, message, statut, created_at')
-    .order('created_at', { ascending: false })
+  const [{ data: raw }, { data: rawLogs }] = await Promise.all([
+    admin
+      .from('reservations')
+      .select('id, nom, email, telephone, adresse_depart, adresse_arrivee, date_heure, nombre_passagers, message, statut, created_at')
+      .order('created_at', { ascending: false }),
+    admin
+      .from('admin_logs')
+      .select('id, type, reservation_id, message, created_at')
+      .order('created_at', { ascending: false })
+      .limit(100),
+  ])
 
   const reservations = (raw ?? []) as Reservation[]
+  const logs         = (rawLogs ?? []) as AdminLog[]
+  const notifPrefs: NotifPrefs = {
+    notif_new_reservation: profile?.notif_new_reservation ?? true,
+    notif_payment:         profile?.notif_payment         ?? true,
+    notif_cancellation:    profile?.notif_cancellation    ?? true,
+  }
   const adminName = (profile?.full_name as string | undefined) ?? user.email ?? 'Admin'
 
   return (
@@ -115,7 +128,7 @@ export default async function AdminPage() {
             </span>
           </div>
 
-          <AdminPanel reservations={reservations} />
+          <AdminPanel reservations={reservations} logs={logs} notifPrefs={notifPrefs} />
         </div>
       </section>
     </main>

@@ -44,18 +44,23 @@ export async function createReservation(
 
   const reservation = { ...payload, id: data.id }
 
-  // Emails en parallèle — une erreur d'envoi ne bloque pas la réservation
+  // Log + check prefs (non-blocking)
+  const adminDb = createAdminClient()
+  const { data: adminProfile } = await adminDb
+    .from('profiles').select('notif_new_reservation').eq('role', 'admin').limit(1).single()
+  const notifyAdmin = adminProfile?.notif_new_reservation ?? true
+
+  try {
+    await adminDb.from('admin_logs').insert({
+      type: 'nueva_reserva',
+      reservation_id: data.id,
+      message: `Nueva reserva #${data.id} de ${payload.nom}`,
+    })
+  } catch { }
+
   await Promise.allSettled([
-    resend.emails.send({
-      from:    FROM,
-      to:      payload.email,
-      ...emailReservationConfirmation(reservation),
-    }),
-    resend.emails.send({
-      from:    FROM,
-      to:      ADMIN_EMAIL,
-      ...emailNewReservationAdmin(reservation),
-    }),
+    resend.emails.send({ from: FROM, to: payload.email, ...emailReservationConfirmation(reservation) }),
+    ...(notifyAdmin ? [resend.emails.send({ from: FROM, to: ADMIN_EMAIL, ...emailNewReservationAdmin(reservation) })] : []),
   ])
 
   return { success: true, id: data.id }
