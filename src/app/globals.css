@@ -380,5 +380,5 @@ html { scroll-behavior: smooth; }
   .reserva-stepper-label { display: none; }
 }
 
-.credit-link { color: var(--fg-dim); opacity: 0.45; font-size: 11px; text-decoration: none; transition: opacity 0.2s; }
-.credit-link:hover { opacity: 1; }
+.credit-link { color: var(--fg-muted); opacity: 0.6; font-size: 12px; text-decoration: none; transition: opacity 0.2s; }
+.credit-link:hover { opacity: 1; color: var(--fg); }
