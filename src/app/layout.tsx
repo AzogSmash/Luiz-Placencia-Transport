@@ -29,7 +29,24 @@ const jetbrains = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'Luis Plasencia Transport — Chófer privado VTC en París',
-  description: 'Servicio de chófer privado VTC en París. Traslados aeropuerto, Disneyland, city tours y excursiones por Francia y Europa. Vehículos premium, 24/7.',
+  description: 'Servicio de chófer privado VTC en París. Traslados aeropuerto CDG, Orly, Beauvais, Disneyland, Versalles, city tours y excursiones por Francia y Europa. Vehículos premium, reserva online.',
+  keywords: [
+    'VTC París', 'chófer privado París', 'traslado aeropuerto París',
+    'taxi privado CDG', 'transfer Orly', 'Disneyland transfer',
+    'chauffeur privé Paris', 'VTC aéroport Paris', 'location avec chauffeur Paris',
+    'excursion Mont-Saint-Michel', 'visite Versailles chauffeur',
+  ],
+  metadataBase: new URL('https://luisplasenciatransport.com'),
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'Luis Plasencia Transport — Chófer privado VTC en París',
+    description: 'Traslados aeropuerto, Disneyland, Versalles, city tours y excursiones. Vehículos premium, reserva online.',
+    url: 'https://luisplasenciatransport.com',
+    siteName: 'Luis Plasencia Transport',
+    locale: 'es_ES',
+    type: 'website',
+  },
+  robots: { index: true, follow: true },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -39,6 +56,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${playfair.variable} ${cormorant.variable} ${jetbrains.variable}`}
     >
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'TaxiService',
+            name: 'Luis Plasencia Transport',
+            url: 'https://luisplasenciatransport.com',
+            telephone: '+33643272173',
+            email: 'Luisplasenciatransport@gmail.com',
+            areaServed: { '@type': 'City', name: 'París' },
+            address: { '@type': 'PostalAddress', addressLocality: 'París', addressCountry: 'FR' },
+            priceRange: '€€',
+            description: 'Servicio de chófer privado VTC en París. Traslados aeropuerto, Disneyland, Versalles, city tours y excursiones por Europa.',
+          }) }}
+        />
         <NavBar />
         {children}
         <Footer />
