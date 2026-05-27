@@ -1,11 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import type { User } from '@supabase/supabase-js'
 import { bg } from '@/lib/images'
 import { createReservation } from '@/app/actions/reservations'
 import { createCheckoutSession } from '@/app/actions/checkout'
 import PhoneInput from '@/components/PhoneInput'
+import { createClient } from '@/lib/supabase-browser'
 
 type FormData = {
   serviceType: string
@@ -175,6 +178,35 @@ export default function ReservaPage() {
   const [data, setData]               = useState<FormData>(EMPTY)
   const [phonePrefix, setPhonePrefix] = useState('+33')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [user, setUser]               = useState<User | null>(null)
+  const [showAuthNudge, setShowAuthNudge] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: d }) => setUser(d.user ?? null))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null)
+    })
+    // Restore draft saved before login/register redirect
+    try {
+      const raw = localStorage.getItem('reserva_draft')
+      if (raw) {
+        const draft = JSON.parse(raw)
+        setData(draft.data)
+        setPhonePrefix(draft.phonePrefix ?? '+33')
+        setPhoneNumber(draft.phoneNumber ?? '')
+        setStep(3)
+        localStorage.removeItem('reserva_draft')
+      }
+    } catch {}
+    return () => subscription.unsubscribe()
+  }, [])
+
+  function saveDraftAndRedirect(path: string) {
+    localStorage.setItem('reserva_draft', JSON.stringify({ data, phonePrefix, phoneNumber }))
+    router.push(`${path}?redirect=/reserva`)
+  }
 
   const upd = (k: keyof FormData, v: string) => {
     setData(d => ({ ...d, [k]: v }))
@@ -228,6 +260,12 @@ export default function ReservaPage() {
 
   async function handleSubmit() {
     if (!validateStep3()) return
+    if (!user) { setShowAuthNudge(true); return }
+    await doSubmit()
+  }
+
+  async function doSubmit() {
+    setShowAuthNudge(false)
     setLoading(true)
     setError(null)
 
@@ -620,12 +658,37 @@ export default function ReservaPage() {
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(2) }} disabled={loading}>← Anterior</button>
-                    <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
-                      {loading ? 'Enviando…' : 'Enviar solicitud'}
-                    </button>
-                  </div>
+                  {showAuthNudge ? (
+                    <div style={{ padding: '24px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 'var(--radius)' }}>
+                      <div style={{ fontFamily: 'var(--display)', fontSize: 22, fontWeight: 400, marginBottom: 8 }}>
+                        ¿Seguir su reserva en tiempo real?
+                      </div>
+                      <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 20, lineHeight: 1.6 }}>
+                        Con una cuenta, consulte el estado de su reserva, reciba actualizaciones y guarde su historial de viajes. Sus datos ya están guardados.
+                      </p>
+                      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+                        <button className="btn btn-primary" onClick={() => saveDraftAndRedirect('/login')}>
+                          Iniciar sesión
+                        </button>
+                        <button className="btn btn-ghost" onClick={() => saveDraftAndRedirect('/register')}>
+                          Crear cuenta
+                        </button>
+                      </div>
+                      <button
+                        onClick={doSubmit}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-muted)', fontSize: 13, padding: 0 }}
+                      >
+                        Continuar sin cuenta →
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                      <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(2) }} disabled={loading}>← Anterior</button>
+                      <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
+                        {loading ? 'Enviando…' : 'Enviar solicitud'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

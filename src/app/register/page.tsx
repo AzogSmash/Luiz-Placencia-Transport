@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Logo from '@/components/Logo'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') ?? '/dashboard'
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -42,7 +44,7 @@ export default function RegisterPage() {
 
     if (data.session) {
       // Email confirmation disabled — user is logged in directly
-      router.push('/dashboard')
+      router.push(redirectTo)
       router.refresh()
     } else {
       // Email confirmation required
