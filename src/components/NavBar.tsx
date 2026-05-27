@@ -177,10 +177,32 @@ export default function NavBar() {
               fontFamily: 'var(--mono)',
               letterSpacing: '0.06em',
               color: 'var(--fg-muted)',
+              borderBottom: '1px solid var(--line-soft)',
             }}
           >
             +33 6 43 27 21 73
           </a>
+          <div style={{ padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {user ? (
+              <>
+                <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="btn btn-ghost" style={{ textAlign: 'center', fontSize: 13 }}>
+                  Mi cuenta
+                </Link>
+                <button onClick={() => { setMobileOpen(false); handleLogout() }} className="btn btn-ghost" style={{ fontSize: 13 }}>
+                  Salir
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setMobileOpen(false)} className="btn btn-ghost" style={{ textAlign: 'center', fontSize: 13 }}>
+                  Iniciar sesión
+                </Link>
+                <Link href="/reserva" onClick={() => setMobileOpen(false)} className="btn btn-primary" style={{ textAlign: 'center' }}>
+                  Reservar
+                </Link>
+              </>
+            )}
+          </div>
         </nav>
       )}
     </>
