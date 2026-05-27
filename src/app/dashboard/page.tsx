@@ -139,9 +139,7 @@ export default async function DashboardPage() {
       {/* ── Stats ── */}
       <section style={{ borderBottom: '1px solid var(--line-soft)', padding: '28px 0' }}>
         <div className="container">
-          <div style={{
-            display: 'inline-grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+          <div className="dashboard-stats" style={{
             gap: 1,
             background: 'var(--line-soft)',
             border: '1px solid var(--line-soft)',
@@ -202,14 +200,7 @@ export default async function DashboardPage() {
               {reservations.map(r => {
                 const userMsg = extractUserMessage(r.message)
                 return (
-                  <article key={r.id} style={{
-                    background: 'var(--bg)',
-                    padding: '22px 28px',
-                    display: 'grid',
-                    gridTemplateColumns: '72px 1fr auto',
-                    gap: 24,
-                    alignItems: 'center',
-                  }}>
+                  <article key={r.id} className="dashboard-res-card" style={{ background: 'var(--bg)' }}>
                     {/* ID + date created */}
                     <div>
                       <div className="mono" style={{ color: 'var(--accent)', fontSize: 13 }}>
@@ -249,7 +240,9 @@ export default async function DashboardPage() {
                     </div>
 
                     {/* Status badge */}
-                    <StatusBadge statut={r.statut} />
+                    <div className="dashboard-res-status">
+                      <StatusBadge statut={r.statut} />
+                    </div>
                   </article>
                 )
               })}

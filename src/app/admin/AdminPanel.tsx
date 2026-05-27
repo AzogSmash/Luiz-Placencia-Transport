@@ -275,7 +275,7 @@ export default function AdminPanel({
               No hay reservas para este filtro.
             </div>
           ) : (
-            <div style={{ border: '1px solid var(--line-soft)' }}>
+            <div style={{ border: '1px solid var(--line-soft)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 130px 1.4fr 110px 46px 170px 40px', background: 'var(--bg-soft)', borderBottom: '1px solid var(--line-soft)', padding: '10px 16px', minWidth: 860 }}>
                 {['#', 'Cliente', 'Teléfono', 'Trayecto', 'Fecha', 'Pax', 'Estado', ''].map(h => (
                   <div key={h} className="eyebrow" style={{ paddingRight: 10 }}>{h}</div>

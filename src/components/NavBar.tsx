@@ -19,6 +19,7 @@ export default function NavBar() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -32,6 +33,7 @@ export default function NavBar() {
   useEffect(() => { setMobileOpen(false) }, [pathname])
 
   async function handleLogout() {
+    setLoggingOut(true)
     const supabase = createClient()
     await supabase.auth.signOut()
     setUser(null)
@@ -91,8 +93,8 @@ export default function NavBar() {
                 <Link href="/dashboard" className="btn btn-ghost nav-auth" style={{ fontSize: 12, padding: '10px 16px' }}>
                   Mi cuenta
                 </Link>
-                <button className="btn btn-ghost nav-auth" onClick={handleLogout} style={{ fontSize: 12, padding: '10px 16px' }}>
-                  Salir
+                <button className="btn btn-ghost nav-auth" onClick={handleLogout} disabled={loggingOut} style={{ fontSize: 12, padding: '10px 16px', opacity: loggingOut ? 0.6 : 1, cursor: loggingOut ? 'wait' : 'pointer' }}>
+                  {loggingOut ? '…' : 'Salir'}
                 </button>
               </>
             ) : (
@@ -180,8 +182,8 @@ export default function NavBar() {
                 <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="btn btn-ghost" style={{ textAlign: 'center', fontSize: 13 }}>
                   Mi cuenta
                 </Link>
-                <button onClick={() => { setMobileOpen(false); handleLogout() }} className="btn btn-ghost" style={{ fontSize: 13 }}>
-                  Salir
+                <button onClick={() => { setMobileOpen(false); handleLogout() }} disabled={loggingOut} className="btn btn-ghost" style={{ fontSize: 13, opacity: loggingOut ? 0.6 : 1 }}>
+                  {loggingOut ? 'Cerrando sesión…' : 'Salir'}
                 </button>
               </>
             ) : (

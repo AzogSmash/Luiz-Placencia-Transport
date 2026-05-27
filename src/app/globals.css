@@ -391,3 +391,15 @@ html { scroll-behavior: smooth; }
 
 .credit-link { color: var(--fg-muted); opacity: 0.6; font-size: 12px; text-decoration: none; transition: opacity 0.2s; }
 .credit-link:hover { opacity: 1; color: var(--fg); }
+
+/* === Dashboard === */
+.dashboard-stats { display: grid; grid-template-columns: repeat(3, 1fr); }
+.dashboard-res-card { padding: 22px 28px; display: grid; grid-template-columns: 72px 1fr auto; gap: 24px; align-items: center; }
+
+@media (max-width: 700px) {
+  .dashboard-stats { grid-template-columns: repeat(3, 1fr); width: 100%; }
+  .dashboard-stats > div { padding: 14px 16px !important; }
+  .dashboard-stats .display { font-size: 28px !important; }
+  .dashboard-res-card { grid-template-columns: 1fr; gap: 10px; padding: 18px 16px; }
+  .dashboard-res-card .dashboard-res-status { order: -1; }
+}
