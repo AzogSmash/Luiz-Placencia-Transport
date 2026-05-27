@@ -185,14 +185,9 @@ export default function NavBar() {
                 </button>
               </>
             ) : (
-              <>
-                <Link href="/login" onClick={() => setMobileOpen(false)} className="btn btn-ghost" style={{ textAlign: 'center', fontSize: 13 }}>
-                  Iniciar sesión
-                </Link>
-                <Link href="/reserva" onClick={() => setMobileOpen(false)} className="btn btn-primary" style={{ textAlign: 'center' }}>
-                  Reservar
-                </Link>
-              </>
+              <Link href="/login" onClick={() => setMobileOpen(false)} className="btn btn-ghost" style={{ textAlign: 'center', fontSize: 13 }}>
+                Iniciar sesión
+              </Link>
             )}
           </div>
         </nav>
