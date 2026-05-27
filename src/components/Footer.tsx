@@ -12,18 +12,9 @@ const SERVICES = ['Aeropuertos', 'Disneyland', 'City tour París', 'Excursiones'
 
 export default function Footer() {
   return (
-    <footer style={{
-      borderTop: '1px solid var(--line-soft)',
-      padding: '64px 0 32px',
-      background: 'var(--bg)',
-    }}>
+    <footer className="site-footer">
       <div className="container">
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr 1fr 1fr',
-          gap: 48,
-          marginBottom: 48,
-        }} className="footer-grid">
+        <div className="footer-grid">
           <div>
             <Logo />
             <p style={{ color: 'var(--fg-muted)', fontSize: 14, marginTop: 20, maxWidth: 320, lineHeight: 1.6 }}>
@@ -31,7 +22,7 @@ export default function Footer() {
             </p>
           </div>
 
-          <div>
+          <div className="footer-col-nav">
             <div className="eyebrow" style={{ marginBottom: 18 }}>Navegación</div>
             {NAV_LINKS.map(link => (
               <div key={link.href} style={{ marginBottom: 8 }}>
@@ -42,7 +33,7 @@ export default function Footer() {
             ))}
           </div>
 
-          <div>
+          <div className="footer-col-nav">
             <div className="eyebrow" style={{ marginBottom: 18 }}>Servicios</div>
             {SERVICES.map(s => (
               <div key={s} style={{ marginBottom: 8, fontSize: 14, color: 'var(--fg-muted)' }}>{s}</div>
@@ -57,18 +48,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingTop: 24,
-          borderTop: '1px solid var(--line-soft)',
-          fontSize: 12,
-          color: 'var(--fg-dim)',
-          letterSpacing: '0.04em',
-          flexWrap: 'wrap',
-          gap: 16,
-        }}>
+        <div className="footer-bottom">
           <div>© 2026 Luis Plasencia Transport · SIRET 101 300 291 000 16</div>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center' }}>
             <Link href="/aviso-legal" style={{ color: 'var(--fg-dim)' }}>Aviso legal</Link>
