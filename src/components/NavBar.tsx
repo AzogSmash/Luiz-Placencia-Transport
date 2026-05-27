@@ -134,6 +134,13 @@ export default function NavBar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 48 }}
+          aria-hidden
+        />
+      )}
+      {mobileOpen && (
         <nav style={{
           position: 'fixed',
           top: 76,
