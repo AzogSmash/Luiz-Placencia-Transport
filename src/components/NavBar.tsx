@@ -174,21 +174,6 @@ export default function NavBar() {
               </Link>
             )
           })}
-          <a
-            href="tel:+33643272173"
-            onClick={() => setMobileOpen(false)}
-            style={{
-              display: 'block',
-              padding: '18px 24px',
-              fontSize: 12,
-              fontFamily: 'var(--mono)',
-              letterSpacing: '0.06em',
-              color: 'var(--fg-muted)',
-              borderBottom: '1px solid var(--line-soft)',
-            }}
-          >
-            +33 6 43 27 21 73
-          </a>
           <div style={{ padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {user ? (
               <>
