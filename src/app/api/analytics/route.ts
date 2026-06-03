@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   const admin = createAdminClient()
   const { data: views, error } = await admin
     .from('page_views')
-    .select('path, country, device, browser, os, referrer, created_at')
+    .select('path, country, device, browser, os, referrer, created_at, ip_hash')
     .gte('created_at', from)
     .order('created_at', { ascending: true })
 
@@ -34,67 +34,99 @@ export async function GET(req: NextRequest) {
   const byOS:       Record<string, number> = {}
   const byReferrer: Record<string, number> = {}
 
-  // Track unique sessions (country+device+day) as approximate visitor count
   const sessions = new Set<string>()
+  const sessionsByDay:      Record<string, Set<string>> = {}
+  const sessionsByCountry:  Record<string, Set<string>> = {}
+  const sessionsByDevice:   Record<string, Set<string>> = {}
+  const sessionsByBrowser:  Record<string, Set<string>> = {}
+  const sessionsByOS:       Record<string, Set<string>> = {}
+  const sessionsByReferrer: Record<string, Set<string>> = {}
 
   for (const v of views ?? []) {
     const day = (v.created_at as string).slice(0, 10)
+    // ip_hash+day = precise unique visitor; fallback to country+device+day for old rows
+    const sessionKey = v.ip_hash
+      ? `ip:${v.ip_hash}-${day}`
+      : `${v.country ?? '?'}-${v.device ?? '?'}-${day}`
 
-    sessions.add(`${v.country ?? '?'}-${v.device ?? '?'}-${day}`)
-    byPath[v.path]    = (byPath[v.path] ?? 0) + 1
+    sessions.add(sessionKey)
+    byPath[v.path] = (byPath[v.path] ?? 0) + 1  // pages = page views
 
-    if (v.country)  byCountry[v.country]   = (byCountry[v.country]   ?? 0) + 1
-    if (v.device)   byDevice[v.device]     = (byDevice[v.device]     ?? 0) + 1
-    if (v.browser)  byBrowser[v.browser]   = (byBrowser[v.browser]   ?? 0) + 1
-    if (v.os)       byOS[v.os]             = (byOS[v.os]             ?? 0) + 1
+    if (!sessionsByDay[day]) sessionsByDay[day] = new Set()
+    sessionsByDay[day].add(sessionKey)
 
+    if (v.country) {
+      if (!sessionsByCountry[v.country]) sessionsByCountry[v.country] = new Set()
+      sessionsByCountry[v.country].add(sessionKey)
+    }
+    if (v.device) {
+      if (!sessionsByDevice[v.device]) sessionsByDevice[v.device] = new Set()
+      sessionsByDevice[v.device].add(sessionKey)
+    }
+    if (v.browser) {
+      if (!sessionsByBrowser[v.browser]) sessionsByBrowser[v.browser] = new Set()
+      sessionsByBrowser[v.browser].add(sessionKey)
+    }
+    if (v.os) {
+      if (!sessionsByOS[v.os]) sessionsByOS[v.os] = new Set()
+      sessionsByOS[v.os].add(sessionKey)
+    }
     if (v.referrer) {
       try {
         const hostname = new URL(v.referrer).hostname.replace(/^www\./, '')
-        // Filter out self-referrers
         if (hostname && !hostname.includes('luisplasenciatransport.com')) {
-          byReferrer[hostname] = (byReferrer[hostname] ?? 0) + 1
+          if (!sessionsByReferrer[hostname]) sessionsByReferrer[hostname] = new Set()
+          sessionsByReferrer[hostname].add(sessionKey)
         }
       } catch { /* invalid URL */ }
     }
   }
 
-  const total     = views?.length ?? 0
-  const visitors  = sessions.size
+  // All dimensions use unique session counts (consistent with visitors KPI)
+  for (const [c, s] of Object.entries(sessionsByCountry))  byCountry[c]  = s.size
+  for (const [d, s] of Object.entries(sessionsByDevice))   byDevice[d]   = s.size
+  for (const [b, s] of Object.entries(sessionsByBrowser))  byBrowser[b]  = s.size
+  for (const [o, s] of Object.entries(sessionsByOS))       byOS[o]       = s.size
+  for (const [r, s] of Object.entries(sessionsByReferrer)) byReferrer[r] = s.size
 
-  // Generate full date range so graph always shows all days (even 0s)
+  const total    = views?.length ?? 0
+  const visitors = sessions.size
+
+  // Per-category totals so percentages always sum to 100% within each category
+  const countryTotal = Object.values(byCountry).reduce((s, v) => s + v, 0)
+  const deviceTotal  = Object.values(byDevice).reduce((s, v) => s + v, 0)
+  const browserTotal = Object.values(byBrowser).reduce((s, v) => s + v, 0)
+  const osTotal      = Object.values(byOS).reduce((s, v) => s + v, 0)
+
+  const pctOf = (v: number, cat: number) => cat > 0 ? Math.round((v / cat) * 100) : 0
+
+  // Full date range — unique visitors (sessions) per day
   const timeseries: { x: string; y: number }[] = []
-  const byDay: Record<string, number> = {}
-  for (const v of views ?? []) {
-    const day = (v.created_at as string).slice(0, 10)
-    byDay[day] = (byDay[day] ?? 0) + 1
-  }
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
     const key = d.toISOString().slice(0, 10)
-    timeseries.push({ x: key, y: byDay[key] ?? 0 })
+    timeseries.push({ x: key, y: sessionsByDay[key]?.size ?? 0 })
   }
 
   const sortDesc = (obj: Record<string, number>) =>
     Object.entries(obj).sort((a, b) => b[1] - a[1])
 
   const countryNames = new Intl.DisplayNames(['es'], { type: 'region' })
-  const pct = (v: number) => total > 0 ? Math.round((v / total) * 100) : 0
 
   return NextResponse.json({
     visitors,
     pageviews: total,
     timeseries,
-    pages:    sortDesc(byPath).slice(0, 10).map(([path, v]) => ({ path, visitors: v })),
+    pages:     sortDesc(byPath).slice(0, 10).map(([path, v]) => ({ path, visitors: v })),
     countries: sortDesc(byCountry).slice(0, 8).map(([code, v]) => ({
       country: countryNames.of(code) ?? code,
       code,
       visitors: v,
-      pct: pct(v),
+      pct: pctOf(v, countryTotal),
     })),
     referrers: sortDesc(byReferrer).slice(0, 8).map(([referrer, v]) => ({ referrer, visitors: v })),
-    devices:   sortDesc(byDevice).slice(0, 4).map(([device, v])   => ({ device,   visitors: v, pct: pct(v) })),
-    browsers:  sortDesc(byBrowser).slice(0, 6).map(([browser, v]) => ({ browser,  visitors: v, pct: pct(v) })),
-    os:        sortDesc(byOS).slice(0, 6).map(([os, v])           => ({ os,       visitors: v, pct: pct(v) })),
+    devices:   sortDesc(byDevice).slice(0, 4).map(([device, v])   => ({ device,   visitors: v, pct: pctOf(v, deviceTotal)  })),
+    browsers:  sortDesc(byBrowser).slice(0, 6).map(([browser, v]) => ({ browser,  visitors: v, pct: pctOf(v, browserTotal) })),
+    os:        sortDesc(byOS).slice(0, 6).map(([os, v])           => ({ os,       visitors: v, pct: pctOf(v, osTotal)      })),
   })
 }

@@ -27,6 +27,12 @@ function detectOS(ua: string): string {
   return 'Other'
 }
 
+function simpleHash(str: string): string {
+  let h = 0
+  for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0
+  return Math.abs(h).toString(36)
+}
+
 function trackPageView(request: NextRequest) {
   const { pathname } = request.nextUrl
   if (!shouldTrack(pathname)) return
@@ -39,16 +45,20 @@ function trackPageView(request: NextRequest) {
   const os       = detectOS(ua)
   const key      = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim()
 
-  // Fire and forget — non-blocking
+  const rawIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+            ?? request.headers.get('x-real-ip')
+            ?? ''
+  const ip_hash = rawIp ? simpleHash(rawIp + 'lpt_salt') : null
+
   fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/page_views`, {
     method: 'POST',
     headers: {
-      'apikey':         key,
-      'Authorization':  `Bearer ${key}`,
-      'Content-Type':   'application/json',
-      'Prefer':         'return=minimal',
+      'apikey':        key,
+      'Authorization': `Bearer ${key}`,
+      'Content-Type':  'application/json',
+      'Prefer':        'return=minimal',
     },
-    body: JSON.stringify({ path: pathname, country, device, browser, os, referrer }),
+    body: JSON.stringify({ path: pathname, country, device, browser, os, referrer, ip_hash }),
   }).catch(() => {})
 }
 

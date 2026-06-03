@@ -518,7 +518,7 @@ export default function AdminPanel({
               {/* Graphique area — Recharts */}
               {analytics.timeseries.length > 0 && (
                 <div style={{ border: '1px solid var(--line-soft)', padding: '24px 24px 8px' }}>
-                  <div className="eyebrow" style={{ marginBottom: 20 }}>Páginas vistas por día</div>
+                  <div className="eyebrow" style={{ marginBottom: 20 }}>Visitantes únicos por día</div>
                   <ResponsiveContainer width="100%" height={140}>
                     <AreaChart data={analytics.timeseries} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                       <defs>
@@ -543,7 +543,7 @@ export default function AdminPanel({
                       <Tooltip
                         contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 4, fontSize: 12 }}
                         labelFormatter={(l: unknown) => fmtDay(String(l))}
-                        formatter={(v: unknown) => [`${v}`, 'Páginas vistas']}
+                        formatter={(v: unknown) => [`${v}`, 'Visitantes']}
                         cursor={{ stroke: '#b8956a', strokeWidth: 1, strokeDasharray: '4 2' }}
                       />
                       <Area
@@ -583,15 +583,19 @@ export default function AdminPanel({
                   </div>
                   {analytics.countries.slice(0, 8).map((c, i) => (
                     <div key={i} style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                       padding: '10px 20px', borderBottom: i < Math.min(analytics.countries.length, 8) - 1 ? '1px solid var(--line-soft)' : undefined,
                       fontSize: 13,
                     }}>
-                      <span style={{ color: 'var(--fg)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 18, lineHeight: 1 }}>{flag(c.code)}</span>
-                        {c.country}
-                      </span>
-                      <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{c.pct}%</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                        <span style={{ color: 'var(--fg)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 18, lineHeight: 1 }}>{flag(c.code)}</span>
+                          {c.country}
+                        </span>
+                        <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{c.pct}%</span>
+                      </div>
+                      <div style={{ height: 3, background: 'var(--bg-soft)', borderRadius: 2, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${c.pct}%`, background: 'var(--accent)', borderRadius: 2, transition: 'width 0.4s ease' }} />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -620,10 +624,13 @@ export default function AdminPanel({
                     { id: 'browsers' as const, label: 'Navegadores'  },
                     { id: 'os'       as const, label: 'Sistema'      },
                   ]
+                  const DEVICE_LABELS: Record<string, string> = {
+                    Desktop: 'Escritorio', Mobile: 'Móvil', Tablet: 'Tableta',
+                  }
                   const rows =
-                    devTab === 'devices'  ? analytics!.devices.map(d  => ({ label: d.device,  pct: d.pct })) :
-                    devTab === 'browsers' ? analytics!.browsers.map(b => ({ label: b.browser, pct: b.pct })) :
-                                           analytics!.os.map(o        => ({ label: o.os,      pct: o.pct }))
+                    devTab === 'devices'  ? analytics!.devices.map(d  => ({ label: DEVICE_LABELS[d.device]  ?? d.device,  n: d.visitors, pct: d.pct })) :
+                    devTab === 'browsers' ? analytics!.browsers.map(b => ({ label: b.browser, n: b.visitors, pct: b.pct })) :
+                                           analytics!.os.map(o        => ({ label: o.os,      n: o.visitors, pct: o.pct }))
                   return (
                     <div style={{ border: '1px solid var(--line-soft)' }}>
                       <div style={{ display: 'flex', borderBottom: '1px solid var(--line-soft)' }}>
@@ -641,12 +648,16 @@ export default function AdminPanel({
                       </div>
                       {rows.map((r, i) => (
                         <div key={i} style={{
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                           padding: '10px 20px', borderBottom: i < rows.length - 1 ? '1px solid var(--line-soft)' : undefined,
                           fontSize: 13,
                         }}>
-                          <span style={{ color: 'var(--fg)' }}>{r.label}</span>
-                          <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{r.pct}%</span>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                            <span style={{ color: 'var(--fg)' }}>{r.label}</span>
+                            <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{r.pct}%</span>
+                          </div>
+                          <div style={{ height: 3, background: 'var(--bg-soft)', borderRadius: 2, overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${r.pct}%`, background: 'var(--accent)', borderRadius: 2, transition: 'width 0.4s ease' }} />
+                          </div>
                         </div>
                       ))}
                     </div>
