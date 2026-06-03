@@ -156,6 +156,7 @@ export default function AdminPanel({
   const [analytics, setAnalytics]     = useState<AnalyticsData>(null)
   const [analyticsLoading, setAnalyticsLoading] = useState(false)
   const [analyticsRange, setAnalyticsRange]     = useState<'7d' | '30d'>('7d')
+  const [devTab, setDevTab]           = useState<'devices' | 'browsers' | 'os'>('devices')
 
   useEffect(() => {
     if (tab !== 'estadisticas') return
@@ -614,16 +615,15 @@ export default function AdminPanel({
 
                 {/* Devices / Browsers / OS tabs */}
                 {(() => {
-                  const [devTab, setDevTab] = useState<'devices'|'browsers'|'os'>('devices')
                   const devTabs = [
                     { id: 'devices'  as const, label: 'Dispositivos' },
                     { id: 'browsers' as const, label: 'Navegadores'  },
                     { id: 'os'       as const, label: 'Sistema'      },
                   ]
                   const rows =
-                    devTab === 'devices'  ? analytics!.devices.map(d => ({ label: d.device,  pct: d.pct })) :
+                    devTab === 'devices'  ? analytics!.devices.map(d  => ({ label: d.device,  pct: d.pct })) :
                     devTab === 'browsers' ? analytics!.browsers.map(b => ({ label: b.browser, pct: b.pct })) :
-                                           analytics!.os.map(o => ({ label: o.os, pct: o.pct }))
+                                           analytics!.os.map(o        => ({ label: o.os,      pct: o.pct }))
                   return (
                     <div style={{ border: '1px solid var(--line-soft)' }}>
                       <div style={{ display: 'flex', borderBottom: '1px solid var(--line-soft)' }}>
