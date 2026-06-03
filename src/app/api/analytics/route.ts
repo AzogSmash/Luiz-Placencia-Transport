@@ -22,10 +22,13 @@ export async function GET(req: NextRequest) {
   const from = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString()
   const to   = new Date(now).toISOString()
 
+  const base = 'https://vercel.com/api/web-analytics'
   const candidates = [
-    `https://vercel.com/api/web-analytics/timeseries?projectId=${PROJECT}&from=${from}&to=${to}`,
-    `https://api.vercel.com/v1/web/analytics/timeseries?projectId=${PROJECT}&from=${from}&to=${to}`,
-    `https://api.vercel.com/v6/analytics?projectId=${PROJECT}&from=${from}&to=${to}`,
+    `${base}/timeseries?projectId=${PROJECT}&from=${from}&to=${to}&env=production&granularity=day`,
+    `${base}/timeseries?projectId=${PROJECT}&from=${from}&to=${to}&environment=production`,
+    `${base}/timeseries?projectId=${PROJECT}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+    `${base}/summary?projectId=${PROJECT}&from=${from}&to=${to}&env=production`,
+    `${base}/pages?projectId=${PROJECT}&from=${from}&to=${to}&env=production`,
   ]
 
   const results: Record<string, unknown> = {}
@@ -33,7 +36,7 @@ export async function GET(req: NextRequest) {
     try {
       const res = await fetch(url, { headers: { Authorization: `Bearer ${TOKEN}` } })
       const text = await res.text()
-      results[url] = { status: res.status, body: text.slice(0, 500) }
+      results[url.replace(`projectId=${PROJECT}`, 'projectId=HIDDEN')] = { status: res.status, body: text.slice(0, 800) }
     } catch (e) {
       results[url] = { error: String(e) }
     }
