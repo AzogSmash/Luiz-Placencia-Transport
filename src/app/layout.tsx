@@ -30,26 +30,28 @@ const jetbrains = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Luis Plasencia Transport — Chófer privado VTC en París',
-  description: 'Servicio de chófer privado VTC en París. Traslados aeropuerto CDG, Orly, Beauvais, Disneyland, Versalles, city tours y excursiones por Francia y Europa. Vehículos premium, reserva online.',
+  title: {
+    default: 'Luis Plasencia Transport | Chófer Privado VTC en París · Español',
+    template: '%s | Luis Plasencia Transport',
+  },
+  description: 'Chófer privado en París con atención en español. Traslados aeropuerto CDG, Orly, Beauvais · Disneyland · Versalles · Excursiones por Europa. Reserva online 24h.',
   keywords: [
-    'VTC París', 'chófer privado París', 'traslado aeropuerto París',
-    'taxi privado CDG', 'transfer Orly', 'Disneyland transfer',
-    'chauffeur privé Paris', 'VTC aéroport Paris', 'location avec chauffeur Paris',
-    'excursion Mont-Saint-Michel', 'visite Versailles chauffeur',
+    'chófer privado París', 'conductor español París', 'taxi español París',
+    'VTC en español París', 'transfer aeropuerto París español',
+    'traslado CDG español', 'transfer Orly español', 'Disneyland transfer español',
+    'excursión Versalles desde París', 'chauffeur privé Paris espagnol',
+    'VTC Paris hispano', 'conductor privado París',
   ],
   metadataBase: new URL('https://luisplasenciatransport.com'),
-  alternates: { canonical: '/' },
   openGraph: {
-    title: 'Luis Plasencia Transport — Chófer privado VTC en París',
-    description: 'Traslados aeropuerto, Disneyland, Versalles, city tours y excursiones. Vehículos premium, reserva online.',
+    title: 'Luis Plasencia Transport | Chófer Privado VTC en París · Español',
+    description: 'Chófer privado en París con atención en español. Traslados aeropuerto, Disneyland, Versalles y excursiones por Europa.',
     url: 'https://luisplasenciatransport.com',
     siteName: 'Luis Plasencia Transport',
     locale: 'es_ES',
     type: 'website',
   },
   robots: { index: true, follow: true },
-  authors: [{ name: 'Clément Casse', url: 'https://www.linkedin.com/in/cl%C3%A9ment-casse-629242290/' }],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
