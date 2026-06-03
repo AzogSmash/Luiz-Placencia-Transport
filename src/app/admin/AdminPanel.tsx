@@ -116,9 +116,16 @@ type AnalyticsData = {
   os:         { os: string; visitors: number; pct: number }[]
 } | null
 
-function flag(code?: string) {
-  if (!code || code.length !== 2) return ''
-  return code.toUpperCase().replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397))
+function FlagImg({ code }: { code?: string }) {
+  if (!code || code.length !== 2) return null
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`https://flagcdn.com/20x15/${code.toLowerCase()}.png`}
+      width={20} height={15} alt={code}
+      style={{ display: 'inline-block', borderRadius: 1, flexShrink: 0 }}
+    />
+  )
 }
 
 function fmtDay(iso: string) {
@@ -724,7 +731,7 @@ export default function AdminPanel({
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
                         <span style={{ color: 'var(--fg)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ fontSize: 18, lineHeight: 1 }}>{flag(c.code)}</span>
+                          <FlagImg code={c.code} />
                           {c.country}
                         </span>
                         <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{c.pct}%</span>

@@ -4,6 +4,7 @@ import './globals.css'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import WhatsAppFAB from '@/components/WhatsAppFAB'
+import Providers from '@/components/Providers'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
@@ -77,10 +78,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }) }}
         />
         {/* Design & développement : Clément Casse — c.casse92@gmail.com — linkedin.com/in/clément-casse-629242290 */}
-        <NavBar />
-        {children}
-        <Footer />
-        <WhatsAppFAB />
+        <Providers>
+          <NavBar />
+          {children}
+          <Footer />
+          <WhatsAppFAB />
+        </Providers>
         <Analytics />
         <SpeedInsights />
       </body>
