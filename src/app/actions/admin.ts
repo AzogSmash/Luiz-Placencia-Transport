@@ -24,6 +24,8 @@ export type AdminLog = {
   reservation_id: number | null
   message:        string
   created_at:     string
+  admin_id:       string | null
+  admin_name?:    string
 }
 
 // Returns user id if admin, null otherwise
@@ -36,28 +38,14 @@ async function assertAdmin(): Promise<string | null> {
   return data?.role === 'admin' ? user.id : null
 }
 
-async function getAdminNotifPrefs(): Promise<NotifPrefs> {
-  const admin = createAdminClient()
-  const { data } = await admin
-    .from('profiles')
-    .select('notif_new_reservation, notif_payment, notif_cancellation')
-    .eq('role', 'admin')
-    .limit(1)
-    .single()
-  return {
-    notif_new_reservation: data?.notif_new_reservation ?? true,
-    notif_payment:         data?.notif_payment         ?? true,
-    notif_cancellation:    data?.notif_cancellation    ?? true,
-  }
-}
-
 export async function logEvent(
   type: string,
   reservation_id: number | null,
   message: string,
+  admin_id?: string,
 ) {
   const admin = createAdminClient()
-  try { await admin.from('admin_logs').insert({ type, reservation_id, message }) } catch { }
+  try { await admin.from('admin_logs').insert({ type, reservation_id, message, admin_id: admin_id ?? null }) } catch { }
 }
 
 export async function updateReservationStatus(
@@ -83,10 +71,10 @@ export async function updateReservationStatus(
     try {
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-05-28.basil' as any })
       await stripe.refunds.create({ payment_intent: reservation.stripe_payment_intent_id })
-      await logEvent('reembolso_emitido', id, `Reembolso emitido para reserva #${id} (${reservation.nom})`)
+      await logEvent('reembolso_emitido', id, `Reembolso emitido para reserva #${id} (${reservation.nom})`, userId)
     } catch (refundErr) {
       console.error('[refund]', refundErr)
-      await logEvent('reembolso_error', id, `Error al emitir reembolso para reserva #${id}`)
+      await logEvent('reembolso_error', id, `Error al emitir reembolso para reserva #${id}`, userId)
     }
   }
 
@@ -98,6 +86,7 @@ export async function updateReservationStatus(
     `estado_${statut.replace(/ /g, '_')}`,
     id,
     `Reserva #${id} (${reservation?.nom ?? ''}) → ${statusLabel[statut] ?? statut}`,
+    userId,
   )
 
   if (reservation?.email) {
@@ -161,7 +150,7 @@ export async function deleteReservation(id: number): Promise<AdminActionResult> 
   const { error } = await admin.from('reservations').delete().eq('id', id)
   if (error) return { success: false, error: error.message }
 
-  await logEvent('reserva_eliminada', null, `Reserva #${id} (${res?.nom ?? ''}) eliminada`)
+  await logEvent('reserva_eliminada', null, `Reserva #${id} (${res?.nom ?? ''}) eliminada`, userId)
   revalidatePath('/admin')
   return { success: true }
 }

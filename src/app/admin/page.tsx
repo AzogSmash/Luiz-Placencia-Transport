@@ -31,13 +31,28 @@ export default async function AdminPage() {
       .order('created_at', { ascending: false }),
     admin
       .from('admin_logs')
-      .select('id, type, reservation_id, message, created_at')
+      .select('id, type, reservation_id, message, created_at, admin_id')
       .order('created_at', { ascending: false })
       .limit(100),
   ])
 
   const reservations = (raw ?? []) as Reservation[]
-  const logs         = (rawLogs ?? []) as AdminLog[]
+
+  // Résoudre les noms des admins pour l'affichage dans les logs
+  const adminIds = Array.from(new Set((rawLogs ?? []).map(l => l.admin_id).filter(Boolean))) as string[]
+  const adminNameMap: Record<string, string> = {}
+  await Promise.all(adminIds.map(async (aid) => {
+    const [{ data: p }, { data: { user: u } }] = await Promise.all([
+      admin.from('profiles').select('full_name').eq('id', aid).single(),
+      admin.auth.admin.getUserById(aid),
+    ])
+    adminNameMap[aid] = (p?.full_name as string | null) || u?.email || 'Admin'
+  }))
+
+  const logs = ((rawLogs ?? []) as AdminLog[]).map(l => ({
+    ...l,
+    admin_name: l.admin_id ? (adminNameMap[l.admin_id] ?? 'Admin') : undefined,
+  }))
   const notifPrefs: NotifPrefs = {
     notif_new_reservation: profile?.notif_new_reservation ?? true,
     notif_payment:         profile?.notif_payment         ?? true,

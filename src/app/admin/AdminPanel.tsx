@@ -396,7 +396,7 @@ export default function AdminPanel({
                 const style = LOG_STYLE[log.type] ?? { color: 'var(--fg-muted)', label: log.type }
                 return (
                   <div key={log.id} style={{
-                    display: 'grid', gridTemplateColumns: '140px 1fr 100px',
+                    display: 'grid', gridTemplateColumns: '140px 1fr auto 100px',
                     padding: '14px 20px', alignItems: 'center', gap: 16,
                     borderBottom: i < initialLogs.length - 1 ? '1px solid var(--line-soft)' : undefined,
                     background: i % 2 === 0 ? 'var(--bg)' : 'var(--bg-soft)',
@@ -409,6 +409,9 @@ export default function AdminPanel({
                       {style.label}
                     </span>
                     <span style={{ fontSize: 13, color: 'var(--fg)' }}>{log.message}</span>
+                    <span style={{ fontSize: 11, color: 'var(--fg-dim)', whiteSpace: 'nowrap' }}>
+                      {log.admin_name ?? '—'}
+                    </span>
                     <span className="mono" style={{ fontSize: 10, color: 'var(--fg-dim)', textAlign: 'right' }}>
                       {fmt(log.created_at)}
                     </span>
