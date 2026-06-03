@@ -93,7 +93,7 @@ export default function NavBar() {
                 <Link href="/login" className="btn btn-ghost nav-auth" style={{ fontSize: 12, padding: '10px 16px' }}>
                   {t.nav.signIn}
                 </Link>
-                <Link href="/reserva" className="btn btn-primary">
+                <Link href="/reserva" className="btn btn-primary nav-book">
                   {t.nav.bookBtn}
                 </Link>
               </>
@@ -156,9 +156,14 @@ export default function NavBar() {
                 </button>
               </>
             ) : (
-              <Link href="/login" onClick={() => setMobileOpen(false)} className="btn btn-ghost" style={{ textAlign: 'center', fontSize: 13 }}>
-                {t.nav.signIn}
-              </Link>
+              <>
+                <Link href="/reserva" onClick={() => setMobileOpen(false)} className="btn btn-primary" style={{ textAlign: 'center', fontSize: 13, justifyContent: 'center' }}>
+                  {t.nav.bookBtn}
+                </Link>
+                <Link href="/login" onClick={() => setMobileOpen(false)} className="btn btn-ghost" style={{ textAlign: 'center', fontSize: 13 }}>
+                  {t.nav.signIn}
+                </Link>
+              </>
             )}
           </div>
         </nav>

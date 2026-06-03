@@ -34,6 +34,7 @@ html, body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 body { min-height: 100vh; }
@@ -362,6 +363,7 @@ html { scroll-behavior: smooth; }
   .nav-links { display: none !important; }
   .nav-phone { display: none !important; }
   .nav-auth  { display: none !important; }
+  .nav-book  { display: none !important; }
   .nav-hamburger { display: flex !important; }
   .hero-info-card { display: none; }
   .services-grid,
