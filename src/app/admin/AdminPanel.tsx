@@ -108,10 +108,19 @@ type AnalyticsData = {
   bounceRate: number
   timeseries: { x: string; y: number }[]
   pages:      { path: string; visitors: number }[]
-  countries:  { country: string; visitors: number; pct: number }[]
+  countries:  { country: string; code?: string; visitors: number; pct: number }[]
   referrers:  { referrer: string; visitors: number }[]
   devices:    { device: string; visitors: number; pct: number }[]
 } | null
+
+function flag(code?: string) {
+  if (!code || code.length !== 2) return ''
+  return code.toUpperCase().replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397))
+}
+
+function fmtDay(iso: string) {
+  return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })
+}
 
 export default function AdminPanel({
   reservations: initial,
@@ -490,7 +499,7 @@ export default function AdminPanel({
               {/* KPIs */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1, background: 'var(--line-soft)', border: '1px solid var(--line-soft)' }}>
                 {[
-                  { label: 'Visitantes', value: analytics.visitors },
+                  { label: 'Visitantes únicos', value: analytics.visitors },
                   { label: 'Páginas vistas', value: analytics.pageviews },
                 ].map(kpi => (
                   <div key={kpi.label} style={{ background: 'var(--bg)', padding: '20px 24px' }}>
@@ -502,21 +511,30 @@ export default function AdminPanel({
                 ))}
               </div>
 
-              {/* Sparkline visites */}
+              {/* Graphique barres par jour */}
               {analytics.timeseries.length > 0 && (
                 <div style={{ border: '1px solid var(--line-soft)', padding: '24px' }}>
-                  <div className="eyebrow" style={{ marginBottom: 16 }}>Visitantes por día</div>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 80 }}>
+                  <div className="eyebrow" style={{ marginBottom: 20 }}>Páginas vistas por día</div>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 80 }}>
                     {analytics.timeseries.map((d, i) => {
                       const max = Math.max(...analytics.timeseries.map(x => x.y), 1)
-                      const h = Math.max(4, (d.y / max) * 80)
+                      const h = d.y === 0 ? 3 : Math.max(8, (d.y / max) * 80)
                       return (
-                        <div key={i} title={`${d.x}: ${d.y}`} style={{
-                          flex: 1, height: h, background: 'var(--accent)', opacity: 0.8,
-                          borderRadius: 2, minWidth: 8,
-                        }} />
+                        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                          <div title={`${fmtDay(d.x)}: ${d.y}`} style={{
+                            width: '100%', height: h,
+                            background: d.y === 0 ? 'var(--line-soft)' : 'var(--accent)',
+                            opacity: d.y === 0 ? 1 : 0.85,
+                            borderRadius: 2,
+                          }} />
+                        </div>
                       )
                     })}
+                  </div>
+                  {/* Labels dates début / fin */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 10, color: 'var(--fg-dim)' }}>
+                    <span>{fmtDay(analytics.timeseries[0].x)}</span>
+                    <span>{fmtDay(analytics.timeseries[analytics.timeseries.length - 1].x)}</span>
                   </div>
                 </div>
               )}
@@ -552,8 +570,11 @@ export default function AdminPanel({
                       padding: '10px 20px', borderBottom: i < Math.min(analytics.countries.length, 8) - 1 ? '1px solid var(--line-soft)' : undefined,
                       fontSize: 13,
                     }}>
-                      <span style={{ color: 'var(--fg)' }}>{c.country}</span>
-                      <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{c.pct != null ? `${Math.round(c.pct)}%` : c.visitors}</span>
+                      <span style={{ color: 'var(--fg)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 18, lineHeight: 1 }}>{flag(c.code)}</span>
+                        {c.country}
+                      </span>
+                      <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{c.pct}%</span>
                     </div>
                   ))}
                 </div>

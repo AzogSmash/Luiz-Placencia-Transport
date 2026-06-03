@@ -27,15 +27,18 @@ export async function GET(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const byDay:      Record<string, number> = {}
   const byPath:     Record<string, number> = {}
   const byCountry:  Record<string, number> = {}
   const byDevice:   Record<string, number> = {}
   const byReferrer: Record<string, number> = {}
 
+  // Track unique sessions (country+device+day) as approximate visitor count
+  const sessions = new Set<string>()
+
   for (const v of views ?? []) {
     const day = (v.created_at as string).slice(0, 10)
-    byDay[day]        = (byDay[day]     ?? 0) + 1
+
+    sessions.add(`${v.country ?? '?'}-${v.device ?? '?'}-${day}`)
     byPath[v.path]    = (byPath[v.path] ?? 0) + 1
 
     if (v.country) byCountry[v.country] = (byCountry[v.country] ?? 0) + 1
@@ -44,34 +47,54 @@ export async function GET(req: NextRequest) {
     if (v.referrer) {
       try {
         const hostname = new URL(v.referrer).hostname.replace(/^www\./, '')
-        if (hostname) byReferrer[hostname] = (byReferrer[hostname] ?? 0) + 1
+        // Filter out self-referrers
+        if (hostname && !hostname.includes('luisplasenciatransport.com')) {
+          byReferrer[hostname] = (byReferrer[hostname] ?? 0) + 1
+        }
       } catch { /* invalid URL */ }
     }
   }
 
-  const total = views?.length ?? 0
+  const total     = views?.length ?? 0
+  const visitors  = sessions.size
+
+  // Generate full date range so graph always shows all days (even 0s)
+  const timeseries: { x: string; y: number }[] = []
+  const byDay: Record<string, number> = {}
+  for (const v of views ?? []) {
+    const day = (v.created_at as string).slice(0, 10)
+    byDay[day] = (byDay[day] ?? 0) + 1
+  }
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
+    const key = d.toISOString().slice(0, 10)
+    timeseries.push({ x: key, y: byDay[key] ?? 0 })
+  }
 
   const sortDesc = (obj: Record<string, number>) =>
     Object.entries(obj).sort((a, b) => b[1] - a[1])
 
+  // Resolve country codes to full Spanish names
+  const countryNames = new Intl.DisplayNames(['es'], { type: 'region' })
   const countriesArr = sortDesc(byCountry)
   const devicesArr   = sortDesc(byDevice)
 
   return NextResponse.json({
-    visitors:  total,
+    visitors,
     pageviews: total,
-    timeseries: Object.entries(byDay).map(([x, y]) => ({ x, y })),
-    pages:     sortDesc(byPath).slice(0, 10).map(([path, visitors]) => ({ path, visitors })),
-    countries: countriesArr.slice(0, 8).map(([country, visitors]) => ({
-      country,
-      visitors,
-      pct: total > 0 ? Math.round((visitors / total) * 100) : 0,
+    timeseries,
+    pages:     sortDesc(byPath).slice(0, 10).map(([path, pageviews]) => ({ path, visitors: pageviews })),
+    countries: countriesArr.slice(0, 8).map(([code, v]) => ({
+      country: countryNames.of(code) ?? code,
+      code,
+      visitors: v,
+      pct: total > 0 ? Math.round((v / total) * 100) : 0,
     })),
-    referrers: sortDesc(byReferrer).slice(0, 8).map(([referrer, visitors]) => ({ referrer, visitors })),
-    devices:   devicesArr.slice(0, 4).map(([device, visitors]) => ({
+    referrers: sortDesc(byReferrer).slice(0, 8).map(([referrer, v]) => ({ referrer, visitors: v })),
+    devices:   devicesArr.slice(0, 4).map(([device, v]) => ({
       device,
-      visitors,
-      pct: total > 0 ? Math.round((visitors / total) * 100) : 0,
+      visitors: v,
+      pct: total > 0 ? Math.round((v / total) * 100) : 0,
     })),
   })
 }
