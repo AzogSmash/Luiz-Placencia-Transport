@@ -9,6 +9,24 @@ function shouldTrack(pathname: string): boolean {
   return true
 }
 
+function detectBrowser(ua: string): string {
+  if (/Edg\//.test(ua))          return 'Microsoft Edge'
+  if (/OPR\/|Opera/.test(ua))    return 'Opera'
+  if (/Firefox\//.test(ua))      return 'Firefox'
+  if (/Chrome\//.test(ua))       return 'Chrome'
+  if (/Safari\//.test(ua))       return 'Safari'
+  return 'Other'
+}
+
+function detectOS(ua: string): string {
+  if (/Windows/.test(ua))        return 'Windows'
+  if (/Macintosh|Mac OS X/.test(ua)) return 'Mac'
+  if (/iPhone|iPad/.test(ua))    return 'iOS'
+  if (/Android/.test(ua))        return 'Android'
+  if (/Linux/.test(ua))          return 'Linux'
+  return 'Other'
+}
+
 function trackPageView(request: NextRequest) {
   const { pathname } = request.nextUrl
   if (!shouldTrack(pathname)) return
@@ -17,6 +35,8 @@ function trackPageView(request: NextRequest) {
   const ua       = request.headers.get('user-agent') ?? ''
   const referrer = request.headers.get('referer') ?? null
   const device   = /mobile|android/i.test(ua) ? 'Mobile' : /ipad|tablet/i.test(ua) ? 'Tablet' : 'Desktop'
+  const browser  = detectBrowser(ua)
+  const os       = detectOS(ua)
   const key      = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim()
 
   // Fire and forget — non-blocking
@@ -28,7 +48,7 @@ function trackPageView(request: NextRequest) {
       'Content-Type':   'application/json',
       'Prefer':         'return=minimal',
     },
-    body: JSON.stringify({ path: pathname, country, device, referrer }),
+    body: JSON.stringify({ path: pathname, country, device, browser, os, referrer }),
   }).catch(() => {})
 }
 

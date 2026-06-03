@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { updateReservationStatus, deleteReservation, updateNotifPreferences } from '@/app/actions/admin'
 import type { AdminLog, NotifPrefs } from '@/app/actions/admin'
 
@@ -111,6 +112,8 @@ type AnalyticsData = {
   countries:  { country: string; code?: string; visitors: number; pct: number }[]
   referrers:  { referrer: string; visitors: number }[]
   devices:    { device: string; visitors: number; pct: number }[]
+  browsers:   { browser: string; visitors: number; pct: number }[]
+  os:         { os: string; visitors: number; pct: number }[]
 } | null
 
 function flag(code?: string) {
@@ -511,31 +514,44 @@ export default function AdminPanel({
                 ))}
               </div>
 
-              {/* Graphique barres par jour */}
+              {/* Graphique area — Recharts */}
               {analytics.timeseries.length > 0 && (
-                <div style={{ border: '1px solid var(--line-soft)', padding: '24px' }}>
+                <div style={{ border: '1px solid var(--line-soft)', padding: '24px 24px 8px' }}>
                   <div className="eyebrow" style={{ marginBottom: 20 }}>Páginas vistas por día</div>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 80 }}>
-                    {analytics.timeseries.map((d, i) => {
-                      const max = Math.max(...analytics.timeseries.map(x => x.y), 1)
-                      const h = d.y === 0 ? 3 : Math.max(8, (d.y / max) * 80)
-                      return (
-                        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                          <div title={`${fmtDay(d.x)}: ${d.y}`} style={{
-                            width: '100%', height: h,
-                            background: d.y === 0 ? 'var(--line-soft)' : 'var(--accent)',
-                            opacity: d.y === 0 ? 1 : 0.85,
-                            borderRadius: 2,
-                          }} />
-                        </div>
-                      )
-                    })}
-                  </div>
-                  {/* Labels dates début / fin */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 10, color: 'var(--fg-dim)' }}>
-                    <span>{fmtDay(analytics.timeseries[0].x)}</span>
-                    <span>{fmtDay(analytics.timeseries[analytics.timeseries.length - 1].x)}</span>
-                  </div>
+                  <ResponsiveContainer width="100%" height={140}>
+                    <AreaChart data={analytics.timeseries} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%"  stopColor="#b8956a" stopOpacity={0.25} />
+                          <stop offset="95%" stopColor="#b8956a" stopOpacity={0}    />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--line-soft)" vertical={false} />
+                      <XAxis
+                        dataKey="x"
+                        tickFormatter={fmtDay}
+                        tick={{ fontSize: 10, fill: 'var(--fg-dim)' }}
+                        axisLine={false} tickLine={false}
+                        interval={analyticsRange === '7d' ? 0 : 4}
+                      />
+                      <YAxis
+                        allowDecimals={false}
+                        tick={{ fontSize: 10, fill: 'var(--fg-dim)' }}
+                        axisLine={false} tickLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: 4, fontSize: 12 }}
+                        labelFormatter={(l: unknown) => fmtDay(String(l))}
+                        formatter={(v: unknown) => [`${v}`, 'Páginas vistas']}
+                        cursor={{ stroke: '#b8956a', strokeWidth: 1, strokeDasharray: '4 2' }}
+                      />
+                      <Area
+                        type="monotone" dataKey="y"
+                        stroke="#b8956a" strokeWidth={2}
+                        fill="url(#areaGrad)" dot={false} activeDot={{ r: 4, fill: '#b8956a' }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               )}
 
@@ -596,22 +612,46 @@ export default function AdminPanel({
                   ))}
                 </div>
 
-                {/* Devices */}
-                <div style={{ border: '1px solid var(--line-soft)' }}>
-                  <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--line-soft)' }}>
-                    <div className="eyebrow">Dispositivos</div>
-                  </div>
-                  {analytics.devices.slice(0, 6).map((d, i) => (
-                    <div key={i} style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      padding: '10px 20px', borderBottom: i < Math.min(analytics.devices.length, 6) - 1 ? '1px solid var(--line-soft)' : undefined,
-                      fontSize: 13,
-                    }}>
-                      <span style={{ color: 'var(--fg)' }}>{d.device}</span>
-                      <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{d.pct != null ? `${Math.round(d.pct)}%` : d.visitors}</span>
+                {/* Devices / Browsers / OS tabs */}
+                {(() => {
+                  const [devTab, setDevTab] = useState<'devices'|'browsers'|'os'>('devices')
+                  const devTabs = [
+                    { id: 'devices'  as const, label: 'Dispositivos' },
+                    { id: 'browsers' as const, label: 'Navegadores'  },
+                    { id: 'os'       as const, label: 'Sistema'      },
+                  ]
+                  const rows =
+                    devTab === 'devices'  ? analytics!.devices.map(d => ({ label: d.device,  pct: d.pct })) :
+                    devTab === 'browsers' ? analytics!.browsers.map(b => ({ label: b.browser, pct: b.pct })) :
+                                           analytics!.os.map(o => ({ label: o.os, pct: o.pct }))
+                  return (
+                    <div style={{ border: '1px solid var(--line-soft)' }}>
+                      <div style={{ display: 'flex', borderBottom: '1px solid var(--line-soft)' }}>
+                        {devTabs.map(t => (
+                          <button key={t.id} onClick={() => setDevTab(t.id)} style={{
+                            flex: 1, padding: '12px 8px', background: 'transparent', border: 0,
+                            borderBottom: devTab === t.id ? '2px solid var(--accent)' : '2px solid transparent',
+                            color: devTab === t.id ? 'var(--accent)' : 'var(--fg-muted)',
+                            cursor: 'pointer', fontSize: 10, fontWeight: 600,
+                            letterSpacing: '0.1em', textTransform: 'uppercase',
+                          }}>
+                            {t.label}
+                          </button>
+                        ))}
+                      </div>
+                      {rows.map((r, i) => (
+                        <div key={i} style={{
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          padding: '10px 20px', borderBottom: i < rows.length - 1 ? '1px solid var(--line-soft)' : undefined,
+                          fontSize: 13,
+                        }}>
+                          <span style={{ color: 'var(--fg)' }}>{r.label}</span>
+                          <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{r.pct}%</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  )
+                })()}
 
               </div>
             </div>

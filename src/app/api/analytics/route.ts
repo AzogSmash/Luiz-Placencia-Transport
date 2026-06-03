@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   const admin = createAdminClient()
   const { data: views, error } = await admin
     .from('page_views')
-    .select('path, country, device, referrer, created_at')
+    .select('path, country, device, browser, os, referrer, created_at')
     .gte('created_at', from)
     .order('created_at', { ascending: true })
 
@@ -30,6 +30,8 @@ export async function GET(req: NextRequest) {
   const byPath:     Record<string, number> = {}
   const byCountry:  Record<string, number> = {}
   const byDevice:   Record<string, number> = {}
+  const byBrowser:  Record<string, number> = {}
+  const byOS:       Record<string, number> = {}
   const byReferrer: Record<string, number> = {}
 
   // Track unique sessions (country+device+day) as approximate visitor count
@@ -41,8 +43,10 @@ export async function GET(req: NextRequest) {
     sessions.add(`${v.country ?? '?'}-${v.device ?? '?'}-${day}`)
     byPath[v.path]    = (byPath[v.path] ?? 0) + 1
 
-    if (v.country) byCountry[v.country] = (byCountry[v.country] ?? 0) + 1
-    if (v.device)  byDevice[v.device]   = (byDevice[v.device]   ?? 0) + 1
+    if (v.country)  byCountry[v.country]   = (byCountry[v.country]   ?? 0) + 1
+    if (v.device)   byDevice[v.device]     = (byDevice[v.device]     ?? 0) + 1
+    if (v.browser)  byBrowser[v.browser]   = (byBrowser[v.browser]   ?? 0) + 1
+    if (v.os)       byOS[v.os]             = (byOS[v.os]             ?? 0) + 1
 
     if (v.referrer) {
       try {
@@ -74,27 +78,23 @@ export async function GET(req: NextRequest) {
   const sortDesc = (obj: Record<string, number>) =>
     Object.entries(obj).sort((a, b) => b[1] - a[1])
 
-  // Resolve country codes to full Spanish names
   const countryNames = new Intl.DisplayNames(['es'], { type: 'region' })
-  const countriesArr = sortDesc(byCountry)
-  const devicesArr   = sortDesc(byDevice)
+  const pct = (v: number) => total > 0 ? Math.round((v / total) * 100) : 0
 
   return NextResponse.json({
     visitors,
     pageviews: total,
     timeseries,
-    pages:     sortDesc(byPath).slice(0, 10).map(([path, pageviews]) => ({ path, visitors: pageviews })),
-    countries: countriesArr.slice(0, 8).map(([code, v]) => ({
+    pages:    sortDesc(byPath).slice(0, 10).map(([path, v]) => ({ path, visitors: v })),
+    countries: sortDesc(byCountry).slice(0, 8).map(([code, v]) => ({
       country: countryNames.of(code) ?? code,
       code,
       visitors: v,
-      pct: total > 0 ? Math.round((v / total) * 100) : 0,
+      pct: pct(v),
     })),
     referrers: sortDesc(byReferrer).slice(0, 8).map(([referrer, v]) => ({ referrer, visitors: v })),
-    devices:   devicesArr.slice(0, 4).map(([device, v]) => ({
-      device,
-      visitors: v,
-      pct: total > 0 ? Math.round((v / total) * 100) : 0,
-    })),
+    devices:   sortDesc(byDevice).slice(0, 4).map(([device, v])   => ({ device,   visitors: v, pct: pct(v) })),
+    browsers:  sortDesc(byBrowser).slice(0, 6).map(([browser, v]) => ({ browser,  visitors: v, pct: pct(v) })),
+    os:        sortDesc(byOS).slice(0, 6).map(([os, v])           => ({ os,       visitors: v, pct: pct(v) })),
   })
 }
