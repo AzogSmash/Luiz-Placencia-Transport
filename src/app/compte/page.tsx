@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import LogoutButton from '@/components/LogoutButton'
 import PhoneInput, { parsePhone } from '@/components/PhoneInput'
+import { updateClientNotifPrefs } from '@/app/actions/compte'
 
 type Profile = {
   full_name: string
@@ -77,6 +78,11 @@ export default function ComptePage() {
   const [pwdLoading, setPwdLoading]   = useState(false)
   const [pwdFeedback, setPwdFeedback] = useState<{ type: 'error' | 'success'; msg: string } | null>(null)
 
+  // Notifications
+  const [notifEmails, setNotifEmails] = useState(true)
+  const [notifLoading, setNotifLoading] = useState(false)
+  const [notifFeedback, setNotifFeedback] = useState<{ type: 'error' | 'success'; msg: string } | null>(null)
+
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -86,7 +92,7 @@ export default function ComptePage() {
 
       const { data } = await supabase
         .from('profiles')
-        .select('full_name, phone, address, preferred_language')
+        .select('full_name, phone, address, preferred_language, notif_emails')
         .eq('id', user.id)
         .single()
 
@@ -99,6 +105,7 @@ export default function ComptePage() {
         const parsed = parsePhone(data.phone ?? '')
         setPhonePrefix(parsed.prefix)
         setPhoneNumber(parsed.number)
+        setNotifEmails(data.notif_emails !== false)
       }
     })
   }, [router])
@@ -171,6 +178,19 @@ export default function ComptePage() {
       setPassword('')
       setConfirm('')
       setPwdFeedback({ type: 'success', msg: 'Contraseña actualizada correctamente.' })
+    }
+  }
+
+  async function handleNotifSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setNotifLoading(true)
+    setNotifFeedback(null)
+    const result = await updateClientNotifPrefs(notifEmails)
+    setNotifLoading(false)
+    if (!result.success) {
+      setNotifFeedback({ type: 'error', msg: result.error })
+    } else {
+      setNotifFeedback({ type: 'success', msg: 'Preferencias guardadas correctamente.' })
     }
   }
 
@@ -363,6 +383,51 @@ export default function ComptePage() {
                     style={{ opacity: pwdLoading ? 0.7 : 1, justifyContent: 'center', alignSelf: 'flex-start' }}
                   >
                     {pwdLoading ? 'Actualizando…' : 'Cambiar contraseña'}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* ── Notificaciones ── */}
+            <div>
+              <h2 style={{ fontFamily: 'var(--display)', fontSize: 28, margin: 0, marginBottom: 6, fontWeight: 400 }}>
+                Notificaciones
+              </h2>
+              <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 28 }}>
+                Gestione los correos de seguimiento que le enviamos sobre el estado de sus reservas.
+              </p>
+              <div style={{ border: '1px solid var(--line-soft)', padding: 32 }}>
+                <form onSubmit={handleNotifSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                  <label style={{
+                    display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+                    gap: 20, cursor: 'pointer',
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 6 }}>
+                        Recibir actualizaciones de mis reservas por email
+                      </div>
+                      <div style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.6 }}>
+                        Le notificaremos cuando el estado de su reserva cambie (confirmada, cancelada, etc.).
+                        Siempre enviamos la confirmación inicial de su solicitud.
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={notifEmails}
+                      onChange={e => setNotifEmails(e.target.checked)}
+                      style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer', flexShrink: 0, marginTop: 2 }}
+                    />
+                  </label>
+
+                  {notifFeedback && <FeedbackBox type={notifFeedback.type} msg={notifFeedback.msg} />}
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={notifLoading}
+                    style={{ opacity: notifLoading ? 0.7 : 1, justifyContent: 'center', alignSelf: 'flex-start' }}
+                  >
+                    {notifLoading ? 'Guardando…' : 'Guardar preferencias'}
                   </button>
                 </form>
               </div>

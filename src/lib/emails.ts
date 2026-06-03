@@ -254,6 +254,11 @@ export function emailStatusUpdate(r: ReservationData & { statut: string }) {
     <p style="margin:0;font-size:13px;color:#666;line-height:1.7;">
       ¿Alguna pregunta? No dude en contactarnos por WhatsApp o respondiendo a este correo.
     </p>
+    <p style="margin:16px 0 0 0;font-size:11px;color:#444;line-height:1.6;">
+      Recibe estos emails porque realizó una reserva con nosotros.
+      Para gestionar sus preferencias de notificación, acceda a
+      <a href="https://luisplasenciatransport.com/compte" style="color:${ACCENT};text-decoration:none;">su cuenta</a>.
+    </p>
   `
   return {
     subject: `Su reserva #${r.id} — ${info.label} · Luis Plasencia Transport`,

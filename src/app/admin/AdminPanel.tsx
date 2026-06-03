@@ -422,53 +422,79 @@ export default function AdminPanel({
 
       {/* ══ TAB: CONFIGURACIÓN ══ */}
       {tab === 'configuracion' && (
-        <div style={{ maxWidth: 520 }}>
-          <h3 style={{ fontFamily: 'var(--display)', fontSize: 22, fontWeight: 400, margin: '0 0 8px' }}>
-            Notificaciones por email
-          </h3>
-          <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 32, lineHeight: 1.6 }}>
-            Elija qué eventos generan un email de notificación al administrador.
-          </p>
+        <div style={{ maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 48 }}>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, border: '1px solid var(--line-soft)' }}>
-            {([
-              { key: 'notif_new_reservation', label: 'Nueva reserva recibida',   desc: 'Un cliente completa el formulario de reserva' },
-              { key: 'notif_payment',         label: 'Pago confirmado',          desc: 'Una reserva pasa a estado "Confirmada"'        },
-              { key: 'notif_cancellation',    label: 'Reserva cancelada',        desc: 'Una reserva pasa a estado "Cancelada"'         },
-            ] as { key: keyof NotifPrefs; label: string; desc: string }[]).map((item, i, arr) => (
-              <label key={item.key} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '20px 24px', cursor: 'pointer', gap: 16,
-                borderBottom: i < arr.length - 1 ? '1px solid var(--line-soft)' : undefined,
-                background: 'var(--bg)',
+          {/* Section admin */}
+          <div>
+            <h3 style={{ fontFamily: 'var(--display)', fontSize: 22, fontWeight: 400, margin: '0 0 6px' }}>
+              Mis notificaciones (administrador)
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 24, lineHeight: 1.6 }}>
+              Elija qué eventos le generan un email de alerta a usted como administrador.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, border: '1px solid var(--line-soft)' }}>
+              {([
+                { key: 'notif_new_reservation', label: 'Nueva reserva recibida',   desc: 'Un cliente completa el formulario de reserva' },
+                { key: 'notif_payment',         label: 'Pago confirmado',          desc: 'Una reserva con pago Stripe pasa a "Confirmada"' },
+                { key: 'notif_cancellation',    label: 'Reserva cancelada',        desc: 'Una reserva pasa a estado "Cancelada"'           },
+              ] as { key: keyof NotifPrefs; label: string; desc: string }[]).map((item, i, arr) => (
+                <label key={item.key} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '20px 24px', cursor: 'pointer', gap: 16,
+                  borderBottom: i < arr.length - 1 ? '1px solid var(--line-soft)' : undefined,
+                  background: 'var(--bg)',
+                }}>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>{item.label}</div>
+                    <div style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{item.desc}</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={prefs[item.key]}
+                    onChange={e => setPrefs(p => ({ ...p, [item.key]: e.target.checked }))}
+                    style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer', flexShrink: 0 }}
+                  />
+                </label>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 16 }}>
+              <button onClick={handleSavePrefs} disabled={savingPrefs} style={{
+                background: 'var(--accent)', color: '#0d0d0d', border: 'none',
+                padding: '10px 24px', fontSize: 12, fontWeight: 600, letterSpacing: '0.1em',
+                textTransform: 'uppercase', cursor: savingPrefs ? 'wait' : 'pointer',
+                opacity: savingPrefs ? 0.7 : 1,
               }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>{item.label}</div>
-                  <div style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{item.desc}</div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={prefs[item.key]}
-                  onChange={e => setPrefs(p => ({ ...p, [item.key]: e.target.checked }))}
-                  style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer', flexShrink: 0 }}
-                />
-              </label>
-            ))}
+                {savingPrefs ? 'Guardando…' : 'Guardar'}
+              </button>
+              {prefsSaved && (
+                <span style={{ fontSize: 13, color: 'oklch(0.65 0.16 145)' }}>✓ Guardado</span>
+              )}
+            </div>
           </div>
 
-          <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
-            <button onClick={handleSavePrefs} disabled={savingPrefs} style={{
-              background: 'var(--accent)', color: '#0d0d0d', border: 'none',
-              padding: '10px 24px', fontSize: 12, fontWeight: 600, letterSpacing: '0.1em',
-              textTransform: 'uppercase', cursor: savingPrefs ? 'wait' : 'pointer',
-              opacity: savingPrefs ? 0.7 : 1,
+          {/* Section client emails */}
+          <div>
+            <h3 style={{ fontFamily: 'var(--display)', fontSize: 22, fontWeight: 400, margin: '0 0 6px' }}>
+              Emails a los clientes
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 24, lineHeight: 1.6 }}>
+              Los clientes reciben siempre sus emails de seguimiento (confirmación de solicitud,
+              cambios de estado, etc.). Esta es una decisión de servicio — no se puede desactivar
+              desde el panel.
+            </p>
+            <div style={{
+              padding: '20px 24px', background: 'var(--bg-soft)', border: '1px solid var(--line-soft)',
+              fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.7,
             }}>
-              {savingPrefs ? 'Guardando…' : 'Guardar'}
-            </button>
-            {prefsSaved && (
-              <span style={{ fontSize: 13, color: 'oklch(0.65 0.16 145)' }}>✓ Guardado</span>
-            )}
+              Cada cliente puede gestionar sus propias preferencias de notificación desde su{' '}
+              <strong style={{ color: 'var(--fg)' }}>espacio personal → Mi cuenta → Notificaciones</strong>.
+              Si un cliente ha desactivado los emails de seguimiento, respetamos su elección incluso
+              cuando el estado de su reserva cambia.
+            </div>
           </div>
+
         </div>
       )}
     </div>

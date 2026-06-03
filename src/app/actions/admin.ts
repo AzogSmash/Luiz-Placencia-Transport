@@ -71,7 +71,7 @@ export async function updateReservationStatus(
   const admin = createAdminClient()
   const { data: reservation } = await admin
     .from('reservations')
-    .select('id, nom, email, adresse_depart, adresse_arrivee, date_heure, nombre_passagers, message, stripe_payment_intent_id')
+    .select('id, nom, email, adresse_depart, adresse_arrivee, date_heure, nombre_passagers, message, stripe_payment_intent_id, user_id')
     .eq('id', id)
     .single()
 
@@ -101,18 +101,50 @@ export async function updateReservationStatus(
   )
 
   if (reservation?.email) {
-    const prefs = await getAdminNotifPrefs()
-    const notify =
-      (statut === 'confirmée' && prefs.notif_payment) ||
-      (statut === 'annulée'   && prefs.notif_cancellation) ||
-      (statut !== 'confirmée' && statut !== 'annulée')
+    // Toujours envoyer au client, sauf s'il a désactivé ses notifications
+    let clientWantsEmail = true
+    if (reservation.user_id) {
+      const { data: clientProfile } = await admin
+        .from('profiles')
+        .select('notif_emails')
+        .eq('id', reservation.user_id)
+        .maybeSingle()
+      clientWantsEmail = clientProfile?.notif_emails !== false
+    }
 
-    if (notify) {
+    if (clientWantsEmail) {
       resend.emails.send({
         from: FROM,
         to:   reservation.email,
         ...emailStatusUpdate({ ...reservation, statut }),
       }).catch(err => console.error('[statusEmail]', err))
+    }
+
+    // Notifier les admins selon leurs préférences individuelles
+    if (statut === 'confirmée' || statut === 'annulée') {
+      const { data: adminProfiles } = await admin
+        .from('profiles')
+        .select('id, notif_payment, notif_cancellation')
+        .eq('role', 'admin')
+
+      for (const profile of adminProfiles ?? []) {
+        const shouldSend =
+          (statut === 'confirmée' && profile.notif_payment) ||
+          (statut === 'annulée'   && profile.notif_cancellation)
+        if (!shouldSend) continue
+
+        const { data: { user: adminUser } } = await admin.auth.admin.getUserById(profile.id)
+        if (adminUser?.email) {
+          resend.emails.send({
+            from: FROM,
+            to:   adminUser.email,
+            subject: statut === 'confirmée'
+              ? `✅ Pago confirmado — Reserva #${id} (${reservation.nom})`
+              : `⚠️ Reserva cancelada — #${id} (${reservation.nom})`,
+            html: `<p>La reserva #${id} de <strong>${reservation.nom}</strong> ha pasado al estado: <strong>${statusLabel[statut] ?? statut}</strong>.</p><p><a href="https://luisplasenciatransport.com/admin">Abrir panel admin →</a></p>`,
+          }).catch(err => console.error('[adminStatusEmail]', err))
+        }
+      }
     }
   }
 
