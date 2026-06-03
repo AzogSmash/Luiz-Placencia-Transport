@@ -148,36 +148,15 @@ export default function AdminPanel({
   useEffect(() => {
     if (tab !== 'estadisticas') return
     setAnalyticsLoading(true)
+    setAnalytics(null)
     const days = analyticsRange === '7d' ? 7 : 30
-    const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
-    const to   = new Date().toISOString()
-
-    Promise.all([
-      fetch(`/api/analytics?metric=timeseries&from=${from}&to=${to}`).then(r => r.json()),
-      fetch(`/api/analytics?metric=pages&from=${from}&to=${to}`).then(r => r.json()),
-      fetch(`/api/analytics?metric=countries&from=${from}&to=${to}`).then(r => r.json()),
-      fetch(`/api/analytics?metric=referrers&from=${from}&to=${to}`).then(r => r.json()),
-      fetch(`/api/analytics?metric=devices&from=${from}&to=${to}`).then(r => r.json()),
-    ]).then(([ts, pages, countries, referrers, devices]) => {
-      const tsData: { x: string; y: number }[] = Array.isArray(ts?.data) ? ts.data : (Array.isArray(ts) ? ts : [])
-      const totalVisitors  = tsData.reduce((s: number, d: { y: number }) => s + (d.y ?? 0), 0)
-      const pagesData      = Array.isArray(pages?.data)     ? pages.data     : (Array.isArray(pages)     ? pages     : [])
-      const countriesData  = Array.isArray(countries?.data) ? countries.data : (Array.isArray(countries) ? countries : [])
-      const referrersData  = Array.isArray(referrers?.data) ? referrers.data : (Array.isArray(referrers) ? referrers : [])
-      const devicesData    = Array.isArray(devices?.data)   ? devices.data   : (Array.isArray(devices)   ? devices   : [])
-
-      setAnalytics({
-        visitors:   totalVisitors,
-        pageviews:  pagesData.reduce((s: number, p: { visitors: number }) => s + (p.visitors ?? 0), 0),
-        bounceRate: 0,
-        timeseries: tsData,
-        pages:      pagesData,
-        countries:  countriesData,
-        referrers:  referrersData,
-        devices:    devicesData,
+    fetch(`/api/analytics?days=${days}`)
+      .then(r => r.json())
+      .then(data => {
+        setAnalytics({ bounceRate: 0, ...data })
+        setAnalyticsLoading(false)
       })
-      setAnalyticsLoading(false)
-    }).catch(() => setAnalyticsLoading(false))
+      .catch(() => setAnalyticsLoading(false))
   }, [tab, analyticsRange])
 
   const now = new Date()

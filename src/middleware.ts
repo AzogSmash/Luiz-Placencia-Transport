@@ -1,7 +1,54 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const SKIP_TRACKING = ['/admin', '/dashboard', '/compte', '/login', '/register', '/api/']
+
+function shouldTrack(pathname: string): boolean {
+  if (SKIP_TRACKING.some(s => pathname.startsWith(s))) return false
+  if (pathname.includes('.')) return false // static assets
+  return true
+}
+
+function trackPageView(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  if (!shouldTrack(pathname)) return
+
+  const country  = request.headers.get('x-vercel-ip-country') ?? null
+  const ua       = request.headers.get('user-agent') ?? ''
+  const referrer = request.headers.get('referer') ?? null
+  const device   = /mobile|android/i.test(ua) ? 'Mobile' : /ipad|tablet/i.test(ua) ? 'Tablet' : 'Desktop'
+  const key      = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim()
+
+  // Fire and forget — non-blocking
+  fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/page_views`, {
+    method: 'POST',
+    headers: {
+      'apikey':         key,
+      'Authorization':  `Bearer ${key}`,
+      'Content-Type':   'application/json',
+      'Prefer':         'return=minimal',
+    },
+    body: JSON.stringify({ path: pathname, country, device, referrer }),
+  }).catch(() => {})
+}
+
 export async function middleware(request: NextRequest) {
+  // Track page view for public pages (non-blocking)
+  trackPageView(request)
+
+  const { pathname } = request.nextUrl
+
+  // Only run auth logic for protected routes
+  if (
+    !pathname.startsWith('/dashboard') &&
+    !pathname.startsWith('/admin') &&
+    !pathname.startsWith('/compte') &&
+    pathname !== '/login' &&
+    pathname !== '/register'
+  ) {
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -23,12 +70,9 @@ export async function middleware(request: NextRequest) {
     },
   )
 
-  // Refresh the session — MUST be called before any redirect/response
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { pathname } = request.nextUrl
-
-  // Protect /dashboard, /admin, /compte — redirect to /login if not authenticated
+  // Protect /dashboard, /admin, /compte
   if ((pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/compte')) && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
@@ -47,5 +91,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/compte/:path*', '/login', '/register'],
+  matcher: ['/((?!_next/static|_next/image|favicon|icon).*)'],
 }
