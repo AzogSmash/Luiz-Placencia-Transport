@@ -9,6 +9,7 @@ import { createReservation } from '@/app/actions/reservations'
 import { createCheckoutSession } from '@/app/actions/checkout'
 import PhoneInput from '@/components/PhoneInput'
 import { createClient } from '@/lib/supabase-browser'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type FormData = {
   serviceType: string
@@ -22,7 +23,6 @@ type FormData = {
   destino: string
   pasajeros: string
   equipaje: string
-  // extra fields
   vuelo: string
   vueloVuelta: string
   fechaVuelta: string
@@ -34,16 +34,7 @@ type FormData = {
   mensaje: string
 }
 
-const SERVICES = [
-  { id: 'aeropuerto',      t: 'Traslado CDG / Orly',             d: 'Desde 70 €' },
-  { id: 'beauvais',        t: 'Traslado Beauvais',               d: 'Desde 160 €' },
-  { id: 'disneyland',      t: 'Disneyland París',                d: 'Ida, vuelta o ambos' },
-  { id: 'versailles',      t: 'Visita Versalles',                d: 'Desde 50 €' },
-  { id: 'citytour',        t: 'City tour privado',               d: 'Por horas' },
-  { id: 'disposicion',     t: 'Disposición con chófer',          d: 'A su servicio' },
-  { id: 'excursion',       t: 'St-Michel · Bruges',              d: 'Desde 700 €' },
-  { id: 'excursion_devis', t: 'Excursión a medida',              d: 'Ámsterdam · Loire · Champagne · Italia' },
-]
+const SERVICE_IDS = ['aeropuerto', 'beauvais', 'disneyland', 'versailles', 'citytour', 'disposicion', 'excursion', 'excursion_devis']
 
 const SERVICE_IMGS: Record<string, string> = {
   aeropuerto:      'Mercedes Clase E · CDG Terminal 2E',
@@ -83,31 +74,6 @@ const TARIFAS_EXCURSION: Record<number, number> = {
   15: 2300, 16: 2400,
 }
 
-type PriceInfo = { label: string; note: string; overLimit: boolean }
-
-function getPriceDisplay(serviceType: string, pasajeros: string): PriceInfo {
-  const pax = parseInt(pasajeros) || 1
-  if (serviceType === 'aeropuerto' || serviceType === 'disneyland') {
-    if (pax > 25) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 25 personas.', overLimit: true }
-    return { label: `${TARIFAS_TRASLADO[pax]} €`, note: 'Precio fijo · IVA incluido', overLimit: false }
-  }
-  if (serviceType === 'beauvais') {
-    if (pax > 16) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 16 personas.', overLimit: true }
-    return { label: `${TARIFAS_BEAUVAIS[pax]} €`, note: 'Precio fijo · IVA incluido', overLimit: false }
-  }
-  if (serviceType === 'versailles') {
-    if (pax > 16) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 16 personas.', overLimit: true }
-    return { label: `${TARIFAS_VERSAILLES[pax]} €`, note: 'Precio fijo · IVA incluido', overLimit: false }
-  }
-  if (serviceType === 'excursion') {
-    if (pax > 16) return { label: 'Contactar por WhatsApp', note: 'Grupo de más de 16 personas.', overLimit: true }
-    return { label: `${TARIFAS_EXCURSION[pax]} €`, note: 'Precio fijo · IVA incluido', overLimit: false }
-  }
-  return { label: 'Precio bajo consulta', note: 'Tarifa confirmada en menos de 30 min.', overLimit: false }
-}
-
-const FIXED_PRICE_SERVICES = ['aeropuerto', 'beauvais', 'disneyland', 'versailles', 'excursion']
-
 function getAmount(serviceType: string, pax: number): number | null {
   if (serviceType === 'aeropuerto' || serviceType === 'disneyland') return TARIFAS_TRASLADO[pax] ?? null
   if (serviceType === 'beauvais')   return TARIFAS_BEAUVAIS[pax]   ?? null
@@ -116,13 +82,27 @@ function getAmount(serviceType: string, pax: number): number | null {
   return null
 }
 
+const FIXED_PRICE_SERVICES = ['aeropuerto', 'beauvais', 'disneyland', 'versailles', 'excursion']
+
+// Spanish service names — always used in WhatsApp messages to Luis
+const ES_SERVICE_NAMES: Record<string, string> = {
+  aeropuerto:      'Traslado CDG / Orly',
+  beauvais:        'Traslado Beauvais',
+  disneyland:      'Disneyland París',
+  versailles:      'Visita Versalles',
+  citytour:        'City tour privado',
+  disposicion:     'Disposición con chófer',
+  excursion:       'St-Michel · Bruges',
+  excursion_devis: 'Excursión a medida',
+}
+
 function buildWhatsAppUrl(
   data: FormData,
   phonePrefix: string,
   phoneNumber: string,
   reservationId: number | null,
 ): string {
-  const serviceName = SERVICES.find(s => s.id === data.serviceType)?.t ?? data.serviceType
+  const serviceName = ES_SERVICE_NAMES[data.serviceType] ?? data.serviceType
   const lines: string[] = [
     `Hola Luis, me llamo *${data.nombre}${data.apellido ? ' ' + data.apellido : ''}* y quisiera información sobre:`,
     '',
@@ -169,6 +149,9 @@ const EMPTY: FormData = {
 }
 
 export default function ReservaPage() {
+  const { t } = useLanguage()
+  const r = t.reserva
+
   const [step, setStep]               = useState(1)
   const [submitted, setSubmitted]     = useState(false)
   const [reservationId, setReservationId] = useState<number | null>(null)
@@ -188,7 +171,6 @@ export default function ReservaPage() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null)
     })
-    // Restore draft saved before login/register redirect
     try {
       const raw = localStorage.getItem('reserva_draft')
       if (raw) {
@@ -221,20 +203,42 @@ export default function ReservaPage() {
   const overLimit  = FIXED_PRICE_SERVICES.includes(data.serviceType) && pax > paxLimit
   const isAirport  = data.serviceType === 'aeropuerto' || data.serviceType === 'beauvais'
   const hasReturn  = isAirport || data.serviceType === 'disneyland'
+  const amount     = getAmount(data.serviceType, pax)
+
+  // Price display using translated strings
+  function getPriceLabel(): string {
+    if (overLimit || (FIXED_PRICE_SERVICES.includes(data.serviceType) && amount === null)) {
+      return r.price.contactWhatsApp
+    }
+    if (FIXED_PRICE_SERVICES.includes(data.serviceType) && amount !== null) {
+      return `${amount} €`
+    }
+    return r.price.onRequest
+  }
+
+  function getPriceNote(): string {
+    if (overLimit || (FIXED_PRICE_SERVICES.includes(data.serviceType) && amount === null)) {
+      return r.price.overLimitNote.replace('{n}', String(paxLimit))
+    }
+    if (FIXED_PRICE_SERVICES.includes(data.serviceType)) {
+      return r.price.vatIncluded
+    }
+    return r.price.onRequestNote
+  }
 
   function validateStep2(): boolean {
     const e: Record<string, string> = {}
-    if (!data.origen.trim())  e.origen  = 'Por favor, complete este campo'
-    if (!data.destino.trim()) e.destino = 'Por favor, complete este campo'
+    if (!data.origen.trim())  e.origen  = r.validation.required
+    if (!data.destino.trim()) e.destino = r.validation.required
     if (!data.fecha) {
-      e.fecha = 'Por favor, complete este campo'
+      e.fecha = r.validation.required
     } else if (data.fecha < todayStr) {
-      e.fecha = 'La fecha no puede ser anterior a hoy'
+      e.fecha = r.validation.pastDate
     } else if (data.fecha === todayStr && data.hora) {
       const now = new Date()
       const [h, m] = data.hora.split(':').map(Number)
       const sel = new Date(); sel.setHours(h, m, 0, 0)
-      if (sel <= now) e.hora = 'La hora indicada ya ha pasado'
+      if (sel <= now) e.hora = r.validation.pastTime
     }
     setFieldErrors(e)
     return Object.keys(e).length === 0
@@ -242,17 +246,17 @@ export default function ReservaPage() {
 
   function validateStep3(): boolean {
     const e: Record<string, string> = {}
-    if (!data.nombre.trim()) e.nombre = 'Por favor, complete este campo'
+    if (!data.nombre.trim()) e.nombre = r.validation.required
     if (!data.email.trim()) {
-      e.email = 'Por favor, complete este campo'
+      e.email = r.validation.required
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
-      e.email = 'Dirección de email no válida'
+      e.email = r.validation.invalidEmail
     }
     const digits = phoneNumber.replace(/\D/g, '')
     if (!phoneNumber.trim()) {
-      e.telefono = 'Por favor, complete este campo'
+      e.telefono = r.validation.required
     } else if (digits.length < 9) {
-      e.telefono = 'Mínimo 9 dígitos'
+      e.telefono = r.validation.minDigits
     }
     setFieldErrors(e)
     return Object.keys(e).length === 0
@@ -269,8 +273,10 @@ export default function ReservaPage() {
     setLoading(true)
     setError(null)
 
-    const serviceName  = SERVICES.find(s => s.id === data.serviceType)?.t ?? data.serviceType
-    const priceDisplay = getPriceDisplay(data.serviceType, data.pasajeros)
+    const serviceName  = ES_SERVICE_NAMES[data.serviceType] ?? data.serviceType
+    const priceLabel   = FIXED_PRICE_SERVICES.includes(data.serviceType) && !overLimit && amount
+      ? `${amount} €`
+      : 'Precio bajo consulta'
 
     const extras: string[] = []
     if (data.vuelo)       extras.push(`Vuelo ida: ${data.vuelo}`)
@@ -284,7 +290,7 @@ export default function ReservaPage() {
     const messageLines = [
       data.mensaje || null,
       `Service: ${serviceName}`,
-      `Prix: ${priceDisplay.label}`,
+      `Prix: ${priceLabel}`,
       `Equipaje: ${data.equipaje}`,
       ...extras,
     ].filter(Boolean)
@@ -302,22 +308,19 @@ export default function ReservaPage() {
 
     if (!result.success) { setLoading(false); setError(result.error); return }
 
-    // Tarif fixe non dépassé → Stripe Checkout
     const isFixedPrice = FIXED_PRICE_SERVICES.includes(data.serviceType) && !overLimit
     if (isFixedPrice) {
-      const amount = getAmount(data.serviceType, pax)
       if (!amount) { setLoading(false); setError('Error al calcular el importe.'); return }
       const checkout = await createCheckoutSession(result.id, amount, serviceName, data.email)
       if (checkout.url) {
         window.location.href = checkout.url
-        return // spinner actif pendant la redirection
+        return
       }
       setLoading(false)
       setError(checkout.error ?? 'Error al iniciar el pago. Inténtelo de nuevo.')
       return
     }
 
-    // Prix variable ou groupe hors limite → WhatsApp CTA
     setLoading(false)
     setReservationId(result.id)
     setSubmitted(true)
@@ -332,52 +335,43 @@ export default function ReservaPage() {
         <section className="section" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center' }}>
           <div className="container" style={{ textAlign: 'center', maxWidth: 700 }}>
             <div className="tag" style={{ justifyContent: 'center', marginBottom: 32 }}>
-              <span className="dot" /><span>Solicitud recibida</span>
+              <span className="dot" /><span>{r.submitted.tag}</span>
             </div>
             <h1 className="display" style={{ fontSize: 'clamp(40px, 5vw, 72px)', margin: 0, marginBottom: 24 }}>
-              Gracias,{' '}
-              <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>{data.nombre || 'estimado cliente'}.</em>
+              {r.submitted.heading}{' '}
+              <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>{data.nombre || r.submitted.fallbackName}.</em>
             </h1>
             {reservationId && (
-              <div className="mono" style={{ color: 'var(--accent)', marginBottom: 16, fontSize: 13 }}>Reserva #{reservationId}</div>
+              <div className="mono" style={{ color: 'var(--accent)', marginBottom: 16, fontSize: 13 }}>{r.submitted.reservationRef}{reservationId}</div>
             )}
 
             {isFixedPrice ? (
-              /* Fixed price: email confirmation flow */
               <>
                 <p className="lead" style={{ marginBottom: 40, marginLeft: 'auto', marginRight: 'auto' }}>
-                  Hemos recibido su solicitud. Le enviaremos la confirmación y los detalles de pago
-                  en menos de 30 minutos al correo <strong style={{ color: 'var(--fg)' }}>{data.email}</strong>.
+                  {r.submitted.fixed.lead}{' '}
+                  <strong style={{ color: 'var(--fg)' }}>{data.email}</strong>.
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <Link href="/" className="btn btn-primary">Volver al inicio</Link>
+                  <Link href="/" className="btn btn-primary">{r.submitted.fixed.back}</Link>
                   <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
-                    Contactar por WhatsApp
+                    {r.submitted.fixed.whatsapp}
                   </a>
                 </div>
               </>
             ) : (
-              /* Variable price: WhatsApp CTA pre-filled */
               <>
                 <p className="lead" style={{ marginBottom: 16, marginLeft: 'auto', marginRight: 'auto' }}>
-                  Su solicitud ha sido registrada. Para obtener su presupuesto personalizado,
-                  contacte directamente con Luis por WhatsApp — todos los detalles de su reserva
-                  ya están incluidos en el mensaje.
+                  {r.submitted.variable.lead}
                 </p>
                 <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 32 }}>
-                  También recibirá un resumen en <strong style={{ color: 'var(--fg)' }}>{data.email}</strong>.
+                  {r.submitted.variable.note}{' '}
+                  <strong style={{ color: 'var(--fg)' }}>{data.email}</strong>.
                 </p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <a
-                    href={waUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-primary"
-                    style={{ fontSize: 14 }}
-                  >
-                    Enviar por WhatsApp →
+                  <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ fontSize: 14 }}>
+                    {r.submitted.variable.send}
                   </a>
-                  <Link href="/" className="btn btn-ghost">Volver al inicio</Link>
+                  <Link href="/" className="btn btn-ghost">{r.submitted.variable.back}</Link>
                 </div>
               </>
             )}
@@ -387,18 +381,17 @@ export default function ReservaPage() {
     )
   }
 
-  const sidebarImg   = SERVICE_IMGS[data.serviceType] ?? 'Mercedes Clase E · CDG Terminal 2E'
-  const priceDisplay = getPriceDisplay(data.serviceType, data.pasajeros)
+  const sidebarImg = SERVICE_IMGS[data.serviceType] ?? 'Mercedes Clase E · CDG Terminal 2E'
 
   return (
     <main className="page-enter">
       <section className="section" style={{ paddingTop: 56, paddingBottom: 32 }}>
         <div className="container">
-          <div className="eyebrow" style={{ marginBottom: 24 }}>Reserva · Solicitud de presupuesto</div>
+          <div className="eyebrow" style={{ marginBottom: 24 }}>{r.eyebrow}</div>
           <h1 className="display" style={{ fontSize: 'clamp(44px, 6vw, 84px)', margin: 0, marginBottom: 24, maxWidth: 900 }}>
-            Reserve su <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>trayecto.</em>
+            {r.heading1} <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>{r.headingAccent}</em>
           </h1>
-          <p className="lead">Respuesta en menos de 30 minutos · Sin compromiso · Pago a bordo o por enlace seguro.</p>
+          <p className="lead">{r.lead}</p>
         </div>
       </section>
 
@@ -408,7 +401,7 @@ export default function ReservaPage() {
             <div>
               {/* Stepper */}
               <div style={{ display: 'flex', gap: 0, marginBottom: 48, borderBottom: '1px solid var(--line-soft)' }}>
-                {['Servicio', 'Trayecto', 'Contacto'].map((label, i) => {
+                {r.stepper.map((label, i) => {
                   const idx = i + 1; const active = step === idx; const done = step > idx
                   return (
                     <button key={label} onClick={() => done && setStep(idx)} style={{
@@ -427,15 +420,16 @@ export default function ReservaPage() {
               {/* ── Step 1 ── */}
               {step === 1 && (
                 <div className="page-enter">
-                  <h3 style={{ fontFamily: 'var(--display)', fontSize: 32, margin: 0, marginBottom: 8, fontWeight: 400 }}>¿Qué servicio necesita?</h3>
-                  <p style={{ color: 'var(--fg-muted)', marginBottom: 32, fontSize: 14 }}>Seleccione el tipo de trayecto.</p>
+                  <h3 style={{ fontFamily: 'var(--display)', fontSize: 32, margin: 0, marginBottom: 8, fontWeight: 400 }}>{r.step1.heading}</h3>
+                  <p style={{ color: 'var(--fg-muted)', marginBottom: 32, fontSize: 14 }}>{r.step1.sub}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 40 }}>
-                    {SERVICES.map(s => {
-                      const sel = data.serviceType === s.id
+                    {r.services.map((s, i) => {
+                      const id = SERVICE_IDS[i]
+                      const sel = data.serviceType === id
                       return (
-                        <button key={s.id} onClick={() => {
-                          upd('serviceType', s.id)
-                          if (s.id === 'beauvais' && parseInt(data.pasajeros) > 16) upd('pasajeros', '16')
+                        <button key={id} onClick={() => {
+                          upd('serviceType', id)
+                          if (id === 'beauvais' && parseInt(data.pasajeros) > 16) upd('pasajeros', '16')
                         }} style={{
                           textAlign: 'left', padding: '20px 24px', fontFamily: 'var(--sans)',
                           background: sel ? 'var(--accent)' : 'transparent',
@@ -449,57 +443,57 @@ export default function ReservaPage() {
                       )
                     })}
                   </div>
-                  <button className="btn btn-primary" onClick={() => setStep(2)}>Siguiente · Trayecto</button>
+                  <button className="btn btn-primary" onClick={() => setStep(2)}>{r.step1.next}</button>
                 </div>
               )}
 
               {/* ── Step 2 ── */}
               {step === 2 && (
                 <div className="page-enter">
-                  <h3 style={{ fontFamily: 'var(--display)', fontSize: 32, margin: 0, marginBottom: 8, fontWeight: 400 }}>Detalles del trayecto</h3>
-                  <p style={{ color: 'var(--fg-muted)', marginBottom: 32, fontSize: 14 }}>Indique el recorrido y el número de pasajeros.</p>
+                  <h3 style={{ fontFamily: 'var(--display)', fontSize: 32, margin: 0, marginBottom: 8, fontWeight: 400 }}>{r.step2.heading}</h3>
+                  <p style={{ color: 'var(--fg-muted)', marginBottom: 32, fontSize: 14 }}>{r.step2.sub}</p>
 
                   <div className="form-grid" style={{ marginBottom: 24 }}>
                     <div className="field">
-                      <label>Lugar de salida *</label>
-                      <input type="text" placeholder="Hotel Le Bristol, 112 Rue du Faubourg…"
+                      <label>{r.step2.origin}</label>
+                      <input type="text" placeholder={r.step2.originPlaceholder}
                         value={data.origen} onChange={e => upd('origen', e.target.value)}
                         style={fieldErrors.origen ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
                       {fieldErrors.origen && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.origen}</span>}
                     </div>
                     <div className="field">
-                      <label>Destino *</label>
-                      <input type="text" placeholder="Aeropuerto CDG, Terminal 2E…"
+                      <label>{r.step2.destination}</label>
+                      <input type="text" placeholder={r.step2.destinationPlaceholder}
                         value={data.destino} onChange={e => upd('destino', e.target.value)}
                         style={fieldErrors.destino ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
                       {fieldErrors.destino && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.destino}</span>}
                     </div>
                     <div className="field">
-                      <label>Fecha *</label>
+                      <label>{r.step2.date}</label>
                       <input type="date" value={data.fecha} min={todayStr} onChange={e => upd('fecha', e.target.value)}
                         style={fieldErrors.fecha ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
                       {fieldErrors.fecha && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.fecha}</span>}
                     </div>
                     <div className="field">
-                      <label>Hora</label>
+                      <label>{r.step2.time}</label>
                       <input type="time" value={data.hora} onChange={e => upd('hora', e.target.value)}
                         style={fieldErrors.hora ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
                       {fieldErrors.hora && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.hora}</span>}
                     </div>
                     <div className="field">
-                      <label>Pasajeros</label>
+                      <label>{r.step2.pax}</label>
                       <select value={data.pasajeros} onChange={e => upd('pasajeros', e.target.value)}>
                         {Array.from({ length: paxLimit }, (_, i) => String(i + 1)).map(n => (
-                          <option key={n} value={n}>{n} pasajero{n !== '1' ? 's' : ''}</option>
+                          <option key={n} value={n}>{n} {n === '1' ? r.step2.paxSingle : r.step2.paxPlural}</option>
                         ))}
-                        <option value={String(paxLimit + 1)}>Más de {paxLimit} → WhatsApp</option>
+                        <option value={String(paxLimit + 1)}>{r.step2.paxOver.replace('{n}', String(paxLimit))}</option>
                       </select>
                     </div>
                     <div className="field">
-                      <label>Equipaje</label>
+                      <label>{r.step2.luggage}</label>
                       <select value={data.equipaje} onChange={e => upd('equipaje', e.target.value)}>
                         {Array.from({ length: 7 }, (_, i) => String(i)).map(n => (
-                          <option key={n} value={n}>{n} maleta{n !== '1' ? 's' : ''}</option>
+                          <option key={n} value={n}>{n} {n === '1' ? r.step2.luggageSingle : r.step2.luggagePlural}</option>
                         ))}
                       </select>
                     </div>
@@ -507,76 +501,70 @@ export default function ReservaPage() {
 
                   {showPriceBanner && (
                     <div style={{ padding: '14px 18px', marginBottom: 24, background: 'var(--accent-soft)', border: '1px solid var(--accent)', fontSize: 13, color: 'var(--fg-muted)' }}>
-                      <strong style={{ color: 'var(--accent)' }}>Tarifa fija:</strong>{' '}
+                      <strong style={{ color: 'var(--accent)' }}>{r.step2.fixedPriceLabel}</strong>{' '}
                       {overLimit
-                        ? `Para grupos de más de ${paxLimit} personas, contáctenos por WhatsApp.`
-                        : `Para ${data.pasajeros} pasajero${pax > 1 ? 's' : ''}: ${priceDisplay.label} · IVA incluido.`}
+                        ? r.step2.fixedPriceGroup.replace('{n}', String(paxLimit))
+                        : r.step2.fixedPricePax
+                            .replace('{pax}', data.pasajeros)
+                            .replace('{paxWord}', pax === 1 ? r.step2.paxSingle : r.step2.paxPlural)
+                            .replace('{price}', `${amount} €`)}
                     </div>
                   )}
 
-                  {/* ── Informaciones adicionales ── */}
                   <div style={{ borderTop: '1px solid var(--line-soft)', paddingTop: 28, marginBottom: 28 }}>
-                    <div className="eyebrow" style={{ marginBottom: 20 }}>Información del viaje</div>
+                    <div className="eyebrow" style={{ marginBottom: 20 }}>{r.step2.extraSection}</div>
                     <div className="form-grid">
-
-                      {/* Airport: flight numbers + hotels */}
                       {isAirport && (
                         <>
                           <div className="field">
-                            <label>Nº vuelo llegada</label>
-                            <input type="text" placeholder="AF 1234"
+                            <label>{r.step2.flightIn}</label>
+                            <input type="text" placeholder={r.step2.flightInPlaceholder}
                               value={data.vuelo} onChange={e => upd('vuelo', e.target.value)} />
                           </div>
                           <div className="field">
-                            <label>Nº vuelo vuelta</label>
-                            <input type="text" placeholder="BA 567 (si aplica)"
+                            <label>{r.step2.flightOut}</label>
+                            <input type="text" placeholder={r.step2.flightOutPlaceholder}
                               value={data.vueloVuelta} onChange={e => upd('vueloVuelta', e.target.value)} />
                           </div>
                           <div className="field">
-                            <label>Hotel de llegada</label>
-                            <input type="text" placeholder="Hotel Le Meurice, Marriott…"
+                            <label>{r.step2.hotelIn}</label>
+                            <input type="text" placeholder={r.step2.hotelInPlaceholder}
                               value={data.hotel} onChange={e => upd('hotel', e.target.value)} />
                           </div>
                           <div className="field">
-                            <label>Hotel de vuelta (si difiere)</label>
-                            <input type="text" placeholder="Hotel de salida"
+                            <label>{r.step2.hotelOut}</label>
+                            <input type="text" placeholder={r.step2.hotelOutPlaceholder}
                               value={data.hotelVuelta} onChange={e => upd('hotelVuelta', e.target.value)} />
                           </div>
                         </>
                       )}
-
-                      {/* Disneyland: hotel only */}
                       {data.serviceType === 'disneyland' && (
                         <div className="field" style={{ gridColumn: '1/-1' }}>
-                          <label>Hotel en Disneyland</label>
-                          <input type="text" placeholder="Disney's Hotel New York, Santa Fe…"
+                          <label>{r.step2.disneyHotel}</label>
+                          <input type="text" placeholder={r.step2.disneyHotelPlaceholder}
                             value={data.hotel} onChange={e => upd('hotel', e.target.value)} />
                         </div>
                       )}
-
-                      {/* Return date/time for airport + disney */}
                       {hasReturn && (
                         <>
                           <div className="field">
-                            <label>Fecha de vuelta (si aplica)</label>
+                            <label>{r.step2.returnDate}</label>
                             <input type="date" value={data.fechaVuelta} min={data.fecha || todayStr}
                               onChange={e => upd('fechaVuelta', e.target.value)} />
                           </div>
                           <div className="field">
-                            <label>Hora de vuelta</label>
+                            <label>{r.step2.returnTime}</label>
                             <input type="time" value={data.horaVuelta} onChange={e => upd('horaVuelta', e.target.value)} />
                           </div>
                         </>
                       )}
-
-                      {/* City tour: duration */}
                       {data.serviceType === 'citytour' && (
                         <div className="field" style={{ gridColumn: '1/-1' }}>
-                          <label>Duración del tour</label>
+                          <label>{r.step2.duration}</label>
                           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
                             {[
-                              { v: '3h', l: '3 horas' },
-                              { v: '4h', l: '4 horas' },
+                              { v: '3h', l: r.step2.dur3h },
+                              { v: '4h', l: r.step2.dur4h },
                             ].map(d => {
                               const sel = data.duracion === d.v
                               return (
@@ -592,20 +580,17 @@ export default function ReservaPage() {
                           </div>
                         </div>
                       )}
-
-                      {/* Children ages — always visible */}
                       <div className="field" style={{ gridColumn: '1/-1' }}>
-                        <label>Edades de los niños (si aplica)</label>
-                        <input type="text" placeholder="Ej: 3 años, 7 años"
+                        <label>{r.step2.children}</label>
+                        <input type="text" placeholder={r.step2.childrenPlaceholder}
                           value={data.edadNinos} onChange={e => upd('edadNinos', e.target.value)} />
                       </div>
-
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', gap: 12 }}>
-                    <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(1) }}>← Anterior</button>
-                    <button className="btn btn-primary" onClick={() => { if (validateStep2()) setStep(3) }}>Siguiente · Contacto</button>
+                    <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(1) }}>{r.step2.prev}</button>
+                    <button className="btn btn-primary" onClick={() => { if (validateStep2()) setStep(3) }}>{r.step2.next}</button>
                   </div>
                 </div>
               )}
@@ -613,30 +598,30 @@ export default function ReservaPage() {
               {/* ── Step 3 ── */}
               {step === 3 && (
                 <div className="page-enter">
-                  <h3 style={{ fontFamily: 'var(--display)', fontSize: 32, margin: 0, marginBottom: 8, fontWeight: 400 }}>Sus datos de contacto</h3>
-                  <p style={{ color: 'var(--fg-muted)', marginBottom: 32, fontSize: 14 }}>Le contestaremos en menos de 30 minutos.</p>
+                  <h3 style={{ fontFamily: 'var(--display)', fontSize: 32, margin: 0, marginBottom: 8, fontWeight: 400 }}>{r.step3.heading}</h3>
+                  <p style={{ color: 'var(--fg-muted)', marginBottom: 32, fontSize: 14 }}>{r.step3.sub}</p>
 
                   <div className="form-grid" style={{ marginBottom: 24 }}>
                     <div className="field">
-                      <label>Nombre *</label>
-                      <input type="text" placeholder="Carmen"
+                      <label>{r.step3.firstName}</label>
+                      <input type="text" placeholder={r.step3.firstNamePlaceholder}
                         value={data.nombre} onChange={e => upd('nombre', e.target.value)}
                         style={fieldErrors.nombre ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
                       {fieldErrors.nombre && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.nombre}</span>}
                     </div>
                     <div className="field">
-                      <label>Apellido</label>
-                      <input type="text" placeholder="González" value={data.apellido} onChange={e => upd('apellido', e.target.value)} />
+                      <label>{r.step3.lastName}</label>
+                      <input type="text" placeholder={r.step3.lastNamePlaceholder} value={data.apellido} onChange={e => upd('apellido', e.target.value)} />
                     </div>
                     <div className="field">
-                      <label>Email *</label>
-                      <input type="email" placeholder="carmen@correo.com"
+                      <label>{r.step3.email}</label>
+                      <input type="email" placeholder={r.step3.emailPlaceholder}
                         value={data.email} onChange={e => upd('email', e.target.value)}
                         style={fieldErrors.email ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
                       {fieldErrors.email && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.email}</span>}
                     </div>
                     <div className="field">
-                      <label>Teléfono / WhatsApp *</label>
+                      <label>{r.step3.phone}</label>
                       <PhoneInput
                         prefix={phonePrefix} number={phoneNumber}
                         onPrefixChange={setPhonePrefix}
@@ -646,8 +631,8 @@ export default function ReservaPage() {
                       {fieldErrors.telefono && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.telefono}</span>}
                     </div>
                     <div className="field" style={{ gridColumn: '1 / -1' }}>
-                      <label>Mensaje complementario</label>
-                      <textarea placeholder="Sillas infantiles, vuelo de llegada, paradas adicionales…"
+                      <label>{r.step3.message}</label>
+                      <textarea placeholder={r.step3.messagePlaceholder}
                         value={data.mensaje} onChange={e => upd('mensaje', e.target.value)} />
                     </div>
                   </div>
@@ -661,31 +646,31 @@ export default function ReservaPage() {
                   {showAuthNudge ? (
                     <div style={{ padding: '24px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 'var(--radius)' }}>
                       <div style={{ fontFamily: 'var(--display)', fontSize: 22, fontWeight: 400, marginBottom: 8 }}>
-                        ¿Seguir su reserva en tiempo real?
+                        {r.step3.authNudge.heading}
                       </div>
                       <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 20, lineHeight: 1.6 }}>
-                        Con una cuenta, consulte el estado de su reserva, reciba actualizaciones y guarde su historial de viajes. Sus datos ya están guardados.
+                        {r.step3.authNudge.sub}
                       </p>
                       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
                         <button className="btn btn-primary" onClick={() => saveDraftAndRedirect('/login')}>
-                          Iniciar sesión
+                          {r.step3.authNudge.signIn}
                         </button>
                         <button className="btn btn-ghost" onClick={() => saveDraftAndRedirect('/register')}>
-                          Crear cuenta
+                          {r.step3.authNudge.register}
                         </button>
                       </div>
                       <button
                         onClick={doSubmit}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-muted)', fontSize: 13, padding: 0 }}
                       >
-                        Continuar sin cuenta →
+                        {r.step3.authNudge.continueWithout}
                       </button>
                     </div>
                   ) : (
                     <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                      <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(2) }} disabled={loading}>← Anterior</button>
+                      <button className="btn btn-ghost" onClick={() => { setFieldErrors({}); setStep(2) }} disabled={loading}>{r.step3.prev}</button>
                       <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
-                        {loading ? 'Enviando…' : 'Enviar solicitud'}
+                        {loading ? r.step3.submitting : r.step3.submit}
                       </button>
                     </div>
                   )}
@@ -695,29 +680,29 @@ export default function ReservaPage() {
 
             {/* ── Sidebar ── */}
             <aside style={{ border: '1px solid var(--line)', padding: 32, alignSelf: 'start', position: 'sticky', top: 100 }}>
-              <div className="eyebrow" style={{ marginBottom: 20 }}>Resumen</div>
+              <div className="eyebrow" style={{ marginBottom: 20 }}>{r.sidebar.eyebrow}</div>
               <div className="placeholder" data-label={sidebarImg} style={{ ...bg(sidebarImg), aspectRatio: '16/10', marginBottom: 24 }} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <SummaryRow k="Servicio"  v={SERVICES.find(s => s.id === data.serviceType)?.t ?? '—'} />
-                <SummaryRow k="Salida"    v={data.origen || '—'} />
-                <SummaryRow k="Destino"   v={data.destino || '—'} />
-                <SummaryRow k="Fecha"     v={data.fecha ? `${data.fecha} ${data.hora}`.trim() : '—'} />
-                {data.fechaVuelta && <SummaryRow k="Vuelta" v={`${data.fechaVuelta} ${data.horaVuelta}`.trim()} />}
-                <SummaryRow k="Pasajeros" v={overLimit ? `+${paxLimit} · WhatsApp` : `${data.pasajeros} · ${data.equipaje} maletas`} />
-                {data.vuelo      && <SummaryRow k="Vuelo ida"    v={data.vuelo} />}
-                {data.vueloVuelta && <SummaryRow k="Vuelo vuelta" v={data.vueloVuelta} />}
-                {data.hotel      && <SummaryRow k="Hotel"         v={data.hotel} />}
+                <SummaryRow k={r.sidebar.service}     v={r.services[SERVICE_IDS.indexOf(data.serviceType)]?.t ?? '—'} />
+                <SummaryRow k={r.sidebar.departure}   v={data.origen || '—'} />
+                <SummaryRow k={r.sidebar.destination} v={data.destino || '—'} />
+                <SummaryRow k={r.sidebar.date}        v={data.fecha ? `${data.fecha} ${data.hora}`.trim() : '—'} />
+                {data.fechaVuelta && <SummaryRow k={r.sidebar.return} v={`${data.fechaVuelta} ${data.horaVuelta}`.trim()} />}
+                <SummaryRow k={r.sidebar.passengers}  v={overLimit ? `+${paxLimit} · WhatsApp` : `${data.pasajeros} · ${data.equipaje} ${r.sidebar.luggageSuffix}`} />
+                {data.vuelo       && <SummaryRow k={r.sidebar.flightIn}  v={data.vuelo} />}
+                {data.vueloVuelta && <SummaryRow k={r.sidebar.flightOut} v={data.vueloVuelta} />}
+                {data.hotel       && <SummaryRow k={r.sidebar.hotel}     v={data.hotel} />}
               </div>
 
               <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--line-soft)' }}>
-                <div className="eyebrow" style={{ marginBottom: 8 }}>Precio</div>
+                <div className="eyebrow" style={{ marginBottom: 8 }}>{r.sidebar.priceLabel}</div>
                 <div className="display" style={{ fontSize: 28, fontWeight: 400, color: overLimit ? 'var(--fg-muted)' : 'var(--fg)' }}>
-                  {priceDisplay.label}
+                  {getPriceLabel()}
                 </div>
-                <p style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 8 }}>{priceDisplay.note}</p>
+                <p style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 8 }}>{getPriceNote()}</p>
                 {overLimit && (
                   <a href="https://wa.me/33643272173" target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ marginTop: 16, fontSize: 12 }}>
-                    Contactar por WhatsApp
+                    {r.price.contactWhatsApp}
                   </a>
                 )}
               </div>

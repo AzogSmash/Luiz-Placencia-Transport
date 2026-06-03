@@ -1,29 +1,29 @@
-const STEPS = [
-  { n: '01', t: 'Solicite',            d: 'Por formulario, teléfono o WhatsApp. Respuesta en menos de 30 minutos.' },
-  { n: '02', t: 'Confirmación',        d: 'Presupuesto detallado, sin sorpresas. Pago seguro o a bordo.' },
-  { n: '03', t: 'Su chófer le espera', d: 'Cartel personalizado, seguimiento de vuelo, asistencia con el equipaje.' },
-  { n: '04', t: 'Disfrute',            d: 'Wi-Fi, agua, climatización a su gusto. Llegue a su destino en plena forma.' },
-]
+'use client'
+
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Process() {
+  const { t } = useLanguage()
+  const p = t.process
+
   return (
     <section className="section">
       <div className="container">
         <div className="section-head">
-          <div className="eyebrow label">El método</div>
+          <div className="eyebrow label">{p.eyebrow}</div>
           <div>
-            <h2>Sencillo, transparente,<br/>impecable.</h2>
+            <h2>{p.heading}</h2>
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0 }} className="process-grid">
-          {STEPS.map((s, i) => (
-            <div key={s.n} style={{
+          {p.steps.map((s, i) => (
+            <div key={i} style={{
               padding: '32px 28px 32px 0',
               borderTop: '1px solid var(--accent)',
               marginRight: i < 3 ? 24 : 0,
             }}>
-              <div className="mono" style={{ color: 'var(--accent)', marginBottom: 20 }}>{s.n}</div>
+              <div className="mono" style={{ color: 'var(--accent)', marginBottom: 20 }}>0{i + 1}</div>
               <h3 style={{
                 fontFamily: 'var(--display)',
                 fontSize: 24,

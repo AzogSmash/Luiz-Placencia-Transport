@@ -1,20 +1,21 @@
-const ITEMS = [
-  { q: 'Puntualidad absoluta y un trato exquisito. Llevamos tres años llamando solo a Luis para todos nuestros traslados.', a: 'Isabel M.',     r: 'Hôtel Costes · Conserjería' },
-  { q: 'Un city tour memorable. Conoce París como nadie y respeta los silencios. Volveremos.',                             a: 'Carlos & Ana R.', r: 'Madrid' },
-  { q: 'Servicio impecable de París a Reims. Vehículo perfecto, conducción muy suave.',                                    a: 'Marc D.',         r: 'Maison de champagne' },
-]
+'use client'
+
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Testimonios() {
+  const { t } = useLanguage()
+  const t2 = t.testimonios
+
   return (
     <section className="section" style={{ background: 'var(--bg-elev)' }}>
       <div className="container">
         <div className="section-head">
-          <div className="eyebrow label">Testimonios</div>
-          <div><h2>La palabra<br/>de los clientes.</h2></div>
+          <div className="eyebrow label">{t2.eyebrow}</div>
+          <div><h2>{t2.heading1}<br/>{t2.heading2}</h2></div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }} className="testimonios-grid">
-          {ITEMS.map((it, i) => (
+          {t2.items.map((it, i) => (
             <figure key={i} style={{ margin: 0, padding: 32, border: '1px solid var(--line-soft)', background: 'var(--bg)' }}>
               <div style={{ display: 'flex', gap: 4, marginBottom: 20, color: 'var(--accent)' }}>
                 {Array.from({ length: 5 }).map((_, k) => <span key={k}>★</span>)}

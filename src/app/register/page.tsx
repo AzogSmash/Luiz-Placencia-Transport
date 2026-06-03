@@ -5,11 +5,14 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Logo from '@/components/Logo'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 function RegisterForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') ?? '/dashboard'
+  const { t } = useLanguage()
+  const a = t.auth.register
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -24,7 +27,7 @@ function RegisterForm() {
     setError(null)
 
     if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.')
+      setError(a.passwordTooShort)
       setLoading(false)
       return
     }
@@ -43,11 +46,9 @@ function RegisterForm() {
     }
 
     if (data.session) {
-      // Email confirmation disabled — user is logged in directly
       router.push(redirectTo)
       router.refresh()
     } else {
-      // Email confirmation required
       setConfirmationSent(true)
       setLoading(false)
     }
@@ -67,18 +68,18 @@ function RegisterForm() {
             <Link href="/"><Logo /></Link>
           </div>
           <div style={{ border: '1px solid var(--accent)', padding: '40px', background: 'var(--accent-soft)' }}>
-            <div className="eyebrow" style={{ marginBottom: 16, color: 'var(--accent)' }}>✓ Cuenta creada</div>
+            <div className="eyebrow" style={{ marginBottom: 16, color: 'var(--accent)' }}>{a.confirmationTag}</div>
             <h2 style={{ fontFamily: 'var(--display)', fontSize: 28, margin: 0, marginBottom: 16, fontWeight: 400 }}>
-              Verifique su correo
+              {a.confirmationHeading}
             </h2>
             <p style={{ color: 'var(--fg-muted)', fontSize: 14, lineHeight: 1.6 }}>
-              Hemos enviado un enlace de confirmación a{' '}
-              <strong style={{ color: 'var(--fg)' }}>{email}</strong>.
-              Haga clic en el enlace para activar su cuenta.
+              {a.confirmationText}{' '}
+              <strong style={{ color: 'var(--fg)' }}>{email}</strong>.{' '}
+              {a.confirmationText2}
             </p>
           </div>
           <p style={{ marginTop: 24, fontSize: 14, color: 'var(--fg-muted)' }}>
-            <Link href="/login" style={{ color: 'var(--accent)' }}>Volver a inicio de sesión</Link>
+            <Link href="/login" style={{ color: 'var(--accent)' }}>{a.backToLogin}</Link>
           </p>
         </div>
       </main>
@@ -99,25 +100,19 @@ function RegisterForm() {
         </div>
 
         <div style={{ border: '1px solid var(--line-soft)', padding: '40px 40px 36px' }}>
-          <h1 style={{
-            fontFamily: 'var(--display)',
-            fontSize: 38,
-            margin: 0,
-            marginBottom: 8,
-            fontWeight: 400,
-          }}>
-            Crear cuenta
+          <h1 style={{ fontFamily: 'var(--display)', fontSize: 38, margin: 0, marginBottom: 8, fontWeight: 400 }}>
+            {a.heading}
           </h1>
           <p style={{ color: 'var(--fg-muted)', fontSize: 14, marginBottom: 36 }}>
-            Gestione sus reservas y acceda a su historial de trayectos.
+            {a.sub}
           </p>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div className="field">
-              <label>Nombre completo</label>
+              <label>{a.name}</label>
               <input
                 type="text"
-                placeholder="Carmen González"
+                placeholder={a.namePlaceholder}
                 value={name}
                 onChange={e => setName(e.target.value)}
                 required
@@ -125,7 +120,7 @@ function RegisterForm() {
               />
             </div>
             <div className="field">
-              <label>Email</label>
+              <label>{a.email}</label>
               <input
                 type="email"
                 placeholder="carmen@correo.com"
@@ -136,10 +131,10 @@ function RegisterForm() {
               />
             </div>
             <div className="field">
-              <label>Contraseña</label>
+              <label>{a.password}</label>
               <input
                 type="password"
-                placeholder="Mínimo 6 caracteres"
+                placeholder={a.passwordPlaceholder}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
@@ -165,15 +160,15 @@ function RegisterForm() {
               disabled={loading}
               style={{ opacity: loading ? 0.7 : 1, justifyContent: 'center' }}
             >
-              {loading ? 'Creando cuenta…' : 'Crear cuenta'}
+              {loading ? a.submitting : a.submit}
             </button>
           </form>
         </div>
 
         <p style={{ textAlign: 'center', marginTop: 24, fontSize: 14, color: 'var(--fg-muted)' }}>
-          ¿Ya tiene cuenta?{' '}
+          {a.hasAccount}{' '}
           <Link href="/login" style={{ color: 'var(--accent)', borderBottom: '1px solid var(--accent)' }}>
-            Iniciar sesión
+            {a.signIn}
           </Link>
         </p>
       </div>
