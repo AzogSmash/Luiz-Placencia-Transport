@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { updateReservationStatus, deleteReservation, updateNotifPreferences } from '@/app/actions/admin'
 import type { AdminLog, NotifPrefs } from '@/app/actions/admin'
@@ -158,6 +158,14 @@ export default function AdminPanel({
   const [analyticsRange, setAnalyticsRange]     = useState<'7d' | '30d'>('7d')
   const [devTab, setDevTab]           = useState<'devices' | 'browsers' | 'os'>('devices')
 
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 700)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   useEffect(() => {
     if (tab !== 'estadisticas') return
     setAnalyticsLoading(true)
@@ -245,28 +253,57 @@ export default function AdminPanel({
   return (
     <div>
       {/* ── Stats ── */}
-      <div style={{ display: 'flex', gap: 1, background: 'var(--line-soft)', border: '1px solid var(--line-soft)', marginBottom: 32, flexWrap: 'wrap' }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(6, 1fr)',
+        gap: 1,
+        background: 'var(--line-soft)',
+        border: '1px solid var(--line-soft)',
+        marginBottom: isMobile ? 20 : 28,
+      }}>
         {FILTER_TABS.map(t => {
           const st = STATUS_STYLE[t.id]
           return (
-            <div key={t.id} style={{ background: 'var(--bg)', padding: '16px 24px', minWidth: 100 }}>
-              <div style={{ fontFamily: 'var(--display)', fontSize: 32, fontWeight: 400, color: st?.color ?? 'var(--fg)', lineHeight: 1, marginBottom: 4 }}>
+            <div key={t.id} style={{
+              background: 'var(--bg)',
+              padding: isMobile ? '14px 14px' : '20px 24px',
+              borderTop: `2px solid ${st?.color ?? 'var(--line-soft)'}`,
+            }}>
+              <div style={{
+                fontFamily: 'var(--display)',
+                fontSize: isMobile ? 26 : 30,
+                fontWeight: 400,
+                color: st?.color ?? 'var(--fg)',
+                lineHeight: 1,
+                marginBottom: 5,
+              }}>
                 {counts[t.id] ?? 0}
               </div>
-              <div className="eyebrow">{t.label}</div>
+              <div className="eyebrow" style={isMobile ? { fontSize: 8, letterSpacing: '0.08em' } : undefined}>
+                {t.label}
+              </div>
             </div>
           )
         })}
       </div>
 
       {/* ── Main tabs ── */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--line-soft)', marginBottom: 28 }}>
+      <div style={{
+        display: 'flex',
+        borderBottom: '1px solid var(--line-soft)',
+        marginBottom: isMobile ? 20 : 28,
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none' as React.CSSProperties['scrollbarWidth'],
+      }}>
         {MAIN_TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
-            padding: '12px 24px', background: 'transparent', border: 0,
+            padding: isMobile ? '10px 16px' : '12px 24px',
+            background: 'transparent', border: 0, flexShrink: 0,
             borderBottom: tab === t.id ? '2px solid var(--accent)' : '2px solid transparent',
             color: tab === t.id ? 'var(--accent)' : 'var(--fg-muted)',
-            cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 500,
+            cursor: 'pointer', fontFamily: 'var(--sans)',
+            fontSize: isMobile ? 12 : 13, fontWeight: 500,
             letterSpacing: '0.06em', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
           }}>
             {t.label}
@@ -277,37 +314,37 @@ export default function AdminPanel({
       {/* ══ TAB: RESERVAS ══ */}
       {tab === 'reservas' && (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-            <div style={{ display: 'flex', gap: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 8 }}>
+            <div style={{ display: 'flex', gap: 4, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' as React.CSSProperties['scrollbarWidth'] }}>
               {TIME_TABS.map(t => (
                 <button key={t.id} onClick={() => setTimeFilter(t.id)} style={{
-                  padding: '7px 16px', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
-                  border: '1px solid var(--line-soft)',
+                  padding: '7px 14px', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
+                  border: '1px solid var(--line-soft)', flexShrink: 0,
                   background: timeFilter === t.id ? 'var(--accent)' : 'transparent',
                   color: timeFilter === t.id ? '#0d0d0d' : 'var(--fg-muted)',
-                  borderRadius: 4, cursor: 'pointer', transition: 'all 0.15s ease',
+                  borderRadius: 4, cursor: 'pointer', transition: 'all 0.15s ease', whiteSpace: 'nowrap',
                 }}>{t.label}</button>
               ))}
             </div>
             <button onClick={() => setSortAsc(a => !a)} style={{
-              padding: '7px 14px', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
+              padding: '7px 12px', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
               border: '1px solid var(--line-soft)', background: 'transparent', color: 'var(--fg-muted)',
-              borderRadius: 4, cursor: 'pointer',
+              borderRadius: 4, cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap',
             }}>
-              Fecha {sortAsc ? '↑' : '↓'}
+              {sortAsc ? '↑' : '↓'}
             </button>
           </div>
 
-          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--line-soft)', marginBottom: 24, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--line-soft)', marginBottom: 20, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' as React.CSSProperties['scrollbarWidth'] }}>
             {FILTER_TABS.map(t => {
               const active = statusFilter === t.id
               const st = STATUS_STYLE[t.id]
               return (
                 <button key={t.id} onClick={() => setStatusFilter(t.id)} style={{
-                  padding: '12px 20px', background: 'transparent', border: 0,
+                  padding: isMobile ? '10px 14px' : '12px 20px', background: 'transparent', border: 0, flexShrink: 0,
                   borderBottom: active ? `2px solid ${st?.color ?? 'var(--accent)'}` : '2px solid transparent',
                   color: active ? (st?.color ?? 'var(--fg)') : 'var(--fg-muted)',
-                  cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 500,
+                  cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: isMobile ? 11 : 12, fontWeight: 500,
                   letterSpacing: '0.1em', textTransform: 'uppercase', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
                 }}>
                   {t.label} <span style={{ opacity: 0.6 }}>({counts[t.id] ?? 0})</span>
@@ -320,14 +357,108 @@ export default function AdminPanel({
             <div style={{ padding: '48px 32px', border: '1px solid var(--line-soft)', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 14 }}>
               No hay reservas para este filtro.
             </div>
+          ) : isMobile ? (
+            /* ── MOBILE: cards ── */
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line-soft)', border: '1px solid var(--line-soft)' }}>
+              {sorted.map(r => {
+                const currentStatut = statuses[r.id] ?? r.statut
+                const isUpdating = updating.has(r.id)
+                const isDeleting = deleting.has(r.id)
+                const st = STATUS_STYLE[currentStatut] ?? STATUS_STYLE['en attente']
+                const isOpen = expanded.has(r.id)
+                const parsed = parseMessage(r.message)
+                const phoneClean = r.telephone.replace(/\s/g, '')
+                const waPhone = phoneClean.startsWith('+') ? phoneClean.slice(1) : phoneClean
+                const visibleDetails = DETAIL_LABELS
+                  .filter(d => parsed.fields[d.key])
+                  .filter((d, _i, arr) => !(d.key === 'Bagages' && arr.some(x => x.key === 'Equipaje' && parsed.fields['Equipaje'])))
+
+                return (
+                  <div key={r.id} style={{ background: 'var(--bg)', opacity: isDeleting ? 0.4 : 1, borderLeft: `3px solid ${st.color}` }}>
+                    <div style={{ padding: '14px 16px', opacity: isUpdating ? 0.7 : 1 }}>
+                      {/* Row 1: id + name + expand */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                            <span className="mono" style={{ color: 'var(--accent)', fontSize: 11, flexShrink: 0 }}>#{r.id}</span>
+                            <span style={{ fontSize: 14, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.nom}</span>
+                          </div>
+                          <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{r.telephone}</div>
+                        </div>
+                        <button onClick={() => toggleExpand(r.id)} style={{
+                          background: 'transparent', border: 0, cursor: 'pointer',
+                          color: isOpen ? 'var(--accent)' : 'var(--fg-dim)', fontSize: 14, padding: '2px 4px', flexShrink: 0,
+                        }}>{isOpen ? '▲' : '▼'}</button>
+                      </div>
+                      {/* Row 2: route */}
+                      <div style={{ fontSize: 12, marginBottom: 10, lineHeight: 1.5 }}>
+                        <span style={{ color: 'var(--fg-muted)' }}>{r.adresse_depart}</span>
+                        <span style={{ color: 'var(--accent)', margin: '0 6px' }}>→</span>
+                        <span style={{ color: 'var(--fg-muted)' }}>{r.adresse_arrivee}</span>
+                      </div>
+                      {/* Row 3: date + pax + status */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                        <span className="mono" style={{ fontSize: 10, color: 'var(--fg-dim)', flexShrink: 0 }}>
+                          {fmt(r.date_heure)} · {r.nombre_passagers} pax
+                        </span>
+                        <select value={currentStatut} disabled={isUpdating} onChange={e => handleStatusChange(r.id, e.target.value)} style={{
+                          background: st.bg, color: st.color, border: `1px solid ${st.color}`,
+                          borderRadius: 3, padding: '5px 8px', fontSize: 10, fontWeight: 600,
+                          letterSpacing: '0.08em', textTransform: 'uppercase',
+                          cursor: isUpdating ? 'wait' : 'pointer', outline: 'none', appearance: 'none',
+                          backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23999' fill='none' stroke-width='1.2'/></svg>")`,
+                          backgroundRepeat: 'no-repeat', backgroundPosition: 'right 6px center', paddingRight: 20,
+                        }}>
+                          {STATUSES.map(s => <option key={s} value={s}>{STATUS_STYLE[s].label}</option>)}
+                        </select>
+                      </div>
+                      {errors[r.id] && <div style={{ fontSize: 10, color: 'oklch(0.65 0.14 20)', marginTop: 6 }}>{errors[r.id]}</div>}
+                    </div>
+                    {/* Expanded details */}
+                    {isOpen && (
+                      <div style={{ padding: '0 16px 16px', borderTop: '1px solid var(--line-soft)' }}>
+                        <div style={{ paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <ActionBtn href={`tel:${phoneClean}`}        label="Llamar"   color="oklch(0.65 0.16 145)" />
+                            <ActionBtn href={`https://wa.me/${waPhone}`} label="WhatsApp" color="oklch(0.72 0.18 145)" />
+                            <ActionBtn href={`mailto:${r.email}`}        label="Email"    color="var(--accent)"        />
+                          </div>
+                          {visibleDetails.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                              {visibleDetails.map(d => <DetailChip key={d.key} label={d.label} value={parsed.fields[d.key]} />)}
+                            </div>
+                          )}
+                          {parsed.notes && (
+                            <div style={{ padding: '10px 14px', background: 'var(--bg-soft)', border: '1px solid var(--line-soft)', borderRadius: 6, fontSize: 12, color: 'var(--fg-muted)' }}>
+                              <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-dim)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Notas del cliente</span>
+                              {parsed.notes}
+                            </div>
+                          )}
+                          <div style={{ paddingTop: 4, borderTop: '1px solid var(--line-soft)' }}>
+                            <button onClick={() => handleDelete(r.id)} disabled={isDeleting} style={{
+                              background: 'transparent', border: '1px solid oklch(0.65 0.14 20)',
+                              color: 'oklch(0.65 0.14 20)', padding: '6px 14px', fontSize: 11,
+                              fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
+                              borderRadius: 4, cursor: isDeleting ? 'wait' : 'pointer',
+                            }}>
+                              {isDeleting ? 'Eliminando…' : 'Eliminar reserva'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           ) : (
+            /* ── DESKTOP: table ── */
             <div style={{ border: '1px solid var(--line-soft)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 130px 1.4fr 110px 46px 170px 40px', background: 'var(--bg-soft)', borderBottom: '1px solid var(--line-soft)', padding: '10px 16px', minWidth: 860 }}>
                 {['#', 'Cliente', 'Teléfono', 'Trayecto', 'Fecha', 'Pax', 'Estado', ''].map(h => (
                   <div key={h} className="eyebrow" style={{ paddingRight: 10 }}>{h}</div>
                 ))}
               </div>
-
               <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line-soft)', minWidth: 860 }}>
                 {sorted.map(r => {
                   const currentStatut = statuses[r.id] ?? r.statut
@@ -338,14 +469,9 @@ export default function AdminPanel({
                   const parsed = parseMessage(r.message)
                   const phoneClean = r.telephone.replace(/\s/g, '')
                   const waPhone = phoneClean.startsWith('+') ? phoneClean.slice(1) : phoneClean
-
                   const visibleDetails = DETAIL_LABELS
                     .filter(d => parsed.fields[d.key])
-                    .filter((d, i, arr) => {
-                      if (d.key === 'Bagages' && arr.some(x => x.key === 'Equipaje' && parsed.fields['Equipaje'])) return false
-                      return true
-                    })
-
+                    .filter((d, _i, arr) => !(d.key === 'Bagages' && arr.some(x => x.key === 'Equipaje' && parsed.fields['Equipaje'])))
                   return (
                     <div key={r.id} style={{ background: isOpen ? 'var(--bg-elev)' : 'var(--bg)', transition: 'background 0.2s ease', opacity: isDeleting ? 0.4 : 1 }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 130px 1.4fr 110px 46px 170px 40px', padding: '14px 16px', alignItems: 'center', opacity: isUpdating ? 0.7 : 1, transition: 'opacity 0.2s ease' }}>
@@ -379,7 +505,6 @@ export default function AdminPanel({
                           {isOpen ? '▲' : '▼'}
                         </button>
                       </div>
-
                       {isOpen && (
                         <div style={{ padding: '0 16px 20px 72px', borderTop: '1px solid var(--line-soft)' }}>
                           <div style={{ paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -438,7 +563,24 @@ export default function AdminPanel({
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {initialLogs.map((log, i) => {
                 const style = LOG_STYLE[log.type] ?? { color: 'var(--fg-muted)', label: log.type }
-                return (
+                return isMobile ? (
+                  <div key={log.id} style={{
+                    padding: '12px 16px',
+                    borderBottom: i < initialLogs.length - 1 ? '1px solid var(--line-soft)' : undefined,
+                    background: i % 2 === 0 ? 'var(--bg)' : 'var(--bg-soft)',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <span style={{
+                        display: 'inline-block', padding: '2px 8px', fontSize: 9, fontWeight: 600,
+                        letterSpacing: '0.1em', textTransform: 'uppercase',
+                        border: `1px solid ${style.color}`, color: style.color, borderRadius: 3,
+                      }}>{style.label}</span>
+                      <span className="mono" style={{ fontSize: 10, color: 'var(--fg-dim)' }}>{fmt(log.created_at)}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--fg)', marginBottom: log.admin_name ? 4 : 0, lineHeight: 1.4 }}>{log.message}</div>
+                    {log.admin_name && <div style={{ fontSize: 11, color: 'var(--fg-dim)' }}>{log.admin_name}</div>}
+                  </div>
+                ) : (
                   <div key={log.id} style={{
                     display: 'grid', gridTemplateColumns: '140px 1fr auto 100px',
                     padding: '14px 20px', alignItems: 'center', gap: 16,
@@ -449,16 +591,10 @@ export default function AdminPanel({
                       display: 'inline-block', padding: '3px 10px', fontSize: 10, fontWeight: 600,
                       letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap',
                       border: `1px solid ${style.color}`, color: style.color, borderRadius: 3,
-                    }}>
-                      {style.label}
-                    </span>
+                    }}>{style.label}</span>
                     <span style={{ fontSize: 13, color: 'var(--fg)' }}>{log.message}</span>
-                    <span style={{ fontSize: 11, color: 'var(--fg-dim)', whiteSpace: 'nowrap' }}>
-                      {log.admin_name ?? '—'}
-                    </span>
-                    <span className="mono" style={{ fontSize: 10, color: 'var(--fg-dim)', textAlign: 'right' }}>
-                      {fmt(log.created_at)}
-                    </span>
+                    <span style={{ fontSize: 11, color: 'var(--fg-dim)', whiteSpace: 'nowrap' }}>{log.admin_name ?? '—'}</span>
+                    <span className="mono" style={{ fontSize: 10, color: 'var(--fg-dim)', textAlign: 'right' }}>{fmt(log.created_at)}</span>
                   </div>
                 )
               })}
