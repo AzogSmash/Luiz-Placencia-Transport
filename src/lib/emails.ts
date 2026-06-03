@@ -90,7 +90,7 @@ const STATUS_INFO: Record<string, { label: string; color: string; message: strin
   'annulée': {
     label: 'Cancelada',
     color: '#b85a5a',
-    message: 'Su reserva ha sido cancelada. Contáctenos si tiene alguna pregunta.',
+    message: 'Su reserva ha sido cancelada. Si realizó un pago, el reembolso será procesado en 5–10 días hábiles. Contáctenos si tiene alguna pregunta.',
   },
 }
 
@@ -154,15 +154,45 @@ export function emailReservationConfirmation(r: ReservationData) {
   }
 }
 
+function extractMsg(message: string | null, key: string) {
+  if (!message) return null
+  const part = message.split(' | ').find(p => p.startsWith(`${key}: `))
+  return part ? part.slice(key.length + 2) : null
+}
+
 /** Envoyé à l'admin quand une nouvelle réservation arrive */
 export function emailNewReservationAdmin(r: ReservationData) {
+  const service  = extractMsg(r.message, 'Service')
+  const prix     = extractMsg(r.message, 'Prix')
+  const isPaid   = prix && prix !== 'Precio bajo consulta' && prix !== 'Contactar por WhatsApp'
+  const userNote = r.message
+    ? r.message.split(' | ').filter(p =>
+        !p.startsWith('Service:') && !p.startsWith('Prix:') &&
+        !p.startsWith('Equipaje:') && !p.startsWith('Vuelo') &&
+        !p.startsWith('Hotel') && !p.startsWith('Niños:') &&
+        !p.startsWith('Duración:') && !p.startsWith('Fecha vuelta:')
+      ).join(' ').trim()
+    : ''
+
   const body = `
     <h1 style="margin:0 0 8px 0;font-size:28px;font-weight:300;color:#e8e4de;">
       Nueva reserva #${r.id}
     </h1>
-    <p style="margin:0 0 32px 0;font-size:13px;color:#888;">
+    <p style="margin:0 0 24px 0;font-size:13px;color:#888;">
       Recibida el ${new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
     </p>
+
+    ${prix ? `<div style="margin:0 0 24px 0;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:26px;font-weight:300;color:#e8e4de;">${prix}</span>
+      ${isPaid
+        ? `<span style="display:inline-block;padding:3px 10px;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;border:1px solid #4a9968;color:#4a9968;font-weight:600;">Pago Stripe</span>`
+        : `<span style="display:inline-block;padding:3px 10px;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;border:1px solid #888;color:#888;font-weight:600;">Presupuesto</span>`
+      }
+    </div>` : ''}
+
+    ${divider()}
+
+    ${service ? `${label('Servicio')}${value(service)}` : ''}
 
     ${label('Cliente')}
     ${value(`${r.nom} · <a href="mailto:${r.email}" style="color:${ACCENT};text-decoration:none;">${r.email}</a>`)}
@@ -178,16 +208,16 @@ export function emailNewReservationAdmin(r: ReservationData) {
     ${label('Pasajeros')}
     ${value(String(r.nombre_passagers))}
 
-    ${r.message ? `${label('Mensaje del cliente')}${value(r.message)}` : ''}
+    ${userNote ? `${label('Nota del cliente')}${value(userNote)}` : ''}
 
     ${divider()}
 
-    <a href="https://luisplasenciatransport.com/admin" style="display:inline-block;padding:12px 24px;background:${ACCENT};color:#0d0d0d;text-decoration:none;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">
-      Ver en el panel →
+    <a href="https://luisplasenciatransport.com/admin" style="display:inline-block;padding:14px 28px;background:${ACCENT};color:#0d0d0d;text-decoration:none;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;">
+      Abrir panel admin — Reserva #${r.id} →
     </a>
   `
   return {
-    subject: `Nueva reserva #${r.id} — ${r.nom}`,
+    subject: `🔔 Nueva reserva #${r.id} — ${r.nom}${prix && isPaid ? ` · ${prix} pagado` : ''}`,
     html: layout('Nueva reserva', body),
   }
 }

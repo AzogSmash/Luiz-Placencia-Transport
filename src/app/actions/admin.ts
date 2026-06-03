@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import Stripe from 'stripe'
 import { createClient }      from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { resend, FROM } from '@/lib/resend'
@@ -70,12 +71,24 @@ export async function updateReservationStatus(
   const admin = createAdminClient()
   const { data: reservation } = await admin
     .from('reservations')
-    .select('id, nom, email, adresse_depart, adresse_arrivee, date_heure, nombre_passagers, message')
+    .select('id, nom, email, adresse_depart, adresse_arrivee, date_heure, nombre_passagers, message, stripe_payment_intent_id')
     .eq('id', id)
     .single()
 
   const { error } = await admin.from('reservations').update({ statut }).eq('id', id)
   if (error) return { success: false, error: error.message }
+
+  // Remboursement automatique Stripe si paiement existant
+  if (statut === 'annulée' && reservation?.stripe_payment_intent_id) {
+    try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-05-28.basil' as any })
+      await stripe.refunds.create({ payment_intent: reservation.stripe_payment_intent_id })
+      await logEvent('reembolso_emitido', id, `Reembolso emitido para reserva #${id} (${reservation.nom})`)
+    } catch (refundErr) {
+      console.error('[refund]', refundErr)
+      await logEvent('reembolso_error', id, `Error al emitir reembolso para reserva #${id}`)
+    }
+  }
 
   const statusLabel: Record<string, string> = {
     'confirmée': 'Confirmada', 'annulée': 'Cancelada',

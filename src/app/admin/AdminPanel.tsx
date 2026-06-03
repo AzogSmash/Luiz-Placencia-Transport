@@ -36,6 +36,8 @@ const LOG_STYLE: Record<string, { color: string; label: string }> = {
   'estado_terminée':     { color: 'var(--fg-muted)',       label: 'Finalizada'     },
   'estado_en_attente':   { color: 'oklch(0.78 0.09 85)',  label: 'En espera'      },
   'reserva_eliminada':   { color: 'oklch(0.65 0.14 20)',  label: 'Eliminada'      },
+  'reembolso_emitido':   { color: 'oklch(0.65 0.16 145)', label: 'Reembolso'      },
+  'reembolso_error':     { color: 'oklch(0.65 0.14 20)',  label: 'Error reembolso' },
 }
 
 function fmt(iso: string) {

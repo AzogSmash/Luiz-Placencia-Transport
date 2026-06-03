@@ -25,7 +25,11 @@ export default async function PagoExitosoPage({
         const admin = createAdminClient()
         await admin
           .from('reservations')
-          .update({ statut: 'confirmée' })
+          .update({
+            statut: 'confirmée',
+            stripe_session_id: session_id,
+            stripe_payment_intent_id: (session.payment_intent as string) ?? null,
+          })
           .eq('id', parseInt(ref))
       }
     } catch {
