@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient }      from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 
-const BASE    = 'https://vercel.com/api/web-analytics'
 const TOKEN   = process.env.VERCEL_API_TOKEN
 const PROJECT = process.env.VERCEL_PROJECT_ID
 
@@ -15,23 +14,30 @@ async function isAdmin(): Promise<boolean> {
   return data?.role === 'admin'
 }
 
+// Route de debug — retourne la réponse brute de l'API Vercel pour identifier les bons endpoints
 export async function GET(req: NextRequest) {
   if (!await isAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { searchParams } = new URL(req.url)
-  const metric = searchParams.get('metric') ?? 'timeseries'
-
   const now  = Date.now()
-  const from = searchParams.get('from') ?? new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString()
-  const to   = searchParams.get('to')   ?? new Date(now).toISOString()
+  const from = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const to   = new Date(now).toISOString()
 
-  const params = new URLSearchParams({ projectId: PROJECT!, from, to, limit: '10' })
+  const candidates = [
+    `https://vercel.com/api/web-analytics/timeseries?projectId=${PROJECT}&from=${from}&to=${to}`,
+    `https://api.vercel.com/v1/web/analytics/timeseries?projectId=${PROJECT}&from=${from}&to=${to}`,
+    `https://api.vercel.com/v6/analytics?projectId=${PROJECT}&from=${from}&to=${to}`,
+  ]
 
-  const res = await fetch(`${BASE}/${metric}?${params}`, {
-    headers: { Authorization: `Bearer ${TOKEN}` },
-    next: { revalidate: 300 },
-  })
+  const results: Record<string, unknown> = {}
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${TOKEN}` } })
+      const text = await res.text()
+      results[url] = { status: res.status, body: text.slice(0, 500) }
+    } catch (e) {
+      results[url] = { error: String(e) }
+    }
+  }
 
-  const data = await res.json()
-  return NextResponse.json(data, { status: res.ok ? 200 : res.status })
+  return NextResponse.json(results)
 }
