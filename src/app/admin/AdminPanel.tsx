@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { updateReservationStatus, deleteReservation, updateNotifPreferences } from '@/app/actions/admin'
 import type { AdminLog, NotifPrefs } from '@/app/actions/admin'
 
@@ -100,7 +100,18 @@ function ActionBtn({ href, label, color }: { href: string; label: string; color:
 }
 
 type TimeFilter = 'proximas' | 'pasadas' | 'todas'
-type Tab = 'reservas' | 'actividad' | 'configuracion'
+type Tab = 'reservas' | 'actividad' | 'estadisticas' | 'configuracion'
+
+type AnalyticsData = {
+  visitors:   number
+  pageviews:  number
+  bounceRate: number
+  timeseries: { x: string; y: number }[]
+  pages:      { path: string; visitors: number }[]
+  countries:  { country: string; visitors: number; pct: number }[]
+  referrers:  { referrer: string; visitors: number }[]
+  devices:    { device: string; visitors: number; pct: number }[]
+} | null
 
 export default function AdminPanel({
   reservations: initial,
@@ -128,6 +139,46 @@ export default function AdminPanel({
   const [prefs, setPrefs]           = useState<NotifPrefs>(initialPrefs)
   const [savingPrefs, setSavingPrefs] = useState(false)
   const [prefsSaved, setPrefsSaved] = useState(false)
+
+  // Analytics
+  const [analytics, setAnalytics]     = useState<AnalyticsData>(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(false)
+  const [analyticsRange, setAnalyticsRange]     = useState<'7d' | '30d'>('7d')
+
+  useEffect(() => {
+    if (tab !== 'estadisticas') return
+    setAnalyticsLoading(true)
+    const days = analyticsRange === '7d' ? 7 : 30
+    const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+    const to   = new Date().toISOString()
+
+    Promise.all([
+      fetch(`/api/analytics?metric=timeseries&from=${from}&to=${to}`).then(r => r.json()),
+      fetch(`/api/analytics?metric=pages&from=${from}&to=${to}`).then(r => r.json()),
+      fetch(`/api/analytics?metric=countries&from=${from}&to=${to}`).then(r => r.json()),
+      fetch(`/api/analytics?metric=referrers&from=${from}&to=${to}`).then(r => r.json()),
+      fetch(`/api/analytics?metric=devices&from=${from}&to=${to}`).then(r => r.json()),
+    ]).then(([ts, pages, countries, referrers, devices]) => {
+      const tsData: { x: string; y: number }[] = Array.isArray(ts?.data) ? ts.data : (Array.isArray(ts) ? ts : [])
+      const totalVisitors  = tsData.reduce((s: number, d: { y: number }) => s + (d.y ?? 0), 0)
+      const pagesData      = Array.isArray(pages?.data)     ? pages.data     : (Array.isArray(pages)     ? pages     : [])
+      const countriesData  = Array.isArray(countries?.data) ? countries.data : (Array.isArray(countries) ? countries : [])
+      const referrersData  = Array.isArray(referrers?.data) ? referrers.data : (Array.isArray(referrers) ? referrers : [])
+      const devicesData    = Array.isArray(devices?.data)   ? devices.data   : (Array.isArray(devices)   ? devices   : [])
+
+      setAnalytics({
+        visitors:   totalVisitors,
+        pageviews:  pagesData.reduce((s: number, p: { visitors: number }) => s + (p.visitors ?? 0), 0),
+        bounceRate: 0,
+        timeseries: tsData,
+        pages:      pagesData,
+        countries:  countriesData,
+        referrers:  referrersData,
+        devices:    devicesData,
+      })
+      setAnalyticsLoading(false)
+    }).catch(() => setAnalyticsLoading(false))
+  }, [tab, analyticsRange])
 
   const now = new Date()
   const timeFiltered = items.filter(r => {
@@ -195,6 +246,7 @@ export default function AdminPanel({
   const MAIN_TABS: { id: Tab; label: string }[] = [
     { id: 'reservas',      label: `Reservas (${items.length})`  },
     { id: 'actividad',     label: 'Actividad'                   },
+    { id: 'estadisticas',  label: 'Estadísticas'                },
     { id: 'configuracion', label: 'Configuración'               },
   ]
 
@@ -418,6 +470,150 @@ export default function AdminPanel({
                   </div>
                 )
               })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ══ TAB: ESTADÍSTICAS ══ */}
+      {tab === 'estadisticas' && (
+        <div>
+          {/* Range selector */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
+            <h3 style={{ fontFamily: 'var(--display)', fontSize: 22, fontWeight: 400, margin: 0 }}>
+              Audiencia del sitio
+            </h3>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {(['7d', '30d'] as const).map(r => (
+                <button key={r} onClick={() => setAnalyticsRange(r)} style={{
+                  padding: '7px 16px', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
+                  border: '1px solid var(--line-soft)', cursor: 'pointer',
+                  background: analyticsRange === r ? 'var(--accent)' : 'transparent',
+                  color: analyticsRange === r ? '#0d0d0d' : 'var(--fg-muted)',
+                }}>
+                  {r === '7d' ? '7 días' : '30 días'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {analyticsLoading ? (
+            <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>
+              Cargando estadísticas…
+            </div>
+          ) : !analytics ? (
+            <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>
+              No hay datos disponibles.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+              {/* KPIs */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1, background: 'var(--line-soft)', border: '1px solid var(--line-soft)' }}>
+                {[
+                  { label: 'Visitantes', value: analytics.visitors },
+                  { label: 'Páginas vistas', value: analytics.pageviews },
+                ].map(kpi => (
+                  <div key={kpi.label} style={{ background: 'var(--bg)', padding: '20px 24px' }}>
+                    <div style={{ fontFamily: 'var(--display)', fontSize: 36, fontWeight: 400, color: 'var(--accent)', lineHeight: 1, marginBottom: 6 }}>
+                      {kpi.value}
+                    </div>
+                    <div className="eyebrow">{kpi.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Sparkline visites */}
+              {analytics.timeseries.length > 0 && (
+                <div style={{ border: '1px solid var(--line-soft)', padding: '24px' }}>
+                  <div className="eyebrow" style={{ marginBottom: 16 }}>Visitantes por día</div>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 80 }}>
+                    {analytics.timeseries.map((d, i) => {
+                      const max = Math.max(...analytics.timeseries.map(x => x.y), 1)
+                      const h = Math.max(4, (d.y / max) * 80)
+                      return (
+                        <div key={i} title={`${d.x}: ${d.y}`} style={{
+                          flex: 1, height: h, background: 'var(--accent)', opacity: 0.8,
+                          borderRadius: 2, minWidth: 8,
+                        }} />
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Pages + Countries + Referrers + Devices */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+
+                {/* Top pages */}
+                <div style={{ border: '1px solid var(--line-soft)' }}>
+                  <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--line-soft)' }}>
+                    <div className="eyebrow">Páginas más visitadas</div>
+                  </div>
+                  {analytics.pages.slice(0, 8).map((p, i) => (
+                    <div key={i} style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '10px 20px', borderBottom: i < Math.min(analytics.pages.length, 8) - 1 ? '1px solid var(--line-soft)' : undefined,
+                      fontSize: 13,
+                    }}>
+                      <span style={{ color: 'var(--fg)', fontFamily: 'var(--mono)' }}>{p.path || '/'}</span>
+                      <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{p.visitors}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Countries */}
+                <div style={{ border: '1px solid var(--line-soft)' }}>
+                  <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--line-soft)' }}>
+                    <div className="eyebrow">Países</div>
+                  </div>
+                  {analytics.countries.slice(0, 8).map((c, i) => (
+                    <div key={i} style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '10px 20px', borderBottom: i < Math.min(analytics.countries.length, 8) - 1 ? '1px solid var(--line-soft)' : undefined,
+                      fontSize: 13,
+                    }}>
+                      <span style={{ color: 'var(--fg)' }}>{c.country}</span>
+                      <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{c.pct != null ? `${Math.round(c.pct)}%` : c.visitors}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Referrers */}
+                <div style={{ border: '1px solid var(--line-soft)' }}>
+                  <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--line-soft)' }}>
+                    <div className="eyebrow">Fuentes de tráfico</div>
+                  </div>
+                  {analytics.referrers.slice(0, 8).map((r, i) => (
+                    <div key={i} style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '10px 20px', borderBottom: i < Math.min(analytics.referrers.length, 8) - 1 ? '1px solid var(--line-soft)' : undefined,
+                      fontSize: 13,
+                    }}>
+                      <span style={{ color: 'var(--fg)' }}>{r.referrer || 'Directo'}</span>
+                      <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{r.visitors}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Devices */}
+                <div style={{ border: '1px solid var(--line-soft)' }}>
+                  <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--line-soft)' }}>
+                    <div className="eyebrow">Dispositivos</div>
+                  </div>
+                  {analytics.devices.slice(0, 6).map((d, i) => (
+                    <div key={i} style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '10px 20px', borderBottom: i < Math.min(analytics.devices.length, 6) - 1 ? '1px solid var(--line-soft)' : undefined,
+                      fontSize: 13,
+                    }}>
+                      <span style={{ color: 'var(--fg)' }}>{d.device}</span>
+                      <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{d.pct != null ? `${Math.round(d.pct)}%` : d.visitors}</span>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
             </div>
           )}
         </div>
