@@ -2,7 +2,7 @@
 
 import { createClient }      from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { resend, FROM, ADMIN_EMAIL } from '@/lib/resend'
+import { resend, FROM } from '@/lib/resend'
 import { emailReservationConfirmation, emailNewReservationAdmin } from '@/lib/emails'
 
 export type ReservationPayload = {
@@ -44,11 +44,20 @@ export async function createReservation(
 
   const reservation = { ...payload, id: data.id }
 
-  // Log + check prefs (non-blocking)
   const adminDb = createAdminClient()
-  const { data: adminProfile } = await adminDb
-    .from('profiles').select('notif_new_reservation').eq('role', 'admin').limit(1).single()
-  const notifyAdmin = adminProfile?.notif_new_reservation ?? true
+
+  // Récupère tous les admins avec leurs préférences et emails
+  const { data: adminProfiles } = await adminDb
+    .from('profiles')
+    .select('id, notif_new_reservation')
+    .eq('role', 'admin')
+
+  const adminEmailsToNotify: string[] = []
+  for (const profile of adminProfiles ?? []) {
+    if (!profile.notif_new_reservation) continue
+    const { data: { user } } = await adminDb.auth.admin.getUserById(profile.id)
+    if (user?.email) adminEmailsToNotify.push(user.email)
+  }
 
   try {
     await adminDb.from('admin_logs').insert({
@@ -60,7 +69,9 @@ export async function createReservation(
 
   await Promise.allSettled([
     resend.emails.send({ from: FROM, to: payload.email, ...emailReservationConfirmation(reservation) }),
-    ...(notifyAdmin ? [resend.emails.send({ from: FROM, to: ADMIN_EMAIL, ...emailNewReservationAdmin(reservation) })] : []),
+    ...adminEmailsToNotify.map(email =>
+      resend.emails.send({ from: FROM, to: email, ...emailNewReservationAdmin(reservation) })
+    ),
   ])
 
   return { success: true, id: data.id }
