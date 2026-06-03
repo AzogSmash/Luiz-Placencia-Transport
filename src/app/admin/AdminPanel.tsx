@@ -315,7 +315,10 @@ export default function AdminPanel({
                             <span style={{ color: 'var(--accent)', marginRight: 4 }}>→</span>{truncate(r.adresse_arrivee)}
                           </div>
                         </div>
-                        <div className="mono" style={{ fontSize: 10, color: 'var(--fg-muted)', paddingRight: 10, lineHeight: 1.5 }}>{fmt(r.date_heure)}</div>
+                        <div style={{ paddingRight: 10, lineHeight: 1.5 }}>
+                          <div className="mono" style={{ fontSize: 10, color: 'var(--fg-muted)' }}>{fmt(r.date_heure)}</div>
+                          <div style={{ fontSize: 9, color: 'var(--fg-dim)', marginTop: 3, letterSpacing: '0.04em' }}>Reservado {fmt(r.created_at)}</div>
+                        </div>
                         <div style={{ fontSize: 13, textAlign: 'center', paddingRight: 10 }}>{r.nombre_passagers}</div>
                         <div>
                           <select value={currentStatut} disabled={isUpdating} onChange={e => handleStatusChange(r.id, e.target.value)} style={{
