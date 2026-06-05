@@ -7,7 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 
 const SERVICE_IMGS = [
   'Avión llegando al tarmac',
-  'Avión llegando al tarmac',
+  'Ryanair despegando en Beauvais',
   'Llegada Disneyland Hotel',
   'Castillo de Versalles',
   'Torre Eiffel desde Trocadéro',

@@ -39,7 +39,7 @@ const SERVICE_IDS = ['aeropuerto', 'beauvais', 'disneyland', 'versailles', 'city
 
 const SERVICE_IMGS: Record<string, string> = {
   aeropuerto:      'Avión llegando al tarmac',
-  beauvais:        'Avión llegando al tarmac',
+  beauvais:        'Ryanair despegando en Beauvais',
   disneyland:      'Llegada Disneyland Hotel',
   versailles:      'Castillo de Versalles',
   citytour:        'Torre Eiffel desde Trocadéro',

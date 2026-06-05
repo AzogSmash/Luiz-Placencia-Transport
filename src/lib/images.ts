@@ -21,6 +21,8 @@ export const IMG: Record<string, string> = {
   // ── Aéroport ──────────────────────────────────────────────────────────────
   "Avión llegando al tarmac":
     "/services/airport.jpg",
+  "Ryanair despegando en Beauvais":
+    "/services/beauvais.jpg",
 
   // ── Disneyland ────────────────────────────────────────────────────────────
   "Llegada Disneyland Hotel":
