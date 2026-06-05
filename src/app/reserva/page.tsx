@@ -22,7 +22,8 @@ type FormData = {
   origen: string
   destino: string
   pasajeros: string
-  equipaje: string
+  equipajePequeno: string
+  equipajeGrande: string
   vuelo: string
   vueloVuelta: string
   fechaVuelta: string
@@ -113,7 +114,10 @@ function buildWhatsAppUrl(
   ]
   if (data.fechaVuelta) lines.push(`*Vuelta:* ${data.fechaVuelta}${data.horaVuelta ? ' a las ' + data.horaVuelta : ''}`)
   lines.push(`*Pasajeros:* ${data.pasajeros}`)
-  lines.push(`*Equipaje:* ${data.equipaje} maleta${data.equipaje !== '1' ? 's' : ''}`)
+  const grande = parseInt(data.equipajeGrande || '0')
+  const pequeno = parseInt(data.equipajePequeno || '0')
+  const totalEq = grande * 2 + pequeno
+  lines.push(`*Equipaje:* ${grande} grande${grande !== 1 ? 's' : ''} + ${pequeno} pequeña${pequeno !== 1 ? 's' : ''} (= ${totalEq} unidades)`)
   if (data.duracion)    lines.push(`*Duración:* ${data.duracion}`)
   if (data.vuelo)       lines.push(`*Vuelo llegada:* ${data.vuelo}`)
   if (data.vueloVuelta) lines.push(`*Vuelo vuelta:* ${data.vueloVuelta}`)
@@ -142,7 +146,7 @@ const EMPTY: FormData = {
   nombre: '', apellido: '', email: '', telefono: '',
   fecha: '', hora: '',
   origen: '', destino: '',
-  pasajeros: '2', equipaje: '2',
+  pasajeros: '2', equipajePequeno: '0', equipajeGrande: '1',
   vuelo: '', vueloVuelta: '', fechaVuelta: '', horaVuelta: '',
   hotel: '', hotelVuelta: '', edadNinos: '', duracion: '',
   mensaje: '',
@@ -291,7 +295,7 @@ export default function ReservaPage() {
       data.mensaje || null,
       `Service: ${serviceName}`,
       `Prix: ${priceLabel}`,
-      `Equipaje: ${data.equipaje}`,
+      `Equipaje: ${data.equipajeGrande}G + ${data.equipajePequeno}P (= ${parseInt(data.equipajeGrande||'0')*2 + parseInt(data.equipajePequeno||'0')}u)`,
       ...extras,
     ].filter(Boolean)
 
@@ -491,11 +495,29 @@ export default function ReservaPage() {
                     </div>
                     <div className="field">
                       <label>{r.step2.luggage}</label>
-                      <select value={data.equipaje} onChange={e => upd('equipaje', e.target.value)}>
-                        {Array.from({ length: 7 }, (_, i) => String(i)).map(n => (
-                          <option key={n} value={n}>{n} {n === '1' ? r.step2.luggageSingle : r.step2.luggagePlural}</option>
-                        ))}
-                      </select>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <div>
+                          <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginBottom: 4 }}>{r.step2.luggageSmall}</div>
+                          <select value={data.equipajePequeno} onChange={e => upd('equipajePequeno', e.target.value)}>
+                            {Array.from({ length: 7 }, (_, i) => String(i)).map(n => (
+                              <option key={n} value={n}>{n}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginBottom: 4 }}>{r.step2.luggageLarge}</div>
+                          <select value={data.equipajeGrande} onChange={e => upd('equipajeGrande', e.target.value)}>
+                            {Array.from({ length: 7 }, (_, i) => String(i)).map(n => (
+                              <option key={n} value={n}>{n}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      {(parseInt(data.equipajePequeno||'0') + parseInt(data.equipajeGrande||'0') * 2) > 0 && (
+                        <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginTop: 6 }}>
+                          = {parseInt(data.equipajePequeno||'0') + parseInt(data.equipajeGrande||'0') * 2} {r.step2.luggageUnits}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -688,7 +710,8 @@ export default function ReservaPage() {
                 <SummaryRow k={r.sidebar.destination} v={data.destino || '—'} />
                 <SummaryRow k={r.sidebar.date}        v={data.fecha ? `${data.fecha} ${data.hora}`.trim() : '—'} />
                 {data.fechaVuelta && <SummaryRow k={r.sidebar.return} v={`${data.fechaVuelta} ${data.horaVuelta}`.trim()} />}
-                <SummaryRow k={r.sidebar.passengers}  v={overLimit ? `+${paxLimit} · WhatsApp` : `${data.pasajeros} · ${data.equipaje} ${r.sidebar.luggageSuffix}`} />
+                <SummaryRow k={r.sidebar.passengers}  v={overLimit ? `+${paxLimit} · WhatsApp` : data.pasajeros} />
+                {!overLimit && <SummaryRow k={r.step2.luggage} v={`${data.equipajeGrande} ${r.step2.luggageLarge.split(' ')[0].toLowerCase()} · ${data.equipajePequeno} ${r.step2.luggageSmall.split(' ')[0].toLowerCase()} (${parseInt(data.equipajeGrande||'0')*2 + parseInt(data.equipajePequeno||'0')}u)`} />}
                 {data.vuelo       && <SummaryRow k={r.sidebar.flightIn}  v={data.vuelo} />}
                 {data.vueloVuelta && <SummaryRow k={r.sidebar.flightOut} v={data.vueloVuelta} />}
                 {data.hotel       && <SummaryRow k={r.sidebar.hotel}     v={data.hotel} />}
