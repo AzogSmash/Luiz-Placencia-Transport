@@ -484,41 +484,41 @@ export default function ReservaPage() {
                         style={fieldErrors.hora ? { borderColor: 'oklch(0.65 0.14 20)' } : {}} />
                       {fieldErrors.hora && <span style={{ fontSize: 11, color: 'oklch(0.75 0.12 20)', marginTop: 4, display: 'block' }}>{fieldErrors.hora}</span>}
                     </div>
-                    <div className="field" style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'end' }}>
-                      <div className="field" style={{ margin: 0 }}>
-                        <label>{r.step2.pax}</label>
-                        <select value={data.pasajeros} onChange={e => upd('pasajeros', e.target.value)}>
-                          {Array.from({ length: paxLimit }, (_, i) => String(i + 1)).map(n => (
-                            <option key={n} value={n}>{n} {n === '1' ? r.step2.paxSingle : r.step2.paxPlural}</option>
-                          ))}
-                          <option value={String(paxLimit + 1)}>{r.step2.paxOver.replace('{n}', String(paxLimit))}</option>
-                        </select>
-                      </div>
-                      <div className="field" style={{ margin: 0 }}>
-                        <label>{r.step2.luggage}</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    <div className="field">
+                      <label>{r.step2.pax}</label>
+                      <select value={data.pasajeros} onChange={e => upd('pasajeros', e.target.value)}>
+                        {Array.from({ length: paxLimit }, (_, i) => String(i + 1)).map(n => (
+                          <option key={n} value={n}>{n} {n === '1' ? r.step2.paxSingle : r.step2.paxPlural}</option>
+                        ))}
+                        <option value={String(paxLimit + 1)}>{r.step2.paxOver.replace('{n}', String(paxLimit))}</option>
+                      </select>
+                    </div>
+                    <div className="field">
+                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <span>{r.step2.luggage}</span>
+                        {(parseInt(data.equipajePequeno||'0') + parseInt(data.equipajeGrande||'0') * 2) > 0 && (
+                          <span style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--accent)', fontWeight: 400 }}>
+                            = {parseInt(data.equipajePequeno||'0') + parseInt(data.equipajeGrande||'0') * 2} u
+                          </span>
+                        )}
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                         <div>
-                          <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginBottom: 4 }}>{r.step2.luggageSmall}</div>
                           <select value={data.equipajePequeno} onChange={e => upd('equipajePequeno', e.target.value)}>
                             {Array.from({ length: 7 }, (_, i) => String(i)).map(n => (
                               <option key={n} value={n}>{n}</option>
                             ))}
                           </select>
+                          <div style={{ fontSize: 10, color: 'var(--fg-dim)', marginTop: 4, letterSpacing: '0.05em' }}>{r.step2.luggageSmall}</div>
                         </div>
                         <div>
-                          <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginBottom: 4 }}>{r.step2.luggageLarge}</div>
                           <select value={data.equipajeGrande} onChange={e => upd('equipajeGrande', e.target.value)}>
                             {Array.from({ length: 7 }, (_, i) => String(i)).map(n => (
                               <option key={n} value={n}>{n}</option>
                             ))}
                           </select>
+                          <div style={{ fontSize: 10, color: 'var(--fg-dim)', marginTop: 4, letterSpacing: '0.05em' }}>{r.step2.luggageLarge}</div>
                         </div>
-                      </div>
-                      {(parseInt(data.equipajePequeno||'0') + parseInt(data.equipajeGrande||'0') * 2) > 0 && (
-                        <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginTop: 6 }}>
-                          = {parseInt(data.equipajePequeno||'0') + parseInt(data.equipajeGrande||'0') * 2} {r.step2.luggageUnits}
-                        </div>
-                      )}
                       </div>
                     </div>
                   </div>
