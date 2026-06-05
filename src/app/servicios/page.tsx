@@ -13,7 +13,7 @@ const SERVICE_IMGS = [
   'Torre Eiffel desde Trocadéro',
   'Interior cabina trasera Clase S',
   'Canales de Ámsterdam',
-  'Canales de Ámsterdam',
+  'Mont-Saint-Michel',
 ]
 
 export default function ServiciosPage() {

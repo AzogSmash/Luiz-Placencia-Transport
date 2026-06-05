@@ -35,6 +35,8 @@ export const IMG: Record<string, string> = {
     "https://images.unsplash.com/photo-1591828353335-197466da2a4e?w=1400&q=80&auto=format&fit=crop",
   "Canales de Ámsterdam":
     "/services/amsterdam.jpg",
+  "Mont-Saint-Michel":
+    "/services/mont-saint-michel.jpg",
 
   // ── Événements / Bodas ────────────────────────────────────────────────────
   "Cortejo en Place de l'Opéra":

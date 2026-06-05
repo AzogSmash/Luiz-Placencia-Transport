@@ -45,7 +45,7 @@ const SERVICE_IMGS: Record<string, string> = {
   citytour:        'Torre Eiffel desde Trocadéro',
   disposicion:     'Interior cabina trasera',
   excursion:       'Canales de Ámsterdam',
-  excursion_devis: 'Canales de Ámsterdam',
+  excursion_devis: 'Mont-Saint-Michel',
 }
 
 const TARIFAS_TRASLADO: Record<number, number> = {
