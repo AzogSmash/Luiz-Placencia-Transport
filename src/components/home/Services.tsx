@@ -5,7 +5,7 @@ import { bg } from '@/lib/images'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 const IMGS = [
-  'Ryanair despegando en Beauvais',
+  'Avión llegando al tarmac',
   'Llegada Disneyland Hotel',
   'Torre Eiffel desde Trocadéro',
   'Interior cabina trasera',

@@ -6,14 +6,14 @@ import { bg } from '@/lib/images'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 const SERVICE_IMGS = [
-  'Ryanair despegando en Beauvais',
   'Avión llegando al tarmac',
+  'Ryanair despegando en Beauvais',
   'Llegada Disneyland Hotel',
   'Castillo de Versalles',
   'Torre Eiffel desde Trocadéro',
   'Interior cabina trasera Clase S',
-  'Canales de Ámsterdam',
   'Mont-Saint-Michel',
+  'Canales de Ámsterdam',
 ]
 
 export default function ServiciosPage() {
