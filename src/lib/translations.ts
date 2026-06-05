@@ -96,7 +96,7 @@ export const translations = {
       lead: 'Nuestra propuesta cubre todas las necesidades de movilidad privada en París, Île-de-France y más allá. Cada servicio combina vehículos premium, conductores formados y una atención al detalle obsesiva.',
       bookBtn: 'Reservar este servicio',
       items: [
-        { n:'01', t:'Traslado CDG / Orly',          price:'Desde 70 €',          d:'Servicio completo desde y hacia los aeropuertos de Charles de Gaulle y Orly. Tarifa fija según número de pasajeros.',                                                        f:['Seguimiento de vuelo en tiempo real','60 min de espera gratuitos','Cartel personalizado a la llegada','1–3 pax: 70 € · hasta 25 pax con tarifa progresiva'] },
+        { n:'01', t:'Traslado CDG / Orly',          price:'Desde 50 €',          d:'Servicio completo desde y hacia los aeropuertos de Charles de Gaulle y Orly. Tarifa fija según número de pasajeros.',                                                        f:['Seguimiento de vuelo en tiempo real','60 min de espera gratuitos','Cartel personalizado a la llegada','1 pax: 50 € · 2 pax: 60 € · 3 pax: 70 € · 4 pax: 80 €','5–25 pax con tarifa progresiva (+10 € por pax)'] },
         { n:'02', t:'Traslado Beauvais',             price:'Desde 160 €',         d:'Traslado entre París, Disneyland y el aeropuerto de Beauvais-Tillé. Tarifa fija según número de pasajeros.',                                                                  f:['1–3 pax: 160 € · 4 pax: 170 € · 5 pax: 180 € · 6 pax: 190 €','7 pax: 200 € · 8 pax: 210 € · hasta 16 pax con tarifa progresiva','Grupos de más de 16 → presupuesto privado','Seguimiento de vuelo y asistencia con el equipaje incluidos'] },
         { n:'03', t:'París ↔ Disneyland',            price:'Desde 70 €',          d:'Traslado directo y cómodo entre cualquier dirección parisina y los parques Disneyland París.',                                                                                 f:['Sillas infantiles bajo petición','Vehículos hasta 8 pasajeros','Espacio para equipaje y cochecitos','Reserva ida y vuelta con tarifa preferente'] },
         { n:'04', t:'Visita Versalles',              price:'Desde 50 €',          d:'Traslado privado al Palacio de Versalles y regreso. Tarifa fija según el número de pasajeros.',                                                                                 f:['1 pax: 50 € · 2 pax: 60 € · 3 pax: 70 € · 4 pax: 80 €','5 pax: 90 € · 6 pax: 100 € · 7 pax: 110 € · 8 pax: 120 €','9–16 pax: de 130 € a 200 € (+10 € por pax)','Grupos de más de 16 → presupuesto privado'] },
@@ -227,7 +227,7 @@ export const translations = {
         onRequestNote: 'Tarifa confirmada en menos de 30 min.',
       },
       services: [
-        { t: 'Traslado CDG / Orly',    d: 'Desde 70 €' },
+        { t: 'Traslado CDG / Orly',    d: 'Desde 50 €' },
         { t: 'Traslado Beauvais',       d: 'Desde 160 €' },
         { t: 'Disneyland París',        d: 'Ida, vuelta o ambos' },
         { t: 'Visita Versalles',        d: 'Desde 50 €' },
@@ -496,7 +496,7 @@ export const translations = {
       lead: "Notre offre couvre tous les besoins de mobilité privée à Paris, en Île-de-France et au-delà. Chaque service associe véhicules premium, chauffeurs formés et une attention obsessionnelle aux détails.",
       bookBtn: 'Réserver ce service',
       items: [
-        { n:'01', t:'Transfert CDG / Orly',          price:'À partir de 70 €',    d:"Service complet depuis et vers les aéroports Charles de Gaulle et Orly. Tarif fixe selon le nombre de passagers.",                                                             f:["Suivi de vol en temps réel","60 min d'attente offertes","Pancarte personnalisée à l'arrivée","1–3 pax : 70 € · jusqu'à 25 pax avec tarif progressif"] },
+        { n:'01', t:'Transfert CDG / Orly',          price:'À partir de 50 €',    d:"Service complet depuis et vers les aéroports Charles de Gaulle et Orly. Tarif fixe selon le nombre de passagers.",                                                             f:["Suivi de vol en temps réel","60 min d'attente offertes","Pancarte personnalisée à l'arrivée","1 pax : 50 € · 2 pax : 60 € · 3 pax : 70 € · 4 pax : 80 €","5–25 pax avec tarif progressif (+10 € par pax)"] },
         { n:'02', t:'Transfert Beauvais',             price:'À partir de 160 €',   d:"Transfert entre Paris, Disneyland et l'aéroport de Beauvais-Tillé. Tarif fixe selon le nombre de passagers.",                                                                  f:['1–3 pax : 160 € · 4 pax : 170 € · 5 pax : 180 € · 6 pax : 190 €','7 pax : 200 € · 8 pax : 210 € · jusqu\'à 16 pax avec tarif progressif','Groupes de plus de 16 → devis privé','Suivi de vol et assistance bagages inclus'] },
         { n:'03', t:'Paris ↔ Disneyland',             price:'À partir de 70 €',    d:'Transfert direct et confortable entre toute adresse parisienne et les parcs Disneyland Paris.',                                                                                 f:['Sièges enfants sur demande','Véhicules jusqu\'à 8 passagers','Espace pour bagages et poussettes','Réservation aller-retour avec tarif préférentiel'] },
         { n:'04', t:'Visite Versailles',              price:'À partir de 50 €',    d:'Transfert privé au Château de Versailles et retour. Tarif fixe selon le nombre de passagers.',                                                                                  f:['1 pax : 50 € · 2 pax : 60 € · 3 pax : 70 € · 4 pax : 80 €','5 pax : 90 € · 6 pax : 100 € · 7 pax : 110 € · 8 pax : 120 €','9–16 pax : de 130 € à 200 € (+10 € par pax)','Groupes de plus de 16 → devis privé'] },
@@ -627,7 +627,7 @@ export const translations = {
         onRequestNote: 'Tarif confirmé en moins de 30 min.',
       },
       services: [
-        { t: 'Transfert CDG / Orly',  d: 'À partir de 70 €' },
+        { t: 'Transfert CDG / Orly',  d: 'À partir de 50 €' },
         { t: 'Transfert Beauvais',     d: 'À partir de 160 €' },
         { t: 'Disneyland Paris',       d: 'Aller, retour ou les deux' },
         { t: 'Visite Versailles',      d: 'À partir de 50 €' },
@@ -896,7 +896,7 @@ export const translations = {
       lead: 'Our offer covers all private mobility needs in Paris, Île-de-France and beyond. Each service combines premium vehicles, trained drivers and an obsessive attention to detail.',
       bookBtn: 'Book this service',
       items: [
-        { n:'01', t:'CDG / Orly transfer',           price:'From €70',           d:'Full service to and from Charles de Gaulle and Orly airports. Fixed rate by number of passengers.',                                                                             f:['Real-time flight tracking','60 min free waiting time','Personalised sign on arrival','1–3 pax: €70 · up to 25 pax with progressive rates'] },
+        { n:'01', t:'CDG / Orly transfer',           price:'From €50',           d:'Full service to and from Charles de Gaulle and Orly airports. Fixed rate by number of passengers.',                                                                             f:['Real-time flight tracking','60 min free waiting time','Personalised sign on arrival','1 pax: €50 · 2 pax: €60 · 3 pax: €70 · 4 pax: €80','5–25 pax with progressive rates (+€10 per pax)'] },
         { n:'02', t:'Beauvais transfer',              price:'From €160',          d:'Transfer between Paris, Disneyland and Beauvais-Tillé airport. Fixed rate by number of passengers.',                                                                           f:['1–3 pax: €160 · 4 pax: €170 · 5 pax: €180 · 6 pax: €190','7 pax: €200 · 8 pax: €210 · up to 16 pax with progressive rates','Groups over 16 → private quote','Flight tracking and luggage assistance included'] },
         { n:'03', t:'Paris ↔ Disneyland',             price:'From €70',           d:'Direct and comfortable transfer between any Paris address and the Disneyland Paris parks.',                                                                                    f:['Child seats on request','Vehicles for up to 8 passengers','Space for luggage and pushchairs','Return booking at a preferential rate'] },
         { n:'04', t:'Versailles visit',               price:'From €50',           d:'Private transfer to the Palace of Versailles and back. Fixed rate by number of passengers.',                                                                                   f:['1 pax: €50 · 2 pax: €60 · 3 pax: €70 · 4 pax: €80','5 pax: €90 · 6 pax: €100 · 7 pax: €110 · 8 pax: €120','9–16 pax: from €130 to €200 (+€10 per pax)','Groups over 16 → private quote'] },
@@ -1027,7 +1027,7 @@ export const translations = {
         onRequestNote: 'Rate confirmed in under 30 min.',
       },
       services: [
-        { t: 'CDG / Orly transfer',   d: 'From €70' },
+        { t: 'CDG / Orly transfer',   d: 'From €50' },
         { t: 'Beauvais transfer',      d: 'From €160' },
         { t: 'Disneyland Paris',       d: 'Outbound, return or both' },
         { t: 'Versailles visit',       d: 'From €50' },

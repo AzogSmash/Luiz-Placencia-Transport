@@ -48,6 +48,12 @@ const SERVICE_IMGS: Record<string, string> = {
   excursion_devis: 'Canales de Ámsterdam',
 }
 
+const TARIFAS_CDG: Record<number, number> = {
+  1: 50, 2: 60, 3: 70, 4: 80, 5: 90, 6: 100, 7: 110, 8: 120,
+  9: 130, 10: 140, 11: 150, 12: 160, 13: 170, 14: 180, 15: 190, 16: 200,
+  17: 210, 18: 220, 19: 230, 20: 240, 21: 250, 22: 260, 23: 270, 24: 280, 25: 290,
+}
+
 const TARIFAS_TRASLADO: Record<number, number> = {
   1: 70, 2: 70, 3: 70,
   4: 80, 5: 90, 6: 100, 7: 110, 8: 120, 9: 170,
@@ -76,7 +82,8 @@ const TARIFAS_EXCURSION: Record<number, number> = {
 }
 
 function getAmount(serviceType: string, pax: number): number | null {
-  if (serviceType === 'aeropuerto' || serviceType === 'disneyland') return TARIFAS_TRASLADO[pax] ?? null
+  if (serviceType === 'aeropuerto') return TARIFAS_CDG[pax] ?? null
+  if (serviceType === 'disneyland') return TARIFAS_TRASLADO[pax] ?? null
   if (serviceType === 'beauvais')   return TARIFAS_BEAUVAIS[pax]   ?? null
   if (serviceType === 'versailles') return TARIFAS_VERSAILLES[pax] ?? null
   if (serviceType === 'excursion')  return TARIFAS_EXCURSION[pax]  ?? null
