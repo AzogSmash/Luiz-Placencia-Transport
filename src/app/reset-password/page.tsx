@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Logo from '@/components/Logo'
+import PasswordInput from '@/components/PasswordInput'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ResetPasswordPage() {
@@ -100,26 +101,22 @@ export default function ResetPasswordPage() {
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                 <div className="field">
                   <label>{rp.newPassword}</label>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
+                  <PasswordInput
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
+                    onChange={setPassword}
+                    autoComplete="new-password"
                     required
                     minLength={6}
-                    autoComplete="new-password"
                   />
                 </div>
                 <div className="field">
                   <label>{rp.confirmPassword}</label>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
+                  <PasswordInput
                     value={confirm}
-                    onChange={e => setConfirm(e.target.value)}
+                    onChange={setConfirm}
+                    autoComplete="new-password"
                     required
                     minLength={6}
-                    autoComplete="new-password"
                   />
                 </div>
 

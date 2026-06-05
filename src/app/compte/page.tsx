@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import LogoutButton from '@/components/LogoutButton'
+import PasswordInput from '@/components/PasswordInput'
 import PhoneInput, { parsePhone } from '@/components/PhoneInput'
 import { updateClientNotifPrefs } from '@/app/actions/compte'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -353,26 +354,22 @@ export default function ComptePage() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
                     <div className="field">
                       <label>{c.newPassword}</label>
-                      <input
-                        type="password"
-                        placeholder="••••••••"
+                      <PasswordInput
                         value={password}
-                        onChange={e => setPassword(e.target.value)}
+                        onChange={setPassword}
+                        autoComplete="new-password"
                         required
                         minLength={6}
-                        autoComplete="new-password"
                       />
                     </div>
                     <div className="field">
                       <label>{c.confirmPassword}</label>
-                      <input
-                        type="password"
-                        placeholder="••••••••"
+                      <PasswordInput
                         value={confirm}
-                        onChange={e => setConfirm(e.target.value)}
+                        onChange={setConfirm}
+                        autoComplete="new-password"
                         required
                         minLength={6}
-                        autoComplete="new-password"
                       />
                     </div>
                   </div>

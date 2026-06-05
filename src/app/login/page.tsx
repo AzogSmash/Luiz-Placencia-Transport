@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Logo from '@/components/Logo'
+import PasswordInput from '@/components/PasswordInput'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 function LoginForm() {
@@ -64,13 +65,11 @@ function LoginForm() {
             {a.forgotPassword}
           </Link>
         </div>
-        <input
-          type="password"
-          placeholder="••••••••"
+        <PasswordInput
           value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
+          onChange={setPassword}
           autoComplete="current-password"
+          required
         />
       </div>
 

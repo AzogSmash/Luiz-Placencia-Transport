@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Logo from '@/components/Logo'
+import PasswordInput from '@/components/PasswordInput'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 function RegisterForm() {
@@ -17,6 +18,7 @@ function RegisterForm() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmationSent, setConfirmationSent] = useState(false)
@@ -28,6 +30,11 @@ function RegisterForm() {
 
     if (password.length < 6) {
       setError(a.passwordTooShort)
+      setLoading(false)
+      return
+    }
+    if (password !== confirmPassword) {
+      setError(a.passwordMismatch)
       setLoading(false)
       return
     }
@@ -132,13 +139,24 @@ function RegisterForm() {
             </div>
             <div className="field">
               <label>{a.password}</label>
-              <input
-                type="password"
-                placeholder={a.passwordPlaceholder}
+              <PasswordInput
                 value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
+                onChange={setPassword}
+                placeholder={a.passwordPlaceholder}
                 autoComplete="new-password"
+                required
+                minLength={6}
+              />
+            </div>
+            <div className="field">
+              <label>{a.confirmPassword}</label>
+              <PasswordInput
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                placeholder={a.passwordPlaceholder}
+                autoComplete="new-password"
+                required
+                minLength={6}
               />
             </div>
 
