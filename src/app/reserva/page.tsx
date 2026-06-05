@@ -38,8 +38,8 @@ type FormData = {
 const SERVICE_IDS = ['aeropuerto', 'beauvais', 'disneyland', 'versailles', 'citytour', 'disposicion', 'excursion', 'excursion_devis']
 
 const SERVICE_IMGS: Record<string, string> = {
-  aeropuerto:      'Avión llegando al tarmac',
-  beauvais:        'Ryanair despegando en Beauvais',
+  aeropuerto:      'Ryanair despegando en Beauvais',
+  beauvais:        'Avión llegando al tarmac',
   disneyland:      'Llegada Disneyland Hotel',
   versailles:      'Castillo de Versalles',
   citytour:        'Torre Eiffel desde Trocadéro',
