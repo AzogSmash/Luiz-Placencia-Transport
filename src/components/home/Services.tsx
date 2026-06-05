@@ -42,16 +42,11 @@ export default function Services() {
               href="/servicios"
               style={{ textDecoration: 'none' }}
             >
-              <article style={{
-                background: 'var(--bg)',
+              <article className="service-card" style={{
                 padding: '36px 32px',
                 cursor: 'pointer',
-                transition: 'background 0.2s ease',
                 height: '100%',
-              }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-elev)'}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg)'}
-              >
+              }}>
                 <div className="placeholder" data-label={IMGS[i]} style={{ ...bg(IMGS[i]), aspectRatio: '16/10', marginBottom: 24 }} />
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginBottom: 12 }}>
                   <span className="mono" style={{ color: 'var(--accent)' }}>0{i + 1}</span>

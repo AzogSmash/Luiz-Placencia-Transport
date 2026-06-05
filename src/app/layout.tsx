@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, Inter, JetBrains_Mono, Playfair_Display } from 'next/font/google'
+import { Inter, JetBrains_Mono, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
@@ -17,12 +17,6 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
   style: ['normal', 'italic'],
   weight: ['400', '500', '600'],
-})
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  variable: '--font-cormorant',
-  weight: ['400', '500', '600'],
-  style: ['normal', 'italic'],
 })
 const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
@@ -64,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="es"
-      className={`${inter.variable} ${playfair.variable} ${cormorant.variable} ${jetbrains.variable}`}
+      className={`${inter.variable} ${playfair.variable} ${jetbrains.variable}`}
     >
       <body>
         <script

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, startTransition } from 'react'
 import { translations, type Lang } from '@/lib/translations'
 
 type Translations = typeof translations['es']
@@ -26,8 +26,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   function setLang(l: Lang) {
-    setLangState(l)
     localStorage.setItem('site-lang', l)
+    startTransition(() => { setLangState(l) })
   }
 
   return (

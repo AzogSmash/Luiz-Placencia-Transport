@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { bg } from '@/lib/images'
+import Image from 'next/image'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Hero() {
@@ -49,10 +49,16 @@ export default function Hero() {
           </div>
 
           <div style={{ position: 'relative' }}>
-            <div
-              className="placeholder"
-              style={{ ...bg('Mercedes Clase E · Place Vendôme'), aspectRatio: '4/5', width: '100%' }}
-            />
+            <div style={{ position: 'relative', aspectRatio: '4/5', width: '100%', overflow: 'hidden' }}>
+              <Image
+                src="/services/hero.jpg"
+                alt="Luis Plasencia — chauffeur privé VTC Paris"
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 45vw"
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
             <div className="hero-info-card" style={{
               position: 'absolute', bottom: -24, left: -24,
               background: 'var(--bg)', border: '1px solid var(--line)', padding: '20px 24px', maxWidth: 240,
