@@ -132,6 +132,21 @@ function fmtDay(iso: string) {
   return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })
 }
 
+const PAGE_NAMES: Record<string, string> = {
+  '/':                     'Inicio',
+  '/servicios':            'Servicios',
+  '/reserva':              'Reserva',
+  '/contacto':             'Contacto',
+  '/dashboard':            'Mi espacio',
+  '/login':                'Iniciar sesión',
+  '/register':             'Crear cuenta',
+  '/compte':               'Mi cuenta',
+  '/admin':                'Panel Admin',
+  '/reserva/pago-exitoso': 'Pago exitoso',
+  '/mot-de-passe-oublie':  'Contraseña olvidada',
+  '/reset-password':       'Restablecer contraseña',
+}
+
 export default function AdminPanel({
   reservations: initial,
   logs: initialLogs,
@@ -713,7 +728,10 @@ export default function AdminPanel({
                       padding: '10px 20px', borderBottom: i < Math.min(analytics.pages.length, 8) - 1 ? '1px solid var(--line-soft)' : undefined,
                       fontSize: 13,
                     }}>
-                      <span style={{ color: 'var(--fg)', fontFamily: 'var(--mono)' }}>{p.path || '/'}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <span style={{ color: 'var(--fg)' }}>{PAGE_NAMES[p.path] ?? p.path}</span>
+                        <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--fg-dim)' }}>{p.path || '/'}</span>
+                      </div>
                       <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{p.visitors}</span>
                     </div>
                   ))}

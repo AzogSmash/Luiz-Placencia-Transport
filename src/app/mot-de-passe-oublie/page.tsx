@@ -4,8 +4,11 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 import Logo from '@/components/Logo'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage()
+  const fp = t.forgotPassword
   const [email, setEmail]     = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent]       = useState(false)
@@ -55,15 +58,13 @@ export default function ForgotPasswordPage() {
                 fontFamily: 'var(--display)', fontSize: 32,
                 margin: 0, marginBottom: 12, fontWeight: 400,
               }}>
-                Correo enviado
+                {fp.sentHeading}
               </h1>
               <p style={{ color: 'var(--fg-muted)', fontSize: 14, marginBottom: 28, lineHeight: 1.6 }}>
-                Hemos enviado un enlace de restablecimiento a{' '}
-                <strong style={{ color: 'var(--fg)' }}>{email}</strong>.
-                Revise también su carpeta de spam.
+                {fp.sentText.replace('{email}', email)}
               </p>
               <Link href="/login" className="btn btn-ghost" style={{ justifyContent: 'center' }}>
-                Volver al inicio de sesión
+                {fp.backToLogin}
               </Link>
             </div>
           ) : (
@@ -72,15 +73,15 @@ export default function ForgotPasswordPage() {
                 fontFamily: 'var(--display)', fontSize: 38,
                 margin: 0, marginBottom: 8, fontWeight: 400,
               }}>
-                ¿Olvidó su<br />contraseña?
+                {fp.heading}
               </h1>
               <p style={{ color: 'var(--fg-muted)', fontSize: 14, marginBottom: 36, lineHeight: 1.6 }}>
-                Introduzca su correo electrónico y le enviaremos un enlace para restablecer su contraseña.
+                {fp.sub}
               </p>
 
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                 <div className="field">
-                  <label>Correo electrónico</label>
+                  <label>{fp.email}</label>
                   <input
                     type="email"
                     placeholder="carmen@correo.com"
@@ -108,7 +109,7 @@ export default function ForgotPasswordPage() {
                   disabled={loading}
                   style={{ opacity: loading ? 0.7 : 1, justifyContent: 'center' }}
                 >
-                  {loading ? 'Enviando…' : 'Enviar enlace'}
+                  {loading ? fp.submitting : fp.submit}
                 </button>
               </form>
             </>
@@ -117,7 +118,7 @@ export default function ForgotPasswordPage() {
 
         <p style={{ textAlign: 'center', marginTop: 24, fontSize: 14, color: 'var(--fg-muted)' }}>
           <Link href="/login" style={{ color: 'var(--accent)', borderBottom: '1px solid var(--accent)' }}>
-            Volver al inicio de sesión
+            {fp.backToLogin}
           </Link>
         </p>
 

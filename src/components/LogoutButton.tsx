@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function LogoutButton() {
   const router = useRouter()
+  const { t } = useLanguage()
   const [loading, setLoading] = useState(false)
 
   async function handleLogout() {
@@ -23,7 +25,7 @@ export default function LogoutButton() {
       disabled={loading}
       style={{ fontSize: 12, opacity: loading ? 0.6 : 1, cursor: loading ? 'wait' : 'pointer' }}
     >
-      {loading ? 'Cerrando sesión…' : 'Cerrar sesión'}
+      {loading ? '…' : t.nav.signOut}
     </button>
   )
 }

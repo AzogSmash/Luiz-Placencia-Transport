@@ -6,14 +6,14 @@ import { bg } from '@/lib/images'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 const SERVICE_IMGS = [
-  'Mercedes Clase E · CDG Terminal 2E',
-  'Mercedes en zona de embarque CDG',
+  'Avión llegando al tarmac',
+  'Avión llegando al tarmac',
   'Llegada Disneyland Hotel',
   'Castillo de Versalles',
   'Torre Eiffel desde Trocadéro',
   'Interior cabina trasera Clase S',
-  'Castillo de Chenonceau',
-  'Castillo de Chenonceau',
+  'Canales de Ámsterdam',
+  'Canales de Ámsterdam',
 ]
 
 export default function ServiciosPage() {

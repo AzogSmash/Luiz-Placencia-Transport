@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase-browser'
 import LogoutButton from '@/components/LogoutButton'
 import PhoneInput, { parsePhone } from '@/components/PhoneInput'
 import { updateClientNotifPrefs } from '@/app/actions/compte'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type Profile = {
   full_name: string
@@ -57,6 +58,8 @@ function FeedbackBox({ type, msg }: { type: 'error' | 'success'; msg: string }) 
 
 export default function ComptePage() {
   const router = useRouter()
+  const { t } = useLanguage()
+  const c = t.compte
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [userId, setUserId]       = useState<string | null>(null)
 
@@ -130,9 +133,9 @@ export default function ComptePage() {
 
     setProfileLoading(false)
     if (dbErr || authErr) {
-      setProfileFeedback({ type: 'error', msg: (dbErr ?? authErr)?.message ?? 'Error al guardar.' })
+      setProfileFeedback({ type: 'error', msg: (dbErr ?? authErr)?.message ?? c.saveError })
     } else {
-      setProfileFeedback({ type: 'success', msg: 'Datos guardados correctamente.' })
+      setProfileFeedback({ type: 'success', msg: c.saveSuccess })
     }
   }
 
@@ -150,7 +153,7 @@ export default function ComptePage() {
     } else {
       setEmailFeedback({
         type: 'success',
-        msg: `Hemos enviado un enlace de confirmación a ${newEmail}. Su email cambiará al hacer clic en el enlace.`,
+        msg: c.emailSentText.replace('{email}', newEmail),
       })
       setNewEmail('')
     }
@@ -159,11 +162,11 @@ export default function ComptePage() {
   async function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (password !== confirm) {
-      setPwdFeedback({ type: 'error', msg: 'Las contraseñas no coinciden.' })
+      setPwdFeedback({ type: 'error', msg: c.passwordMismatch })
       return
     }
     if (password.length < 6) {
-      setPwdFeedback({ type: 'error', msg: 'La contraseña debe tener al menos 6 caracteres.' })
+      setPwdFeedback({ type: 'error', msg: c.passwordTooShort })
       return
     }
     setPwdLoading(true)
@@ -177,7 +180,7 @@ export default function ComptePage() {
     } else {
       setPassword('')
       setConfirm('')
-      setPwdFeedback({ type: 'success', msg: 'Contraseña actualizada correctamente.' })
+      setPwdFeedback({ type: 'success', msg: c.passwordSuccess })
     }
   }
 
@@ -190,7 +193,7 @@ export default function ComptePage() {
     if (!result.success) {
       setNotifFeedback({ type: 'error', msg: result.error })
     } else {
-      setNotifFeedback({ type: 'success', msg: 'Preferencias guardadas correctamente.' })
+      setNotifFeedback({ type: 'success', msg: c.prefsSuccess })
     }
   }
 
@@ -204,15 +207,15 @@ export default function ComptePage() {
         <div className="container">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 8 }}>Espacio personal</div>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>{c.eyebrow}</div>
               <h1 style={{ fontFamily: 'var(--display)', fontSize: 'clamp(28px, 4vw, 52px)', margin: 0, fontWeight: 400 }}>
-                Mi cuenta
+                {c.heading}
               </h1>
               <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 6 }}>{userEmail}</p>
             </div>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               <Link href="/dashboard" className="btn btn-ghost" style={{ fontSize: 12, padding: '10px 16px' }}>
-                Panel de control
+                {c.dashboard}
               </Link>
               <LogoutButton />
             </div>
@@ -228,16 +231,16 @@ export default function ComptePage() {
             {/* ── Datos personales ── */}
             <div>
               <h2 style={{ fontFamily: 'var(--display)', fontSize: 28, margin: 0, marginBottom: 6, fontWeight: 400 }}>
-                Datos personales
+                {c.personalDataHeading}
               </h2>
               <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 28 }}>
-                Esta información se usará para agilizar sus futuras reservas.
+                {c.personalDataSub}
               </p>
               <div style={{ border: '1px solid var(--line-soft)', padding: 32 }}>
                 <form onSubmit={handleProfileSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
                     <div className="field">
-                      <label>Nombre completo</label>
+                      <label>{c.fullName}</label>
                       <input
                         type="text"
                         placeholder="Carmen González"
@@ -247,7 +250,7 @@ export default function ComptePage() {
                       />
                     </div>
                     <div className="field">
-                      <label>Teléfono</label>
+                      <label>{c.phone}</label>
                       <PhoneInput
                         prefix={phonePrefix}
                         number={phoneNumber}
@@ -259,8 +262,8 @@ export default function ComptePage() {
 
                   <div className="field">
                     <label>
-                      Dirección
-                      <span style={{ fontWeight: 400, opacity: 0.45, fontSize: 11, marginLeft: 6 }}>(opcional)</span>
+                      {c.address}
+                      <span style={{ fontWeight: 400, opacity: 0.45, fontSize: 11, marginLeft: 6 }}>{c.optional}</span>
                     </label>
                     <input
                       type="text"
@@ -273,8 +276,8 @@ export default function ComptePage() {
 
                   <div className="field">
                     <label>
-                      Idioma preferido
-                      <span style={{ fontWeight: 400, opacity: 0.45, fontSize: 11, marginLeft: 6 }}>(opcional)</span>
+                      {c.preferredLanguage}
+                      <span style={{ fontWeight: 400, opacity: 0.45, fontSize: 11, marginLeft: 6 }}>{c.optional}</span>
                     </label>
                     <select
                       value={profile.preferred_language}
@@ -295,7 +298,7 @@ export default function ComptePage() {
                     disabled={profileLoading}
                     style={{ opacity: profileLoading ? 0.7 : 1, justifyContent: 'center', alignSelf: 'flex-start' }}
                   >
-                    {profileLoading ? 'Guardando…' : 'Guardar cambios'}
+                    {profileLoading ? c.saving : c.saveChanges}
                   </button>
                 </form>
               </div>
@@ -304,15 +307,15 @@ export default function ComptePage() {
             {/* ── Correo electrónico ── */}
             <div>
               <h2 style={{ fontFamily: 'var(--display)', fontSize: 28, margin: 0, marginBottom: 6, fontWeight: 400 }}>
-                Correo electrónico
+                {c.emailHeading}
               </h2>
               <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 28 }}>
-                Email actual: <strong style={{ color: 'var(--fg)' }}>{userEmail}</strong>
+                {c.currentEmail} <strong style={{ color: 'var(--fg)' }}>{userEmail}</strong>
               </p>
               <div style={{ border: '1px solid var(--line-soft)', padding: 32 }}>
                 <form onSubmit={handleEmailSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                   <div className="field">
-                    <label>Nuevo correo electrónico</label>
+                    <label>{c.newEmail}</label>
                     <input
                       type="email"
                       placeholder="nuevo@correo.com"
@@ -331,7 +334,7 @@ export default function ComptePage() {
                     disabled={emailLoading || !newEmail}
                     style={{ opacity: emailLoading ? 0.7 : 1, justifyContent: 'center', alignSelf: 'flex-start' }}
                   >
-                    {emailLoading ? 'Enviando…' : 'Cambiar correo'}
+                    {emailLoading ? c.sending : c.changeEmail}
                   </button>
                 </form>
               </div>
@@ -340,16 +343,16 @@ export default function ComptePage() {
             {/* ── Contraseña ── */}
             <div>
               <h2 style={{ fontFamily: 'var(--display)', fontSize: 28, margin: 0, marginBottom: 6, fontWeight: 400 }}>
-                Contraseña
+                {c.passwordHeading}
               </h2>
               <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 28 }}>
-                Mínimo 6 caracteres.
+                {c.passwordSub}
               </p>
               <div style={{ border: '1px solid var(--line-soft)', padding: 32 }}>
                 <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
                     <div className="field">
-                      <label>Nueva contraseña</label>
+                      <label>{c.newPassword}</label>
                       <input
                         type="password"
                         placeholder="••••••••"
@@ -361,7 +364,7 @@ export default function ComptePage() {
                       />
                     </div>
                     <div className="field">
-                      <label>Confirmar contraseña</label>
+                      <label>{c.confirmPassword}</label>
                       <input
                         type="password"
                         placeholder="••••••••"
@@ -382,7 +385,7 @@ export default function ComptePage() {
                     disabled={pwdLoading}
                     style={{ opacity: pwdLoading ? 0.7 : 1, justifyContent: 'center', alignSelf: 'flex-start' }}
                   >
-                    {pwdLoading ? 'Actualizando…' : 'Cambiar contraseña'}
+                    {pwdLoading ? c.updating : c.changePassword}
                   </button>
                 </form>
               </div>
@@ -391,10 +394,10 @@ export default function ComptePage() {
             {/* ── Notificaciones ── */}
             <div>
               <h2 style={{ fontFamily: 'var(--display)', fontSize: 28, margin: 0, marginBottom: 6, fontWeight: 400 }}>
-                Notificaciones
+                {c.notifHeading}
               </h2>
               <p style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 28 }}>
-                Gestione los correos de seguimiento que le enviamos sobre el estado de sus reservas.
+                {c.notifSub}
               </p>
               <div style={{ border: '1px solid var(--line-soft)', padding: 32 }}>
                 <form onSubmit={handleNotifSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -404,11 +407,10 @@ export default function ComptePage() {
                   }}>
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 6 }}>
-                        Recibir actualizaciones de mis reservas por email
+                        {c.notifEmailLabel}
                       </div>
                       <div style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.6 }}>
-                        Le notificaremos cuando el estado de su reserva cambie (confirmada, cancelada, etc.).
-                        Siempre enviamos la confirmación inicial de su solicitud.
+                        {c.notifEmailDesc}
                       </div>
                     </div>
                     <input
@@ -427,7 +429,7 @@ export default function ComptePage() {
                     disabled={notifLoading}
                     style={{ opacity: notifLoading ? 0.7 : 1, justifyContent: 'center', alignSelf: 'flex-start' }}
                   >
-                    {notifLoading ? 'Guardando…' : 'Guardar preferencias'}
+                    {notifLoading ? c.savingPrefs : c.savePrefs}
                   </button>
                 </form>
               </div>

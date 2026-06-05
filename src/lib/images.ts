@@ -4,25 +4,23 @@ export const IMG: Record<string, string> = {
 
   // ── Hero ──────────────────────────────────────────────────────────────────
   "Mercedes Clase E · Place Vendôme":
-    "https://images.unsplash.com/photo-1686199948265-ddc4ebb1cc92?w=1400&q=80&auto=format&fit=crop",
+    "/services/hero.jpg",
 
   // ── Véhicules ─────────────────────────────────────────────────────────────
   "Mercedes Clase V": "/vehicles/mercedesV.png",
   "Hyundai Staria":   "/vehicles/hyunddai.png",
-  "Tesla Model Y":    "https://images.unsplash.com/photo-1536883442700-ffaa4d76e372?w=1400&q=80&auto=format&fit=crop",
-  "Mercedes Clase S": "https://images.unsplash.com/photo-1686199948265-ddc4ebb1cc92?w=1400&q=80&auto=format&fit=crop",
+  "Tesla Model Y":    "/vehicles/modelY.jpg",
+  "Mercedes Clase S": "/vehicles/classeS.jpg",
 
   // ── Intérieur ─────────────────────────────────────────────────────────────
   "Interior cabina trasera":
-    "https://images.unsplash.com/photo-1760161339261-56487b766a17?w=1400&q=80&auto=format&fit=crop",
+    "/services/interior.jpg",
   "Interior cabina trasera Clase S":
-    "https://images.unsplash.com/photo-1760161339261-56487b766a17?w=1400&q=80&auto=format&fit=crop",
+    "/services/interior.jpg",
 
   // ── Aéroport ──────────────────────────────────────────────────────────────
-  "Mercedes en zona de embarque CDG":
-    "https://images.unsplash.com/photo-1551432615-469d73f41b97?w=1400&q=80&auto=format&fit=crop",
-  "Mercedes Clase E · CDG Terminal 2E":
-    "https://images.unsplash.com/photo-1551432615-469d73f41b97?w=1400&q=80&auto=format&fit=crop",
+  "Avión llegando al tarmac":
+    "/services/airport.jpg",
 
   // ── Disneyland ────────────────────────────────────────────────────────────
   "Llegada Disneyland Hotel":
@@ -30,13 +28,13 @@ export const IMG: Record<string, string> = {
 
   // ── Paris / City tour ─────────────────────────────────────────────────────
   "Torre Eiffel desde Trocadéro":
-    "https://images.unsplash.com/photo-1565881606991-789a8dff9dbb?w=1400&q=80&auto=format&fit=crop",
+    "/services/city-tour.jpg",
 
   // ── Excursions ────────────────────────────────────────────────────────────
   "Castillo de Versalles":
     "https://images.unsplash.com/photo-1591828353335-197466da2a4e?w=1400&q=80&auto=format&fit=crop",
-  "Castillo de Chenonceau":
-    "https://images.unsplash.com/photo-1756307400556-e7dc592739b9?w=1400&q=80&auto=format&fit=crop",
+  "Canales de Ámsterdam":
+    "/services/amsterdam.jpg",
 
   // ── Événements / Bodas ────────────────────────────────────────────────────
   "Cortejo en Place de l'Opéra":

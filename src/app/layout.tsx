@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Inter, JetBrains_Mono, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import NavBar from '@/components/NavBar'
@@ -29,6 +29,11 @@ const jetbrains = JetBrains_Mono({
   variable: '--font-jetbrains',
   weight: ['400', '500'],
 })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
 
 export const metadata: Metadata = {
   title: {

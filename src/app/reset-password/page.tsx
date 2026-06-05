@@ -5,9 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Logo from '@/components/Logo'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
+  const { t } = useLanguage()
+  const rp = t.resetPassword
   const [ready, setReady]       = useState(false)
   const [password, setPassword] = useState('')
   const [confirm, setConfirm]   = useState('')
@@ -25,11 +28,11 @@ export default function ResetPasswordPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (password !== confirm) {
-      setError('Las contraseñas no coinciden.')
+      setError(rp.passwordMismatch)
       return
     }
     if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.')
+      setError(rp.passwordTooShort)
       return
     }
     setLoading(true)
@@ -76,10 +79,10 @@ export default function ResetPasswordPage() {
                 fontFamily: 'var(--display)', fontSize: 32,
                 margin: 0, marginBottom: 12, fontWeight: 400,
               }}>
-                Contraseña actualizada
+                {rp.doneHeading}
               </h1>
               <p style={{ color: 'var(--fg-muted)', fontSize: 14 }}>
-                Redirigiendo a su espacio personal…
+                {rp.doneText}
               </p>
             </div>
           ) : (
@@ -88,15 +91,15 @@ export default function ResetPasswordPage() {
                 fontFamily: 'var(--display)', fontSize: 38,
                 margin: 0, marginBottom: 8, fontWeight: 400,
               }}>
-                Nueva<br />contraseña
+                {rp.heading}
               </h1>
               <p style={{ color: 'var(--fg-muted)', fontSize: 14, marginBottom: 36, lineHeight: 1.6 }}>
-                Elija una contraseña segura para su cuenta.
+                {rp.sub}
               </p>
 
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                 <div className="field">
-                  <label>Nueva contraseña</label>
+                  <label>{rp.newPassword}</label>
                   <input
                     type="password"
                     placeholder="••••••••"
@@ -108,7 +111,7 @@ export default function ResetPasswordPage() {
                   />
                 </div>
                 <div className="field">
-                  <label>Confirmar contraseña</label>
+                  <label>{rp.confirmPassword}</label>
                   <input
                     type="password"
                     placeholder="••••••••"
@@ -137,7 +140,7 @@ export default function ResetPasswordPage() {
                   disabled={loading}
                   style={{ opacity: loading ? 0.7 : 1, justifyContent: 'center' }}
                 >
-                  {loading ? 'Actualizando…' : 'Establecer contraseña'}
+                  {loading ? rp.submitting : rp.submit}
                 </button>
               </form>
             </>

@@ -5,12 +5,12 @@ import { bg } from '@/lib/images'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 const IMGS = [
-  'Mercedes en zona de embarque CDG',
+  'Avión llegando al tarmac',
   'Llegada Disneyland Hotel',
   'Torre Eiffel desde Trocadéro',
   'Interior cabina trasera',
   'Castillo de Versalles',
-  'Castillo de Chenonceau',
+  'Canales de Ámsterdam',
 ]
 
 export default function Services() {

@@ -51,7 +51,6 @@ export default function Hero() {
           <div style={{ position: 'relative' }}>
             <div
               className="placeholder"
-              data-label="Mercedes Clase E · Place Vendôme"
               style={{ ...bg('Mercedes Clase E · Place Vendôme'), aspectRatio: '4/5', width: '100%' }}
             />
             <div className="hero-info-card" style={{
