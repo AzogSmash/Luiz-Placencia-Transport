@@ -81,13 +81,22 @@ const TARIFAS_EXCURSION: Record<number, number> = {
   15: 2300, 16: 2400,
 }
 
+function vehicleSurcharge(pax: number): number {
+  let s = 0
+  if (pax >= 8)  s += 50
+  if (pax >= 16) s += 50
+  return s
+}
+
 function getAmount(serviceType: string, pax: number): number | null {
-  if (serviceType === 'aeropuerto') return TARIFAS_CDG[pax] ?? null
-  if (serviceType === 'disneyland') return TARIFAS_TRASLADO[pax] ?? null
-  if (serviceType === 'beauvais')   return TARIFAS_BEAUVAIS[pax]   ?? null
-  if (serviceType === 'versailles') return TARIFAS_VERSAILLES[pax] ?? null
-  if (serviceType === 'excursion')  return TARIFAS_EXCURSION[pax]  ?? null
-  return null
+  let base: number | null = null
+  if (serviceType === 'aeropuerto') base = TARIFAS_CDG[pax] ?? null
+  else if (serviceType === 'disneyland') base = TARIFAS_TRASLADO[pax] ?? null
+  else if (serviceType === 'beauvais')   base = TARIFAS_BEAUVAIS[pax]   ?? null
+  else if (serviceType === 'versailles') base = TARIFAS_VERSAILLES[pax] ?? null
+  else if (serviceType === 'excursion')  base = TARIFAS_EXCURSION[pax]  ?? null
+  if (base === null) return null
+  return base + vehicleSurcharge(pax)
 }
 
 const FIXED_PRICE_SERVICES = ['aeropuerto', 'beauvais', 'disneyland', 'versailles', 'excursion']
@@ -215,6 +224,7 @@ export default function ReservaPage() {
   const isAirport  = data.serviceType === 'aeropuerto' || data.serviceType === 'beauvais'
   const hasReturn  = isAirport || data.serviceType === 'disneyland'
   const amount     = getAmount(data.serviceType, pax)
+  const surcharge  = showPriceBanner && !overLimit ? vehicleSurcharge(pax) : 0
 
   // Price display using translated strings
   function getPriceLabel(): string {
@@ -539,6 +549,12 @@ export default function ReservaPage() {
                             .replace('{pax}', data.pasajeros)
                             .replace('{paxWord}', pax === 1 ? r.step2.paxSingle : r.step2.paxPlural)
                             .replace('{price}', `${amount} €`)}
+                      {surcharge > 0 && !overLimit && (
+                        <div style={{ marginTop: 6, fontSize: 11, color: 'var(--fg-dim)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                          {r.step2.vehicleSurcharge.replace('{n}', String(surcharge))}
+                        </div>
+                      )}
                     </div>
                   )}
 
