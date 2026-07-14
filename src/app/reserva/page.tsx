@@ -50,8 +50,8 @@ const SERVICE_IMGS: Record<string, string> = {
 
 const TARIFAS_CDG: Record<number, number> = {
   1: 50, 2: 60, 3: 70, 4: 80, 5: 90, 6: 100, 7: 110, 8: 120,
-  9: 130, 10: 140, 11: 150, 12: 160, 13: 170, 14: 180, 15: 190, 16: 200,
-  17: 210, 18: 220, 19: 230, 20: 240, 21: 250, 22: 260, 23: 270, 24: 280, 25: 290,
+  9: 170, 10: 180, 11: 190, 12: 200, 13: 210, 14: 220, 15: 230, 16: 240,
+  17: 290, 18: 300, 19: 310, 20: 320, 21: 330, 22: 340, 23: 350, 24: 360, 25: 370,
 }
 
 const TARIFAS_TRASLADO: Record<number, number> = {
@@ -71,7 +71,7 @@ const TARIFAS_BEAUVAIS: Record<number, number> = {
 
 const TARIFAS_VERSAILLES: Record<number, number> = {
   1: 50, 2: 60, 3: 70, 4: 80, 5: 90, 6: 100, 7: 110, 8: 120,
-  9: 130, 10: 140, 11: 150, 12: 160, 13: 170, 14: 180, 15: 190, 16: 200,
+  9: 170, 10: 180, 11: 190, 12: 200, 13: 210, 14: 220, 15: 230, 16: 240,
 }
 
 const TARIFAS_EXCURSION: Record<number, number> = {
@@ -81,22 +81,20 @@ const TARIFAS_EXCURSION: Record<number, number> = {
   15: 2300, 16: 2400,
 }
 
+// Surcharge display only — already baked into all price tables
 function vehicleSurcharge(pax: number): number {
-  let s = 0
-  if (pax >= 8)  s += 50
-  if (pax >= 16) s += 50
-  return s
+  if (pax >= 17) return 100
+  if (pax >= 9)  return 50
+  return 0
 }
 
 function getAmount(serviceType: string, pax: number): number | null {
-  let base: number | null = null
-  if (serviceType === 'aeropuerto') base = TARIFAS_CDG[pax] ?? null
-  else if (serviceType === 'disneyland') base = TARIFAS_TRASLADO[pax] ?? null
-  else if (serviceType === 'beauvais')   base = TARIFAS_BEAUVAIS[pax]   ?? null
-  else if (serviceType === 'versailles') base = TARIFAS_VERSAILLES[pax] ?? null
-  else if (serviceType === 'excursion')  base = TARIFAS_EXCURSION[pax]  ?? null
-  if (base === null) return null
-  return base + vehicleSurcharge(pax)
+  if (serviceType === 'aeropuerto') return TARIFAS_CDG[pax] ?? null
+  if (serviceType === 'disneyland') return TARIFAS_TRASLADO[pax] ?? null
+  if (serviceType === 'beauvais')   return TARIFAS_BEAUVAIS[pax] ?? null
+  if (serviceType === 'versailles') return TARIFAS_VERSAILLES[pax] ?? null
+  if (serviceType === 'excursion')  return TARIFAS_EXCURSION[pax] ?? null
+  return null
 }
 
 const FIXED_PRICE_SERVICES = ['aeropuerto', 'beauvais', 'disneyland', 'versailles', 'excursion']
