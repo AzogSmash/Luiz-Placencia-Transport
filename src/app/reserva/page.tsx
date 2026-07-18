@@ -217,7 +217,7 @@ export default function ReservaPage() {
   const pax        = parseInt(data.pasajeros) || 1
   const isTransfer     = ['aeropuerto', 'disneyland', 'beauvais'].includes(data.serviceType)
   const showPriceBanner = FIXED_PRICE_SERVICES.includes(data.serviceType)
-  const paxLimit   = ['beauvais', 'versailles', 'excursion'].includes(data.serviceType) ? 16 : 25
+  const paxLimit   = 16
   const overLimit  = FIXED_PRICE_SERVICES.includes(data.serviceType) && pax > paxLimit
   const isAirport  = data.serviceType === 'aeropuerto' || data.serviceType === 'beauvais'
   const hasReturn  = isAirport || data.serviceType === 'disneyland'
